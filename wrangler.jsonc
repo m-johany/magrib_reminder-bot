@@ -11,5 +11,12 @@
       "database_name": "al-kahf-db",
       "database_id": "REPLACE_ME_after_wrangler_d1_create"
     }
+  ],
+  "migrations": [
+    {
+      "tag": "v1",
+      "database_name": "al-kahf-db",
+      "migrations_dir": "migrations"
+    }
   ]
 }

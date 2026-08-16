@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { helpText, welcomeText } from "../src/messages";
+import {
+  cityNotFoundText,
+  citySetText,
+  helpText,
+  noCityText,
+  statusText,
+  welcomeText,
+} from "../src/messages";
 
 describe("welcomeText", () => {
   it("opens with Islamic greeting in English", () => {
@@ -43,5 +50,36 @@ describe("helpText", () => {
     const text = helpText("ar");
     expect(text).toContain("/setcity");
     expect(text).toContain("/help");
+  });
+});
+
+describe("citySetText", () => {
+  it("confirms the stored city", () => {
+    expect(citySetText("en", "London", "UK")).toBe("Your city is set to London, UK");
+  });
+
+  it("has an Arabic variant", () => {
+    expect(citySetText("ar", "London", "UK")).toContain("London");
+  });
+});
+
+describe("cityNotFoundText", () => {
+  it("matches the agreed retry format", () => {
+    expect(cityNotFoundText("en")).toBe(
+      "I couldn't find that city. Please try again with format: /setcity London, UK"
+    );
+  });
+});
+
+describe("noCityText", () => {
+  it("guides to /setcity", () => {
+    expect(noCityText("en")).toBe("No city set. Use /setcity to configure");
+  });
+});
+
+describe("statusText", () => {
+  it("shows the stored city and country", () => {
+    const text = statusText("en", { city: "London", country: "UK", language: "en", paused: false });
+    expect(text).toContain("London, UK");
   });
 });

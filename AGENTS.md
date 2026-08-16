@@ -4,53 +4,71 @@ Context file for starting work on this project from any fresh session.
 
 ## What this is
 
-A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recite Surah al-Kahf, with dynamically generated images featuring rotating hadith on the surah's virtues. Multi-user, multi-language (English/Arabic), warm spiritual tone.
+A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recite Surah al-Kahf, with dynamically generated image cards featuring a rotating hadith on the surah's virtues. Multi-user, multi-language (English/Arabic), warm spiritual tone. Cloudflare Workers + D1.
+
+## Status (as of 2026-08-17)
+
+**All 7 tickets implemented, reviewed, merged to `main`, pushed. Issues #1–#7 closed.**
+
+Repo state: `main` @ `2bd5ed2` on GitHub, 89 tests green, typecheck clean, `wrangler deploy --dry-run` bundles (3MB / 1.17MB gzip).
+
+### Remaining before real deployment (pick up here)
+
+1. **Re-verify the 10 hadith texts** in `db/seed.sql` with a qualified source (Arabic matn + translations + gradings). The seed file itself flags this.
+2. **Visually check one rendered card** — Arabic shaping (rtl + ligatures) in resvg needs eyeball verification. Render: `renderCardPng(buildCardSvg(hadith, "en"), wasm)`; easiest via a small local script or after deploy, `/status`-adjacent test message.
+3. **Deploy**: create D1 (`wrangler d1 create al-kahf-db`), put real `database_id` in `wrangler.jsonc` (currently `REPLACE_ME_after_wrangler_d1_create`), `wrangler secret put TELEGRAM_BOT_TOKEN`, `npm run deploy`, `npm run db:migrate:remote`, `npm run db:seed:remote`, register webhook via `curl setWebhook` (steps in `README.md`).
+4. **Measure cold start / render CPU** on the deployed worker (issue #7 criteria deferred until deployed).
+5. Optional follow-ups from code review (judgement calls, not blocking): user shape declared 4× (`commands/cron/store/index`), `city|country` string encoding in `cron.ts`, `sendReminder` Middle Man in `index.ts`, `dateEn` naming in `window.ts`/`aladhan.ts`.
+
+### Known deviations from SPEC.md (intentional)
+
+- Maghrib window 15 min, not 10 (cron jitter margin) — `REMINDER_WINDOW_MIN` in `src/cron.ts`.
+- After-midnight sends for late Maghribs (Thu 23:50 → tick Fri 00:05 still fires) — `EARLY_MORNING_CUTOFF`.
+- `users.city` nullable (language-first setup); `sent_log.week_key` column added for exact ISO-week dedup.
+- Webhook registered manually, not on deploy.
+- **Fixed in review**: Thursday-morning false positive (was modulo-1440 wrap bug — now linear `minutesAfterMaghrib` for the Thursday branch; don't reintroduce).
 
 ## Repo
 
 - **GitHub:** https://github.com/m-johany/magrib_reminder-bot
 - **Local:** `D:\Projects\al-kahf_bot`
-- **Issue tracker:** GitHub Issues on the repo
-- **Spec:** `D:\Projects\al-kahf_bot\SPEC.md`
+- **Spec:** `SPEC.md` · **Deploy guide:** `README.md` · **Issues:** GitHub Issues (1–7 closed)
 
-## Tickets (linear chain — work in order)
+## Codebase map
 
-1. **[Project scaffold + /start + /help](https://github.com/m-johany/magrib_reminder-bot/issues/1)** — wrangler init, TypeScript, D1 binding, Telegram webhook, /start and /help commands. No blockers.
-2. **[User city + /setcity + /status](https://github.com/m-johany/magrib_reminder-bot/issues/2)** — D1 users table, /setcity validates via Aladhan, /status. Blocked by #1.
-3. **[Language + pause/resume](https://github.com/m-johany/magrib_reminder-bot/issues/3)** — /setlanguage inline keyboard, /pause /resume, language+paused columns. Blocked by #2.
-4. **[Cron scheduler + reminder dispatch](https://github.com/m-johany/magrib_reminder-bot/issues/4)** — 10-min Cron Trigger, deduplicated Aladhan calls, Thursday+Maghrib detection, text reminders, sent_log. Blocked by #3.
-5. **[Hadith seed data + rotation](https://github.com/m-johany/magrib_reminder-bot/issues/5)** — D1 hadith table, 10-20 authentic hadith, weekly rotation (week_number % count). Blocked by #4.
-6. **[Image generation](https://github.com/m-johany/magrib_reminder-bot/issues/6)** — SVG template, @resvg/resvg-wasm, arabic font bundled, sendPhoto. Blocked by #5.
-7. **[Hardening](https://github.com/m-johany/magrib_reminder-bot/issues/7)** — retry logic, fallback to text on image failure, per-user error isolation, logging. Blocked by #6.
+| Path | What |
+|------|------|
+| `src/index.ts` | grammy bot wiring: commands, webhook fetch handler, scheduled handler, real TickDeps (D1 + Aladhan + resvg) |
+| `src/commands.ts` | Command logic (`setCityCommand`, `statusCommand`, language/pause/resume) — deps injected (`UserStore`, `fetchPrayerTimes`) |
+| `src/cron.ts` | `runTick` — city dedup, Thursday+window detection, retry-once-30s, hadith rotation, per-user isolation, image cache |
+| `src/aladhan.ts` | Aladhan client — `fetchPrayerTimes`, `CityNotFoundError` vs `AladhanError` ("Unable to compute" payload = city not found) |
+| `src/window.ts` | Time math — `minutesAfterMaghrib` (linear, same-day), `minutesSinceMaghrib` (midnight-crossing), `formatHHMM`/`formatDateEn` (IANA tz via Intl) |
+| `src/week.ts` / `src/rotation.ts` | ISO week key + `week_number % count` rotation |
+| `src/messages.ts` | All user-facing text, en + ar variants |
+| `src/card.ts` | 1080×1080 SVG card (pattern, matn rtl, translation, source) |
+| `src/image.ts` | `renderCardPng` via `@resvg/resvg-wasm` (wasm injected by caller) |
+| `src/font.ts` | Noto Naskh Arabic base64 — generated by `node scripts/embed-font.mjs` from `assets/NotoNaskhArabic-Regular.ttf` |
+| `src/store.ts` | `d1UserStore` — dynamic upsert (`save`) + `get` |
+| `migrations/` | `0001_users.sql`, `0002_hadith_sent_log.sql` (wrangler tagged migrations, tag `v1`) |
+| `db/seed.sql` | 10 hadith (week_order 0–9) |
+| `test/` | vitest: messages, commands, aladhan (msw), cron (fake deps), window, week, rotation, card, image (resvg render smoke) |
 
-## Tech stack
+## Dev commands
 
-| Layer | Choice |
-|-------|--------|
-| Platform | Cloudflare Workers |
-| Deploy | Wrangler (`wrangler deploy`) |
-| Language | TypeScript (`@cloudflare/workers-types`) |
-| Database | D1 (SQLite) |
-| Scheduling | Workers Cron Triggers (every 10 min) |
-| Prayer times | Aladhan API (`api.aladhan.com/v1/timingsByCity`) — free, no auth |
-| Telegram SDK | `grammy` or raw fetch to Bot API |
-| Image gen | SVG template + `@resvg/resvg-wasm` → PNG |
-| Arabic font | Noto Naskh Arabic (bundled base64) |
-
-## Architecture
-
+```bash
+npm test                 # vitest, 89 tests
+npm run typecheck        # tsc --noEmit
+npm run db:migrate:local # apply migrations to local D1 (.wrangler/state)
+npm run db:seed:local
+npm run dev              # wrangler dev
+npm run deploy           # wrangler deploy
 ```
-Telegram user → Webhook → Worker (main handler)
-                              ├── /start, /help, /setcity, /setlanguage, /pause, /resume, /status
-                              └── (commands handled inline)
 
-Cron Trigger (every 10 min) → Worker (scheduled handler)
-  ├── Query D1 for unpaused users with city set
-  ├── Deduplicate cities → fetch Maghrib from Aladhan (one per city)
-  ├── Filter: is Thursday AND Maghrib passed within this 10-min window
-  ├── Generate hadith image (or fallback text)
-  └── sendPhoto to each matching user via Telegram Bot API
-```
+## Testing seams (pre-agreed, from SPEC.md)
+
+- Unit: rotation logic, time-window logic, city dedup.
+- Integration: cron tick + commands with mocked Aladhan (msw) / Telegram at the boundary via injected deps.
+- No tests for: visual rendering output, Telegram wire format, deploy pipeline.
 
 ## D1 Schema
 
@@ -96,47 +114,20 @@ CREATE TABLE sent_log (
 | /status | Show city, language, paused state |
 | /help | List all commands |
 
-Register via Telegram `setMyCommands` on deploy.
-
 ## Key design decisions
 
-- **Scheduling:** 10-minute cron instead of queue-based. Simpler, fits free tier.
-- **City lookup:** Free-text via Aladhan, no geocoding needed. User types "London, UK".
+- **Scheduling:** 10-minute cron. Aladhan retry once after 30s, skip city on double failure.
 - **Rotation:** `week_number % hadith_count` — deterministic, global, not per-user.
-- **Image:** SVG→PNG in Worker. Single template, text overlaid. 1080×1080.
-- **Fallback:** Image gen fails → text-only reminder. Never silent failure.
-- **Isolation:** One user's failure never blocks another user's send.
-- **Tone:** Warm, spiritual. Uses "ﷺ", Islamic greetings, appropriate in both languages.
-- **Hadith source:** Config-curated, seeded via SQL. Designed for future API swap.
-
-## Environment setup
-
-```bash
-# Prerequisites
-npm install -g wrangler
-
-# Clone
-git clone https://github.com/m-johany/magrib_reminder-bot.git
-cd magrib_reminder-bot
-
-# D1
-wrangler d1 create al-kahf-db
-
-# Secrets
-wrangler secret put TELEGRAM_BOT_TOKEN
-
-# Deploy
-wrangler deploy
-
-# Seed hadith
-wrangler d1 execute al-kahf-db --file=./db/seed.sql
-```
+- **Image:** SVG→PNG in Worker via resvg-wasm. Text-only fallback, never silent.
+- **Isolation:** One user's failure never blocks another's send.
+- **Tone:** Warm, spiritual, "ﷺ", Islamic greetings, both languages.
+- **Hadith source:** Config-curated, seeded via SQL.
 
 ## APIs used
 
-- **Aladhan:** `GET https://api.aladhan.com/v1/timingsByCity?city=London&country=UK&method=2` — returns JSON with `data.timings.Maghrib` and `data.date.gregorian.weekday.en`
+- **Aladhan:** `GET https://api.aladhan.com/v1/timingsByCity?city=London&country=UK&method=2` (+ optional `date=DD-MM-YYYY`) — `data.timings.Maghrib`, `data.date.gregorian.weekday.en`, `data.meta.timezone`
 - **Telegram Bot API:** Webhook for updates, `sendMessage`, `sendPhoto`, `setMyCommands`
-- No auth keys needed beyond `TELEGRAM_BOT_TOKEN` (Aladhan is free/open)
+- No auth keys beyond `TELEGRAM_BOT_TOKEN`
 
 ## Out of scope
 

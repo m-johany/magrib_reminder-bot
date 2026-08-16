@@ -1,9 +1,9 @@
-import type { User, UserStore } from "./commands";
+import type { User, UserPatch, UserStore } from "./commands";
 
 interface DbUserRow {
   telegram_chat_id: string;
-  city: string;
-  country: string;
+  city: string | null;
+  country: string | null;
   language: string;
   paused: number;
 }
@@ -19,19 +19,25 @@ function toUser(row: DbUserRow): User {
 }
 
 export function d1UserStore(db: D1Database): UserStore {
+  async function save(chatId: string, fields: UserPatch): Promise<void> {
+    // Build a dynamic upsert over only the provided fields.
+    const keys = Object.keys(fields) as (keyof UserPatch)[];
+    const columns = keys.join(", ");
+    const placeholders = keys.map(() => "?").join(", ");
+    const updates = keys
+      .map((k) => `${k} = excluded.${k}`)
+      .join(", ");
+    await db
+      .prepare(
+        `INSERT INTO users (telegram_chat_id, ${columns}) VALUES (?, ${placeholders})
+         ON CONFLICT(telegram_chat_id) DO UPDATE SET ${updates}, updated_at = datetime('now')`
+      )
+      .bind(chatId, ...keys.map((k) => fields[k] as string | number))
+      .run();
+  }
+
   return {
-    async upsert(chatId, fields) {
-      await db
-        .prepare(
-          `INSERT INTO users (telegram_chat_id, city, country) VALUES (?, ?, ?)
-           ON CONFLICT(telegram_chat_id) DO UPDATE SET
-             city = excluded.city,
-             country = excluded.country,
-             updated_at = datetime('now')`
-        )
-        .bind(chatId, fields.city, fields.country)
-        .run();
-    },
+    save,
     async get(chatId) {
       const row = await db
         .prepare("SELECT * FROM users WHERE telegram_chat_id = ?")

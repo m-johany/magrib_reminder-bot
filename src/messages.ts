@@ -84,8 +84,40 @@ export function statusText(
   lang: Language,
   user: { city: string; country: string; language: Language; paused: boolean }
 ): string {
+  const langName = user.language === "ar" ? "العربية" : "English";
   if (lang === "ar") {
-    return `🏙️ المدينة: ${user.city}, ${user.country}`;
+    const state = user.paused ? "متوقفة" : "مفعّلة";
+    return [
+      `🏙️ المدينة: ${user.city}, ${user.country}`,
+      `🗣️ اللغة: ${langName}`,
+      `⏸️ التذكيرات: ${state}`,
+    ].join("\n");
   }
-  return `🏙️ City: ${user.city}, ${user.country}`;
+  const state = user.paused ? "Paused" : "Active";
+  return [
+    `🏙️ City: ${user.city}, ${user.country}`,
+    `🗣️ Language: ${langName}`,
+    `⏸️ Reminders: ${state}`,
+  ].join("\n");
+}
+
+export function languageSetText(lang: Language): string {
+  if (lang === "ar") {
+    return "تم اختيار اللغة: العربية ✅";
+  }
+  return "Language set to English ✅";
+}
+
+export function pausedText(lang: Language): string {
+  if (lang === "ar") {
+    return "تم إيقاف التذكيرات مؤقتًا. أرسل /resume لاستئنافها في أي وقت.";
+  }
+  return "Reminders paused. Send /resume anytime to restart them.";
+}
+
+export function resumedText(lang: Language): string {
+  if (lang === "ar") {
+    return "تم استئناف التذكيرات ✅. نلتقي ليلة الجمعة بعد المغرب بإذن الله 🌙";
+  }
+  return "Reminders resumed ✅. See you Thursday after Maghrib, insha'Allah 🌙";
 }

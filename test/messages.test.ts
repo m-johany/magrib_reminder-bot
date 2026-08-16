@@ -3,7 +3,10 @@ import {
   cityNotFoundText,
   citySetText,
   helpText,
+  languageSetText,
   noCityText,
+  pausedText,
+  resumedText,
   statusText,
   welcomeText,
 } from "../src/messages";
@@ -81,5 +84,41 @@ describe("statusText", () => {
   it("shows the stored city and country", () => {
     const text = statusText("en", { city: "London", country: "UK", language: "en", paused: false });
     expect(text).toContain("London, UK");
+  });
+
+  it("shows language and active state", () => {
+    const text = statusText("en", { city: "London", country: "UK", language: "ar", paused: false });
+    expect(text).toContain("العربية");
+    expect(text).toContain("Active");
+  });
+
+  it("shows paused state when paused", () => {
+    const text = statusText("en", { city: "London", country: "UK", language: "en", paused: true });
+    expect(text).toContain("Paused");
+  });
+});
+
+describe("languageSetText", () => {
+  it("confirms English selection", () => {
+    expect(languageSetText("en")).toContain("English");
+  });
+
+  it("confirms Arabic selection in Arabic", () => {
+    expect(languageSetText("ar")).toContain("العربية");
+  });
+});
+
+describe("pausedText / resumedText", () => {
+  it("confirms pause", () => {
+    expect(pausedText("en")).toContain("/resume");
+  });
+
+  it("confirms resume", () => {
+    expect(resumedText("en")).toContain("resumed");
+  });
+
+  it("has Arabic variants", () => {
+    expect(pausedText("ar")).toContain("إيقاف");
+    expect(resumedText("ar")).toContain("استئناف");
   });
 });

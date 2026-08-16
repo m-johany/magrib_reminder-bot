@@ -1,16 +1,27 @@
 import { CityNotFoundError, type PrayerTimes } from "./aladhan";
-import { cityNotFoundText, citySetText, noCityText, statusText } from "./messages";
+import {
+  cityNotFoundText,
+  citySetText,
+  languageSetText,
+  noCityText,
+  pausedText,
+  resumedText,
+  statusText,
+  type Language,
+} from "./messages";
 
 export interface User {
   telegram_chat_id: string;
-  city: string;
-  country: string;
-  language: "en" | "ar";
+  city: string | null;
+  country: string | null;
+  language: Language;
   paused: boolean;
 }
 
+export type UserPatch = Partial<Omit<User, "telegram_chat_id">>;
+
 export interface UserStore {
-  upsert(chatId: string, fields: { city: string; country: string }): Promise<void>;
+  save(chatId: string, fields: UserPatch): Promise<void>;
   get(chatId: string): Promise<User | null>;
 }
 
@@ -44,8 +55,9 @@ export async function setCityCommand(
     return "I couldn't reach the prayer times service. Please try again in a moment.";
   }
 
-  await deps.store.upsert(chatId, { city, country });
-  return citySetText("en", city, country);
+  await deps.store.save(chatId, { city, country });
+  const user = await deps.store.get(chatId);
+  return citySetText(user?.language ?? "en", city, country);
 }
 
 export async function statusCommand(
@@ -53,8 +65,8 @@ export async function statusCommand(
   deps: Pick<CommandDeps, "store">
 ): Promise<string> {
   const user = await deps.store.get(chatId);
-  if (!user) {
-    return noCityText("en");
+  if (!user || !user.city || !user.country) {
+    return noCityText(user?.language ?? "en");
   }
   return statusText(user.language, {
     city: user.city,
@@ -62,4 +74,31 @@ export async function statusCommand(
     language: user.language,
     paused: user.paused,
   });
+}
+
+export async function setLanguageCommand(
+  lang: Language,
+  chatId: string,
+  deps: Pick<CommandDeps, "store">
+): Promise<string> {
+  await deps.store.save(chatId, { language: lang });
+  return languageSetText(lang);
+}
+
+export async function pauseCommand(
+  chatId: string,
+  deps: Pick<CommandDeps, "store">
+): Promise<string> {
+  await deps.store.save(chatId, { paused: true });
+  const user = await deps.store.get(chatId);
+  return pausedText(user?.language ?? "en");
+}
+
+export async function resumeCommand(
+  chatId: string,
+  deps: Pick<CommandDeps, "store">
+): Promise<string> {
+  await deps.store.save(chatId, { paused: false });
+  const user = await deps.store.get(chatId);
+  return resumedText(user?.language ?? "en");
 }

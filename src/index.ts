@@ -1,5 +1,7 @@
-import { Bot, InlineKeyboard, webhookCallback } from "grammy";
+import { Bot, InlineKeyboard, InputFile, webhookCallback } from "grammy";
+import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
 import { fetchPrayerTimes } from "./aladhan";
+import { buildCardSvg } from "./card";
 import {
   pauseCommand,
   resumeCommand,
@@ -8,7 +10,8 @@ import {
   statusCommand,
 } from "./commands";
 import { runTick, type TickDeps } from "./cron";
-import { helpText, type Language, welcomeText } from "./messages";
+import { helpText, type HadithText, type Language, welcomeText } from "./messages";
+import { renderCardPng } from "./image";
 import { d1UserStore } from "./store";
 
 export interface Env {
@@ -87,7 +90,10 @@ function createBot(token: string, env: Env): Bot {
   return bot;
 }
 
-function makeTickDeps(env: Env, sendMessage: (chatId: string, text: string) => Promise<unknown>): TickDeps {
+function makeTickDeps(
+  env: Env,
+  sendMessage: (chatId: string, text: string, photo?: Uint8Array) => Promise<unknown>
+): TickDeps {
   const logError = (message: string, err?: unknown) =>
     console.error(JSON.stringify({ level: "error", message, error: String(err ?? "") }));
 
@@ -117,8 +123,11 @@ function makeTickDeps(env: Env, sendMessage: (chatId: string, text: string) => P
     fetchTimings(city, country, dateEn) {
       return fetchPrayerTimes(city, country, dateEn ?? undefined);
     },
-    async sendReminder(chatId, text) {
-      await sendMessage(chatId, text);
+    async sendReminder(chatId, text, photo) {
+      await sendMessage(chatId, text, photo);
+    },
+    async createImage(hadith: HadithText, lang: Language) {
+      return renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm));
     },
     async alreadySent(userId, weekKey) {
       const row = await env.DB.prepare(
@@ -182,6 +191,15 @@ export default {
   },
   scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): void {
     const activeBot = getBot(env);
-    ctx.waitUntil(runTick(new Date(), makeTickDeps(env, (chatId, text) => activeBot.api.sendMessage(chatId, text))));
+    ctx.waitUntil(
+      runTick(
+        new Date(),
+        makeTickDeps(env, (chatId, text, photo) =>
+          photo
+            ? activeBot.api.sendPhoto(chatId, new InputFile(photo, "al-kahf.png"), { caption: text })
+            : activeBot.api.sendMessage(chatId, text)
+        )
+      )
+    );
   },
 };

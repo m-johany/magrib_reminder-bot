@@ -22,10 +22,11 @@ function makeDeps(
   hadiths: Hadith[] = [weekHadith]
 ) {
   const fetchCalls: { city: string; dateEn: string | null }[] = [];
-  const sends: { chatId: string; text: string }[] = [];
+  const sends: { chatId: string; text: string; photo?: Uint8Array }[] = [];
   const records: { userId: number; hadithId: number | null; weekKey: string }[] = [];
   const errors: string[] = [];
   const hadithOrders: number[] = [];
+  const imageBuilds: string[] = [];
 
   const deps: TickDeps = {
     async listActiveUsers() {
@@ -39,8 +40,12 @@ function makeDeps(
       if (!hit) throw new Error(`no fixture for ${city} date=${dateEn}`);
       return hit.timings;
     },
-    async sendReminder(chatId, text) {
-      sends.push({ chatId, text });
+    async sendReminder(chatId, text, photo) {
+      sends.push({ chatId, text, photo });
+    },
+    async createImage(_hadith, lang) {
+      imageBuilds.push(lang);
+      return new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
     },
     async alreadySent() {
       return false;
@@ -60,7 +65,7 @@ function makeDeps(
     },
   };
 
-  return { deps, fetchCalls, sends, records, errors, hadithOrders };
+  return { deps, fetchCalls, sends, records, errors, hadithOrders, imageBuilds };
 }
 
 const londonActive: ActiveUser = {
@@ -248,6 +253,45 @@ describe("runTick", () => {
     await runTick(new Date("2026-08-13T19:05:00Z"), deps);
 
     expect(sends[0]?.text).not.toContain("Hadith");
+    expect(sends[0]?.photo).toBeUndefined();
     expect(records[0]?.hadithId).toBeNull();
+  });
+
+  it("sends the hadith card image as a photo with the warm message as caption", async () => {
+    const { deps, sends } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(sends[0]?.photo).toBeInstanceOf(Uint8Array);
+    expect(sends[0]?.text).toContain("Surah al-Kahf");
+  });
+
+  it("renders each language variant of the image at most once per tick", async () => {
+    const arUser: ActiveUser = { ...londonActive2, id: 9, telegram_chat_id: "999", language: "ar" };
+    const { deps, imageBuilds } = makeDeps([londonActive, londonActive2, arUser], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(imageBuilds.filter((l) => l === "en")).toHaveLength(1);
+    expect(imageBuilds.filter((l) => l === "ar")).toHaveLength(1);
+  });
+
+  it("falls back to text-only when image generation fails", async () => {
+    const { deps, sends, errors } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+    deps.createImage = async () => {
+      throw new Error("wasm boom");
+    };
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(sends[0]?.photo).toBeUndefined();
+    expect(sends[0]?.text).toContain("light will shine");
+    expect(errors).toHaveLength(1);
   });
 });

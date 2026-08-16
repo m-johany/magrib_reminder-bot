@@ -31,7 +31,8 @@ export interface Hadith extends HadithText {
 export interface TickDeps {
   listActiveUsers(): Promise<ActiveUser[]>;
   fetchTimings(city: string, country: string, dateEn: string | null): Promise<PrayerTimes>;
-  sendReminder(chatId: string, text: string): Promise<void>;
+  sendReminder(chatId: string, text: string, photo?: Uint8Array): Promise<void>;
+  createImage(hadith: HadithText, lang: Language): Promise<Uint8Array>;
   alreadySent(userId: number, weekKey: string): Promise<boolean>;
   recordSend(userId: number, hadithId: number | null, weekKey: string): Promise<void>;
   countHadith(): Promise<number>;
@@ -94,15 +95,33 @@ export async function runTick(now: Date, deps: TickDeps): Promise<void> {
     }
   }
 
+  // Render each language variant once per tick (max 2 renders).
+  const imageCache = new Map<string, Promise<Uint8Array>>();
+  const imageFor = (lang: Language): Promise<Uint8Array> => {
+    let p = imageCache.get(lang);
+    if (!p) {
+      p = deps.createImage(hadith as HadithText, lang);
+      imageCache.set(lang, p);
+    }
+    return p;
+  };
+
   for (const user of due) {
     try {
       if (await deps.alreadySent(user.id, weekKey)) {
         continue;
       }
-      await deps.sendReminder(
-        user.telegram_chat_id,
-        reminderText(user.language, user.city as string, hadith)
-      );
+      const text = reminderText(user.language, user.city as string, hadith);
+      let photo: Uint8Array | undefined;
+      if (hadith) {
+        try {
+          photo = await imageFor(user.language);
+        } catch (err) {
+          // Image failure never blocks the reminder — fall back to text-only.
+          deps.logError(`Image generation failed for lang ${user.language}`, err);
+        }
+      }
+      await deps.sendReminder(user.telegram_chat_id, text, photo);
       await deps.recordSend(user.id, hadith?.id ?? null, weekKey);
     } catch (err) {
       deps.logError(`Reminder send failed for user ${user.id}`, err);

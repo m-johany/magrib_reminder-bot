@@ -18,5 +18,8 @@
       "database_name": "al-kahf-db",
       "migrations_dir": "migrations"
     }
-  ]
+  ],
+  "triggers": {
+    "crons": ["*/10 * * * *"]
+  }
 }

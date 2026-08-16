@@ -2,6 +2,7 @@ export interface PrayerTimes {
   maghrib: string; // "HH:MM" 24-hour, e.g. "19:45"
   weekdayEn: string; // e.g. "Thursday"
   dateEn: string; // "DD-MM-YYYY" gregorian
+  timezone: string; // IANA, e.g. "Europe/London"
 }
 
 export class AladhanError extends Error {}
@@ -13,18 +14,23 @@ interface AladhanResponse {
   data?: {
     timings?: { Maghrib?: string };
     date?: { gregorian?: { date?: string; weekday?: { en?: string } } };
+    meta?: { timezone?: string };
   };
 }
 
 export async function fetchPrayerTimes(
   city: string,
   country: string,
+  dateEn?: string,
   fetchFn: typeof fetch = fetch
 ): Promise<PrayerTimes> {
   const url = new URL("https://api.aladhan.com/v1/timingsByCity");
   url.searchParams.set("city", city);
   url.searchParams.set("country", country);
   url.searchParams.set("method", "2"); // ISNA
+  if (dateEn) {
+    url.searchParams.set("date", dateEn);
+  }
 
   const res = await fetchFn(url);
   let body: AladhanResponse | string;
@@ -47,12 +53,13 @@ export async function fetchPrayerTimes(
     throw new CityNotFoundError();
   }
 
-  const { timings, date } = body.data;
+  const { timings, date, meta } = body.data;
   const maghrib = timings?.Maghrib;
   const weekdayEn = date?.gregorian?.weekday?.en;
-  const dateEn = date?.gregorian?.date;
-  if (!maghrib || !weekdayEn || !dateEn) {
+  const dateEnOut = date?.gregorian?.date;
+  const timezone = meta?.timezone;
+  if (!maghrib || !weekdayEn || !dateEnOut || !timezone) {
     throw new AladhanError("Aladhan response missing timings/date fields");
   }
-  return { maghrib, weekdayEn, dateEn };
+  return { maghrib, weekdayEn, dateEn: dateEnOut, timezone };
 }

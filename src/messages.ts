@@ -121,3 +121,22 @@ export function resumedText(lang: Language): string {
   }
   return "Reminders resumed ✅. See you Thursday after Maghrib, insha'Allah 🌙";
 }
+
+export function reminderText(lang: Language, city: string): string {
+  if (lang === "ar") {
+    return [
+      "السلام عليكم ورحمة الله وبركاته 🌙",
+      "",
+      `حان وقت قراءة سورة الكهف — إنها ليلة الجمعة في ${city} بعد المغرب.`,
+      "",
+      "لا تنسَ قراءة سورة الكهف اليوم، فقد حثّ عليها النبي ﷺ. تقبّل الله منا ومنكم.",
+    ].join("\n");
+  }
+  return [
+    "As-salamu alaykum 🌙",
+    "",
+    `It's Thursday after Maghrib in ${city} — the night of Jumu'ah has begun.`,
+    "",
+    "Don't forget to recite Surah al-Kahf today, as the Prophet ﷺ encouraged. May Allah accept it from you.",
+  ].join("\n");
+}

@@ -33,6 +33,7 @@ const okTimings: PrayerTimes = {
   maghrib: "19:45",
   weekdayEn: "Thursday",
   dateEn: "14-08-2026",
+  timezone: "Europe/London",
 };
 
 describe("setCityCommand", () => {

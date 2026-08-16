@@ -17,6 +17,7 @@ const aladhanResponse = {
     date: {
       gregorian: { date: "14-08-2026", weekday: { en: "Thursday" } },
     },
+    meta: { timezone: "Europe/London" },
   },
 };
 
@@ -34,6 +35,7 @@ describe("fetchPrayerTimes", () => {
       maghrib: "19:45",
       weekdayEn: "Thursday",
       dateEn: "14-08-2026",
+      timezone: "Europe/London",
     });
   });
 

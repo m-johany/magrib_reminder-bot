@@ -7,6 +7,7 @@ import {
   setLanguageCommand,
   statusCommand,
 } from "./commands";
+import { runTick, type TickDeps } from "./cron";
 import { helpText, type Language, welcomeText } from "./messages";
 import { d1UserStore } from "./store";
 
@@ -86,15 +87,75 @@ function createBot(token: string, env: Env): Bot {
   return bot;
 }
 
+function makeTickDeps(env: Env, sendMessage: (chatId: string, text: string) => Promise<unknown>): TickDeps {
+  const logError = (message: string, err?: unknown) =>
+    console.error(JSON.stringify({ level: "error", message, error: String(err ?? "") }));
+
+  return {
+    async listActiveUsers() {
+      const { results } = await env.DB.prepare(
+        `SELECT id, telegram_chat_id, city, country, language, paused
+         FROM users
+         WHERE paused = 0 AND city IS NOT NULL AND city != ''`
+      ).all<{
+        id: number;
+        telegram_chat_id: string;
+        city: string;
+        country: string;
+        language: string;
+        paused: number;
+      }>();
+      return results.map((r) => ({
+        id: r.id,
+        telegram_chat_id: r.telegram_chat_id,
+        city: r.city,
+        country: r.country,
+        language: r.language === "ar" ? "ar" : "en",
+        paused: r.paused !== 0,
+      }));
+    },
+    fetchTimings(city, country, dateEn) {
+      return fetchPrayerTimes(city, country, dateEn ?? undefined);
+    },
+    async sendReminder(chatId, text) {
+      await sendMessage(chatId, text);
+    },
+    async alreadySent(userId, weekKey) {
+      const row = await env.DB.prepare(
+        "SELECT COUNT(*) AS n FROM sent_log WHERE user_id = ? AND week_key = ?"
+      )
+        .bind(userId, weekKey)
+        .first<{ n: number }>();
+      return (row?.n ?? 0) > 0;
+    },
+    async recordSend(userId, hadithId, weekKey) {
+      await env.DB.prepare(
+        "INSERT INTO sent_log (user_id, hadith_id, week_key) VALUES (?, ?, ?)"
+      )
+        .bind(userId, hadithId, weekKey)
+        .run();
+    },
+    logError,
+  };
+}
+
 let bot: Bot | undefined;
 let botToken: string | undefined;
 
+function getBot(env: Env): Bot {
+  if (bot === undefined || botToken !== env.TELEGRAM_BOT_TOKEN) {
+    bot = createBot(env.TELEGRAM_BOT_TOKEN, env);
+    botToken = env.TELEGRAM_BOT_TOKEN;
+  }
+  return bot;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    if (bot === undefined || botToken !== env.TELEGRAM_BOT_TOKEN) {
-      bot = createBot(env.TELEGRAM_BOT_TOKEN, env);
-      botToken = env.TELEGRAM_BOT_TOKEN;
-    }
-    return webhookCallback(bot, "cloudflare-mod")(request);
+    return webhookCallback(getBot(env), "cloudflare-mod")(request);
+  },
+  scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): void {
+    const activeBot = getBot(env);
+    ctx.waitUntil(runTick(new Date(), makeTickDeps(env, (chatId, text) => activeBot.api.sendMessage(chatId, text))));
   },
 };

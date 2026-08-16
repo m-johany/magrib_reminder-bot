@@ -1,0 +1,15 @@
+{
+  "name": "al-kahf-bot",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "al-kahf-db",
+      "database_id": "REPLACE_ME_after_wrangler_d1_create"
+    }
+  ]
+}

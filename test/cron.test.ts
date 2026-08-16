@@ -60,8 +60,14 @@ function makeDeps(
       hadithOrders.push(weekOrder);
       return hadiths[weekOrder % hadiths.length] ?? null;
     },
+    async sleep(_ms) {
+      // tests that care about the delay override this
+    },
     logError(msg) {
       errors.push(msg);
+    },
+    logWarn(_msg) {
+      // warnings (e.g. Aladhan retry notices) are not errors
     },
   };
 
@@ -293,5 +299,65 @@ describe("runTick", () => {
     expect(sends[0]?.photo).toBeUndefined();
     expect(sends[0]?.text).toContain("light will shine");
     expect(errors).toHaveLength(1);
+  });
+
+  it("retries a failed Aladhan fetch once after a delay", async () => {
+    const { deps, sends, fetchCalls, errors } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+    const sleeps: number[] = [];
+    deps.sleep = async (ms) => {
+      sleeps.push(ms);
+    };
+    let attempts = 0;
+    deps.fetchTimings = async (city, _country, dateEn) => {
+      fetchCalls.push({ city, dateEn });
+      attempts += 1;
+      if (attempts === 1) throw new Error("Aladhan 500");
+      return thursdayLondon;
+    };
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(fetchCalls.filter((c) => c.city === "London")).toHaveLength(2);
+    expect(sleeps).toEqual([30_000]);
+    expect(sends.map((s) => s.chatId)).toEqual(["111"]);
+    expect(errors).toHaveLength(0);
+  });
+
+  it("skips the city after the retry also fails, logging the error", async () => {
+    const { deps, sends, errors } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+    const sleeps: number[] = [];
+    deps.sleep = async (ms) => {
+      sleeps.push(ms);
+    };
+    deps.fetchTimings = async () => {
+      throw new Error("Aladhan down");
+    };
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(sleeps).toEqual([30_000]);
+    expect(sends).toHaveLength(0);
+    expect(errors).toHaveLength(1);
+  });
+
+  it("logs chat_id context on per-user send failures", async () => {
+    const { deps } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+    const logged: (string | undefined)[] = [];
+    deps.sendReminder = async () => {
+      throw new Error("telegram down");
+    };
+    deps.logError = (_msg, _err, ctx) => {
+      logged.push(ctx?.chat_id);
+    };
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(logged).toEqual(["111"]);
   });
 });

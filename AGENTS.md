@@ -58,8 +58,8 @@ Cron Trigger (every 10 min) → Worker (scheduled handler)
 CREATE TABLE users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   telegram_chat_id TEXT UNIQUE NOT NULL,
-  city TEXT NOT NULL,
-  country TEXT NOT NULL,
+  city TEXT,               -- nullable: language can be set before city
+  country TEXT,
   language TEXT NOT NULL DEFAULT 'en' CHECK(language IN ('en', 'ar')),
   paused INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -68,7 +68,7 @@ CREATE TABLE users (
 
 CREATE TABLE hadith (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  week_order INTEGER NOT NULL,
+  week_order INTEGER NOT NULL UNIQUE,   -- 0..N-1, rotation = week_number % count
   text_en TEXT NOT NULL,
   text_ar TEXT NOT NULL,
   source_en TEXT NOT NULL,
@@ -78,7 +78,8 @@ CREATE TABLE hadith (
 CREATE TABLE sent_log (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id),
-  hadith_id INTEGER NOT NULL REFERENCES hadith(id),
+  hadith_id INTEGER REFERENCES hadith(id),  -- nullable pre-seed
+  week_key TEXT NOT NULL,                  -- ISO week "2026-W33", dedup key
   sent_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 ```

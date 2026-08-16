@@ -94,8 +94,12 @@ function makeTickDeps(
   env: Env,
   sendMessage: (chatId: string, text: string, photo?: Uint8Array) => Promise<unknown>
 ): TickDeps {
-  const logError = (message: string, err?: unknown) =>
-    console.error(JSON.stringify({ level: "error", message, error: String(err ?? "") }));
+  const logError = (message: string, err?: unknown, context?: { chat_id?: string }) =>
+    console.error(
+      JSON.stringify({ level: "error", message, error: String(err ?? ""), ...context })
+    );
+  const logWarn = (message: string, err?: unknown) =>
+    console.warn(JSON.stringify({ level: "warn", message, error: String(err ?? "") }));
 
   return {
     async listActiveUsers() {
@@ -170,7 +174,11 @@ function makeTickDeps(
           }
         : null;
     },
+    sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
     logError,
+    logWarn,
   };
 }
 

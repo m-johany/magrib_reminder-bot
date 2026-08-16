@@ -28,6 +28,11 @@ export interface Hadith extends HadithText {
   id: number;
 }
 
+export interface LogContext {
+  chat_id?: string;
+  city?: string;
+}
+
 export interface TickDeps {
   listActiveUsers(): Promise<ActiveUser[]>;
   fetchTimings(city: string, country: string, dateEn: string | null): Promise<PrayerTimes>;
@@ -37,8 +42,13 @@ export interface TickDeps {
   recordSend(userId: number, hadithId: number | null, weekKey: string): Promise<void>;
   countHadith(): Promise<number>;
   getHadithByWeekOrder(weekOrder: number): Promise<Hadith | null>;
-  logError(message: string, err?: unknown): void;
+  sleep(ms: number): Promise<void>;
+  logError(message: string, err?: unknown, context?: LogContext): void;
+  logWarn(message: string, err?: unknown): void;
 }
+
+/** Aladhan retry delay, per spec: retry once after 30s, then skip this tick. */
+export const ALADHAN_RETRY_DELAY_MS = 30_000;
 
 export async function runTick(now: Date, deps: TickDeps): Promise<void> {
   const users = (await deps.listActiveUsers()).filter((u) => !u.paused && u.city && u.country);
@@ -65,7 +75,17 @@ export async function runTick(now: Date, deps: TickDeps): Promise<void> {
     const key = `${city}|${country}|${dateEn ?? "today"}`;
     let p = timingsCache.get(key);
     if (!p) {
-      p = deps.fetchTimings(city, country, dateEn);
+      p = (async (): Promise<PrayerTimes> => {
+        try {
+          return await deps.fetchTimings(city, country, dateEn);
+        } catch (err) {
+          deps.logWarn(`Aladhan fetch failed for ${city}|${country}, retrying in ${ALADHAN_RETRY_DELAY_MS}ms`, err);
+          await deps.sleep(ALADHAN_RETRY_DELAY_MS);
+          return await deps.fetchTimings(city, country, dateEn);
+        }
+      })();
+      // Purge rejected promises so a later city or the next tick retries fresh.
+      p.catch(() => timingsCache.delete(key));
       timingsCache.set(key, p);
     }
     return p;
@@ -124,7 +144,9 @@ export async function runTick(now: Date, deps: TickDeps): Promise<void> {
       await deps.sendReminder(user.telegram_chat_id, text, photo);
       await deps.recordSend(user.id, hadith?.id ?? null, weekKey);
     } catch (err) {
-      deps.logError(`Reminder send failed for user ${user.id}`, err);
+      deps.logError(`Reminder send failed for user ${user.id}`, err, {
+        chat_id: user.telegram_chat_id,
+      });
     }
   }
 }

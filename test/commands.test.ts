@@ -59,6 +59,18 @@ describe("setCityCommand", () => {
     );
   });
 
+  it("answers Arabic-language users in Arabic on invalid city", async () => {
+    const store = fakeStore();
+    await store.save("42", { language: "ar" });
+    const reply = await setCityCommand("Narnia, XX", "42", {
+      store,
+      fetchPrayerTimes: async () => {
+        throw new CityNotFoundError();
+      },
+    });
+    expect(reply).toContain("لم أجد");
+  });
+
   it("rejects input without a comma", async () => {
     let called = false;
     const reply = await setCityCommand("London", "42", {

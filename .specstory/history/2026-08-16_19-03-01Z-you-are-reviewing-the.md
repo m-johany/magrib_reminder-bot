@@ -8446,3 +8446,5545 @@ Verify fixed point + commit list
  43 files changed, 17656 insertions(+), 6 deletions(-)
 ```
 </details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:25Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Standards review of diff
+
+```text
+Async agent launched successfully. (This tool result is internal metadata — never quote or paste any part of it, including the agentId below, into a user-facing reply.)
+agentId: ab1d5fb9780763b10 (internal ID - do not mention to user. Use SendMessage with to: 'ab1d5fb9780763b10', summary: '<5-10 word recap>' to continue this agent.)
+The agent is working in the background. You will be notified automatically when it completes. You know nothing about its results until that notification arrives — do not report, assume, or predict them; continue other work or respond to the user in the meantime.
+Do not duplicate this agent's work — avoid working with the same files or topics it is using.
+output_file: C:\Users\eshan\AppData\Local\Temp\claude\D--Projects-al-kahf-bot\93e3c44b-6689-44b4-ab8a-742cd7cc1995\tasks\ab1d5fb9780763b10.output
+Do NOT Read or tail this file via the shell tool — it is the full subagent JSONL transcript and reading it will overflow your context. If the user asks for progress, say the agent is still running; you'll get a completion notification.
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-08-16 19:28:25Z)**_
+
+You are reviewing the diff between git ref 01e6c15 and HEAD in the repo at D:\Projects\al-kahf_bot (branch main). Run this to see the changes:
+
+```
+git -C D:\Projects\al-kahf_bot diff 01e6c15...HEAD
+```
+
+Commit list: 53448ad (scaffold), 1c1df42 (/setcity+/status), 3a73c61 (language+pause), 23fc0f3 (cron), 3570f27 (hadith seed+rotation), 1337102 (image gen), 8761fe7 (hardening).
+
+Standards sources in the repo: AGENTS.md (architecture + key design decisions + D1 schema), SPEC.md (Testing Decisions section), README.md. Read them. There is no CODING_STANDARDS.md.
+
+Report — per file/hunk where relevant — (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces (typecheck/tests).
+
+Smell baseline (Fowler, Refactoring ch.3 — judgement calls, not hard violations):
+- Mysterious Name — a function, variable, or type whose name doesn't reveal what it does or holds. → rename it.
+- Duplicated Code — the same logic shape appears in more than one hunk or file in the change. → extract the shared shape, call it from both.
+- Feature Envy — a method that reaches into another object's data more than its own. → move the method onto the data it envies.
+- Data Clumps — the same few fields or params keep travelling together (a type wanting to be born). → bundle them into one type, pass that.
+- Primitive Obsession — a primitive or string standing in for a domain concept that deserves its own type. → give the concept its own small type.
+- Repeated Switches — the same switch/if-cascade on the same type recurs across the change. → replace with polymorphism, or one map both sites share.
+- Shotgun Surgery — one logical change forces scattered edits across many files in the diff. → gather what changes together into one module.
+- Divergent Change — one file or module is edited for several unrelated reasons. → split so each module changes for one reason.
+- Speculative Generality — abstraction, parameters, or hooks added for needs the spec doesn't have. → delete it; inline back until a real need shows.
+- Message Chains — long a.b().c().d() navigation the caller shouldn't depend on. → hide the walk behind one method on the first object.
+- Middle Man — a class or function that mostly just delegates onward. → cut it, call the real target direct.
+- Refused Bequest — a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
+
+Under 400 words.
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:27Z)**_
+
+<think><details><summary>Thought Process</summary>
+Let me start by reading the standards files and getting the diff. I'll run the git diff command and read the standards files in parallel.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:28Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show diff stat between refs
+
+`git -C D:\Projects\al-kahf_bot diff 01e6c15...HEAD --stat`
+
+```text
+Exit code 128
+fatal: cannot change to 'D:Projectsal-kahf_bot': No such file or directory
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:28Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\AGENTS.md`
+
+```text
+1	# AGENTS.md — Al-Kahf Bot
+2	
+3	Context file for starting work on this project from any fresh session.
+4	
+5	## What this is
+6	
+7	A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recite Surah al-Kahf, with dynamically generated images featuring rotating hadith on the surah's virtues. Multi-user, multi-language (English/Arabic), warm spiritual tone.
+8	
+9	## Repo
+10	
+11	- **GitHub:** https://github.com/m-johany/magrib_reminder-bot
+12	- **Local:** `D:\Projects\al-kahf_bot`
+13	- **Issue tracker:** GitHub Issues on the repo
+14	- **Spec:** `D:\Projects\al-kahf_bot\SPEC.md`
+15	
+16	## Tickets (linear chain — work in order)
+17	
+18	1. **[Project scaffold + /start + /help](https://github.com/m-johany/magrib_reminder-bot/issues/1)** — wrangler init, TypeScript, D1 binding, Telegram webhook, /start and /help commands. No blockers.
+19	2. **[User city + /setcity + /status](https://github.com/m-johany/magrib_reminder-bot/issues/2)** — D1 users table, /setcity validates via Aladhan, /status. Blocked by #1.
+20	3. **[Language + pause/resume](https://github.com/m-johany/magrib_reminder-bot/issues/3)** — /setlanguage inline keyboard, /pause /resume, language+paused columns. Blocked by #2.
+21	4. **[Cron scheduler + reminder dispatch](https://github.com/m-johany/magrib_reminder-bot/issues/4)** — 10-min Cron Trigger, deduplicated Aladhan calls, Thursday+Maghrib detection, text reminders, sent_log. Blocked by #3.
+22	5. **[Hadith seed data + rotation](https://github.com/m-johany/magrib_reminder-bot/issues/5)** — D1 hadith table, 10-20 authentic hadith, weekly rotation (week_number % count). Blocked by #4.
+23	6. **[Image generation](https://github.com/m-johany/magrib_reminder-bot/issues/6)** — SVG template, @resvg/resvg-wasm, arabic font bundled, sendPhoto. Blocked by #5.
+24	7. **[Hardening](https://github.com/m-johany/magrib_reminder-bot/issues/7)** — retry logic, fallback to text on image failure, per-user error isolation, logging. Blocked by #6.
+25	
+26	## Tech stack
+27	
+28	| Layer | Choice |
+29	|-------|--------|
+30	| Platform | Cloudflare Workers |
+31	| Deploy | Wrangler (`wrangler deploy`) |
+32	| Language | TypeScript (`@cloudflare/workers-types`) |
+33	| Database | D1 (SQLite) |
+34	| Scheduling | Workers Cron Triggers (every 10 min) |
+35	| Prayer times | Aladhan API (`api.aladhan.com/v1/timingsByCity`) — free, no auth |
+36	| Telegram SDK | `grammy` or raw fetch to Bot API |
+37	| Image gen | SVG template + `@resvg/resvg-wasm` → PNG |
+38	| Arabic font | Noto Naskh Arabic (bundled base64) |
+39	
+40	## Architecture
+41	
+42	```
+43	Telegram user → Webhook → Worker (main handler)
+44	                              ├── /start, /help, /setcity, /setlanguage, /pause, /resume, /status
+45	                              └── (commands handled inline)
+46	
+47	Cron Trigger (every 10 min) → Worker (scheduled handler)
+48	  ├── Query D1 for unpaused users with city set
+49	  ├── Deduplicate cities → fetch Maghrib from Aladhan (one per city)
+50	  ├── Filter: is Thursday AND Maghrib passed within this 10-min window
+51	  ├── Generate hadith image (or fallback text)
+52	  └── sendPhoto to each matching user via Telegram Bot API
+53	```
+54	
+55	## D1 Schema
+56	
+57	```sql
+58	CREATE TABLE users (
+59	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+60	  telegram_chat_id TEXT UNIQUE NOT NULL,
+61	  city TEXT,               -- nullable: language can be set before city
+62	  country TEXT,
+63	  language TEXT NOT NULL DEFAULT 'en' CHECK(language IN ('en', 'ar')),
+64	  paused INTEGER NOT NULL DEFAULT 0,
+65	  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+66	  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+67	);
+68	
+69	CREATE TABLE hadith (
+70	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+71	  week_order INTEGER NOT NULL UNIQUE,   -- 0..N-1, rotation = week_number % count
+72	  text_en TEXT NOT NULL,
+73	  text_ar TEXT NOT NULL,
+74	  source_en TEXT NOT NULL,
+75	  source_ar TEXT NOT NULL
+76	);
+77	
+78	CREATE TABLE sent_log (
+79	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+80	  user_id INTEGER NOT NULL REFERENCES users(id),
+81	  hadith_id INTEGER REFERENCES hadith(id),  -- nullable pre-seed
+82	  week_key TEXT NOT NULL,                  -- ISO week "2026-W33", dedup key
+83	  sent_at TEXT NOT NULL DEFAULT (datetime('now'))
+84	);
+85	```
+86	
+87	## Bot commands
+88	
+89	| Command | Behavior |
+90	|---------|----------|
+91	| /start | Welcome + prompt set city/language |
+92	| /setcity London, UK | Validate via Aladhan, store, confirm |
+93	| /setlanguage | Inline keyboard: English / العربية |
+94	| /pause | Halt reminders, confirm |
+95	| /resume | Resume reminders, confirm |
+96	| /status | Show city, language, paused state |
+97	| /help | List all commands |
+98	
+99	Register via Telegram `setMyCommands` on deploy.
+100	
+101	## Key design decisions
+102	
+103	- **Scheduling:** 10-minute cron instead of queue-based. Simpler, fits free tier.
+104	- **City lookup:** Free-text via Aladhan, no geocoding needed. User types "London, UK".
+105	- **Rotation:** `week_number % hadith_count` — deterministic, global, not per-user.
+106	- **Image:** SVG→PNG in Worker. Single template, text overlaid. 1080×1080.
+107	- **Fallback:** Image gen fails → text-only reminder. Never silent failure.
+108	- **Isolation:** One user's failure never blocks another user's send.
+109	- **Tone:** Warm, spiritual. Uses "ﷺ", Islamic greetings, appropriate in both languages.
+110	- **Hadith source:** Config-curated, seeded via SQL. Designed for future API swap.
+111	
+112	## Environment setup
+113	
+114	```bash
+115	# Prerequisites
+116	npm install -g wrangler
+117	
+118	# Clone
+119	git clone https://github.com/m-johany/magrib_reminder-bot.git
+120	cd magrib_reminder-bot
+121	
+122	# D1
+123	wrangler d1 create al-kahf-db
+124	
+125	# Secrets
+126	wrangler secret put TELEGRAM_BOT_TOKEN
+127	
+128	# Deploy
+129	wrangler deploy
+130	
+131	# Seed hadith
+132	wrangler d1 execute al-kahf-db --file=./db/seed.sql
+133	```
+134	
+135	## APIs used
+136	
+137	- **Aladhan:** `GET https://api.aladhan.com/v1/timingsByCity?city=London&country=UK&method=2` — returns JSON with `data.timings.Maghrib` and `data.date.gregorian.weekday.en`
+138	- **Telegram Bot API:** Webhook for updates, `sendMessage`, `sendPhoto`, `setMyCommands`
+139	- No auth keys needed beyond `TELEGRAM_BOT_TOKEN` (Aladhan is free/open)
+140	
+141	## Out of scope
+142	
+143	- Admin dashboard / web UI
+144	- Group chat support (DM only initially)
+145	- Hijri calendar integration
+146	- Dynamic hadith API (config-based only)
+147	- Multiple prayer calculation methods (ISNA only)
+148	- Analytics / usage tracking beyond sent_log
+149
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:28Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\SPEC.md`
+
+```text
+1	# Al-Kahf Bot — Specification
+2	
+3	A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recite Surah al-Kahf, with dynamically generated images featuring a rotating hadith on the surah's virtues.
+4	
+5	## Problem Statement
+6	
+7	The previous Al-Kahf reminder bot is defunct. Users who relied on it to remember reciting Surah al-Kahf on Fridays (which begins Thursday after Maghrib) have no automated reminder. The new bot must handle per-user timezone-aware Maghrib calculation, present hadith on the surah's virtues with a rotating weekly cycle, and produce visually fitting imagery — all without manual upkeep.
+8	
+9	## Solution
+10	
+11	A multi-user Telegram bot running on Cloudflare Workers. Each user sets their city and preferred language. A Cron Trigger runs every 10 minutes, fetches Maghrib times from the Aladhan API for each user's city, and sends a reminder when Maghrib has just passed on a Thursday. Each reminder includes a dynamically generated image card with the week's rotating hadith virtue rendered over an Islamic/natural template background. The bot speaks in a warm, spiritual tone and supports both English and Arabic.
+12	
+13	## User Stories
+14	
+15	### Core Flow
+16	1. As a user, I want to add the bot on Telegram and receive a welcome message explaining its purpose, so that I understand what the bot does.
+17	2. As a user, I want to set my city so that the bot sends reminders at the correct Maghrib time for my location.
+18	3. As a user, I want to choose English or Arabic as my preferred language, so that I receive reminders in a language I understand.
+19	4. As a user, I want to receive a reminder every Thursday after my local Maghrib time, so that I remember to recite Surah al-Kahf.
+20	5. As a user, I want each reminder to include an image with a hadith about the virtues of Surah al-Kahf, so that I am motivated by the authentic teachings.
+21	6. As a user, I want the hadith virtue to rotate each week, so that I learn different virtues over time.
+22	7. As a user, I want the image to have an Islamic or natural aesthetic, so that it befits the sacred content.
+23	
+24	### Settings & Control
+25	8. As a user, I want to change my city later, so that the bot stays accurate when I move or travel.
+26	9. As a user, I want to change my language preference later, so that I can switch between English and Arabic.
+27	10. As a user, I want to pause reminders temporarily, so that I am not disturbed during travel or unusual schedules.
+28	11. As a user, I want to resume reminders after pausing, so that I don't miss future reminders.
+29	12. As a user, I want to check my current settings (city, language, reminder status), so that I can confirm they are correct.
+30	
+31	### Discoverability
+32	13. As a user, I want a help command listing all available commands, so that I can discover functionality without memorizing them.
+33	14. As a new user, I want the start command to guide me through setup (city + language), so that I am not confused about what to do first.
+34	
+35	### Reliability
+36	15. As a user, I want the bot to handle unknown or misspelled cities gracefully with a helpful error message, so that I can correct my input.
+37	16. As a user, I want the bot to work even when Aladhan API is slow or temporarily unavailable, so that I don't miss a reminder due to a transient error.
+38	
+39	## Implementation Decisions
+40	
+41	### Architecture
+42	- **Platform:** Cloudflare Workers, deployed via Wrangler.
+43	- **Language:** TypeScript with `@cloudflare/workers-types`.
+44	- **Database:** Cloudflare D1 (SQLite). Schema:
+45	  - `users` table: `id` (PK), `telegram_chat_id` (unique), `city`, `country`, `language` (`'en'` | `'ar'`), `paused` (boolean), `created_at`, `updated_at`.
+46	  - `hadith` table: `id` (PK), `week_number` (integer), `text_en`, `text_ar`, `source_en`, `source_ar`.
+47	  - `sent_log` table: `id` (PK), `user_id` (FK), `hadith_id` (FK), `sent_at`.
+48	- **Scheduling:** Cloudflare Workers Cron Trigger, every 10 minutes. On each tick: query D1 for unpaused users, fetch Maghrib for each unique city (cached per tick), identify users whose Maghrib just passed on a Thursday, generate + send reminders.
+49	- **Telegram integration:** Webhook mode. Worker registers webhook with Telegram on deploy. Handles updates from Telegram for commands.
+50	
+51	### Prayer Times
+52	- **API:** Aladhan API (`api.aladhan.com`), free tier, no authentication.
+53	- **Endpoint:** `/timingsByCity?city=London&country=UK&method=2` (ISNA method default, configurable per-city later if needed).
+54	- **Caching:** Per 10-minute tick, deduplicate city lookups. Store timestamp of lookup so duplicate cities in same tick hit cache, not the API.
+55	- **Thursday detection:** Server-side. After fetching timings, check `DateObject.gregorian.weekday.en` === "Thursday" from the Aladhan response. Only send if both conditions hold: Maghrib just passed AND today is Thursday.
+56	
+57	### Image Generation
+58	- **Approach:** Single static Islamic/natural template background image. Hadith text overlaid dynamically at send time.
+59	- **Rendering:** SVG composed programmatically, converted to PNG via `@resvg/resvg-wasm` in the Worker. Arabic text rendered with appropriate font (e.g., Noto Naskh Arabic) bundled as a base64 font in the Worker.
+60	- **Template design:** Calm natural motif (floral/geometric Islamic pattern or nature landscape), muted warm tones. Arabic text prominently with English below. Source citation in small text at bottom.
+61	- **Dimensions:** 1080×1080 (square, Telegram-optimized).
+62	
+63	### Bot Commands & Interaction
+64	Bot responds to the following commands. Commands are registered via Telegram's `setMyCommands` API.
+65	
+66	| Command | Behavior |
+67	|---------|----------|
+68	| `/start` | Welcome message with bot purpose, prompt to set city + language. |
+69	| `/setcity <city>, <country>` | Store user's city/country. Validates against Aladhan. On failure, asks user to retry. |
+70	| `/setlanguage` | Inline keyboard: "English" / "العربية". Stores preference. |
+71	| `/pause` | Sets `paused = true`. Confirms with message. |
+72	| `/resume` | Sets `paused = false`. Confirms with message. |
+73	| `/status` | Replies with current city, language, and paused state. |
+74	| `/help` | Lists all commands with brief descriptions. |
+75	
+76	### Hadith Rotation
+77	- **Rotation logic:** Weekly cycle. The active hadith for a given ISO week number = `week_number % total_hadith_count`. This deterministically maps each week to a hadith, rotating through all entries.
+78	- **Seed data:** 10-20 curated authentic hadith on Surah al-Kahf virtues. Each entry has Arabic text, English translation, and source reference. Stored in the `hadith` table, populated via a seed SQL file.
+79	- **Future extensibility:** The `hadith` table schema supports adding new entries or swapping to an API-backed source later. The rotation logic is agnostic to data origin.
+80	
+81	### Tone & Language
+82	- **English messages:** Warm, spiritual tone. Uses "ﷺ" after mentioning the Prophet. Opens with Islamic greetings (As-salamu alaykum) where appropriate.
+83	- **Arabic messages:** Matching warm spiritual tone, with appropriate Islamic phrasing.
+84	- **Hadith images:** Always show both Arabic text (original hadith) and the user's chosen language for translation. If user chose Arabic, Arabic-only card is acceptable with the matn (text) being the primary content.
+85	
+86	### Error Handling
+87	- **Aladhan API failure:** Retry once after 30s. If still failing, skip that tick. Log error. Next tick (10 min later) retries.
+88	- **Invalid city:** Aladhan returns error → bot replies: "I couldn't find that city. Please try again with format: `/setcity London, UK`".
+89	- **Telegram API failure:** Log error. Send failure for one user does not block others.
+90	- **Image generation failure:** Fallback to text-only reminder message with the hadith in plain text.
+91	
+92	## Testing Decisions
+93	
+94	- **What makes a good test:** Test external behavior only — given a user with city X, when the cron fires at a Thursday Maghrib time, the bot sends a message. Mock Aladhan and Telegram APIs at the boundary. Never test internal Worker plumbing.
+95	- **Integration tests:** Use `wrangler dev` with a local D1 binding. Mock Aladhan responses via `undici` MockAgent or `msw`. Assert the bot calls Telegram's `sendPhoto` with correct chat ID, image, and caption.
+96	- **Unit tests:**
+97	  - Rotation logic: given week numbers and hadith counts, assert correct index.
+98	  - Time window logic: given a Maghrib timestamp and current timestamp, assert whether reminder should fire.
+99	  - City deduplication: given multiple users in same city, assert one API call.
+100	- **No tests for:** Template rendering output (visual regression), Telegram Bot API wire format (tested by their SDK/server), Worker deployment pipeline.
+101	
+102	## Out of Scope
+103	
+104	- Admin dashboard or web UI.
+105	- Analytics or usage tracking beyond the `sent_log` table.
+106	- User-facing hadith management interface — hadith are seeded via SQL and manageably curated by the maintainer.
+107	- Group chat support — direct messages only for initial release.
+108	- Multiple calculation methods (Hanafi vs. standard) — ISNA method only. Can parameterize later.
+109	- Push notifications outside Telegram.
+110	- Dynamic hadith API integration — designed for but not built now.
+111	- Payment or donation features.
+112	- Multi-language beyond English and Arabic.
+113	
+114	## Further Notes
+115	
+116	- **Hadith authenticity:** All hadith in the seed data must be verified authentic (sahih or hasan) from recognized collections (Bukhari, Muslim, Tirmidhi, Abu Dawud, etc.). Include full reference chain in source fields.
+117	- **Islamic date consideration:** The bot uses Gregorian calendar (Thursday detection). Hijri calendar integration is out of scope but the Aladhan API returns Hijri date data if needed later.
+118	- **Deployment flow:** `wrangler deploy` from local machine. Set Telegram bot token as Worker secret (`wrangler secret put TELEGRAM_BOT_TOKEN`). D1 database created via `wrangler d1 create al-kahf-db`. Seed with `wrangler d1 execute al-kahf-db --file=./db/seed.sql`.
+119	- **Cold start:** Workers cold-start in <5ms for scheduled triggers. No warm-up needed.
+120	- **Free tier fit:** ~8,640 cron invocations/month + negligible D1 reads. Well within Cloudflare free tier. Aladhan API is free with no rate limits (reasonable use).
+121
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:28Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\README.md`
+
+```text
+1	# Al-Kahf Bot 🌙
+2	
+3	A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recite Surah al-Kahf, with dynamically generated image cards featuring a rotating hadith on the surah's virtues.
+4	
+5	Runs on Cloudflare Workers with D1 (SQLite), Cron Triggers, and the Aladhan API. Full spec: [SPEC.md](SPEC.md).
+6	
+7	## Architecture
+8	
+9	```
+10	Telegram user → Webhook → Worker (fetch handler)
+11	                              ├── /start /help /setcity /setlanguage
+12	                              ├── /pause /resume /status
+13	                              └── language keyboard callbacks
+14	
+15	Cron Trigger (every 10 min) → Worker (scheduled handler)
+16	  ├── Unpaused users with a city set (D1)
+17	  ├── Deduplicated Aladhan fetches (one per city per date)
+18	  ├── Thursday + 15-minute Maghrib window detection
+19	  ├── Weekly hadith rotation: week_number % hadith_count
+20	  ├── SVG card rendered to PNG (resvg-wasm, Noto Naskh Arabic)
+21	  └── sendPhoto with warm caption (text-only fallback on image failure)
+22	```
+23	
+24	## Commands
+25	
+26	| Command | Behavior |
+27	|---------|----------|
+28	| `/start` | Welcome + setup guide |
+29	| `/setcity London, UK` | Validate city via Aladhan, store, confirm |
+30	| `/setlanguage` | Inline keyboard: English / العربية |
+31	| `/pause` / `/resume` | Toggle reminders |
+32	| `/status` | City, language, paused state |
+33	| `/help` | List all commands |
+34	
+35	Commands are registered via Telegram `setMyCommands` on cold start.
+36	
+37	## Local development
+38	
+39	```bash
+40	npm install
+41	npm run db:migrate:local    # apply D1 migrations to local DB
+42	npm run db:seed:local       # seed the hadith table
+43	npm test                    # vitest unit tests
+44	npm run typecheck
+45	npm run dev                 # wrangler dev (webhook needs a tunnel for Telegram)
+46	```
+47	
+48	## Deployment
+49	
+50	1. **Create the D1 database** (once):
+51	   ```bash
+52	   npx wrangler d1 create al-kahf-db
+53	   ```
+54	   Copy the printed `database_id` into `wrangler.jsonc` (`d1_databases[0].database_id`).
+55	
+56	2. **Set the bot token secret** (once, or to rotate):
+57	   ```bash
+58	   npx wrangler secret put TELEGRAM_BOT_TOKEN
+59	   ```
+60	   Get the token from [@BotFather](https://t.me/BotFather). It never leaves Workers as a secret — no other API keys are used (Aladhan is open).
+61	
+62	3. **Deploy + migrate + seed**:
+63	   ```bash
+64	   npm run deploy
+65	   npm run db:migrate:remote
+66	   npm run db:seed:remote
+67	   ```
+68	
+69	4. **Register the webhook** (once, after first deploy):
+70	   ```bash
+71	   curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://<your-worker-url>/"
+72	   ```
+73	
+74	## Reliability behavior
+75	
+76	- **Aladhan failure:** each city fetch retries once after 30s; if it still fails the city is skipped for that tick and logged. The next tick (10 min later) retries fresh.
+77	- **Image generation failure:** the reminder falls back to text-only with the hadith in plain text — never silent.
+78	- **Per-user isolation:** one user's Telegram failure never blocks another user's send in the same tick.
+79	- **Duplicate prevention:** `sent_log` records the ISO week key per user; a user never receives two reminders in the same week.
+80	- **Invalid city:** `/setcity` replies with the format guide: `/setcity London, UK`.
+81	
+82	## Logs
+83	
+84	Worker logs are structured JSON lines (`wrangler tail` / Workers dashboard):
+85	
+86	```json
+87	{ "level": "error", "message": "Reminder send failed for user 1", "error": "...", "chat_id": "123456" }
+88	{ "level": "warn", "message": "Aladhan fetch failed for London|UK, retrying in 30000ms", "error": "..." }
+89	```
+90	
+91	Context is limited to chat_id / city — no personal data.
+92	
+93	## Cold start measurement
+94	
+95	Cloudflare Workers cron triggers are expected to cold-start in <5ms (no warm-up needed). To verify on your deployed Worker: `wrangler tail` and inspect the invocation `duration` in the Workers dashboard for a scheduled event. If rendering pushes wall time up, that's billed CPU per request, not cold start.
+96	
+97	## Font
+98	
+99	Arabic rendering uses Noto Naskh Arabic (OFL), embedded as base64 in `src/font.ts` via:
+100	
+101	```bash
+102	node scripts/embed-font.mjs
+103	```
+104	
+105	The source TTF lives in `assets/`. If you replace it, re-run the embed script.
+106	
+107	## Hadith data
+108	
+109	`db/seed.sql` holds 10 authentic (sahih/hasan) hadith on the virtues of Surah al-Kahf with Arabic matn, English translation, and sources. **Re-verify texts with a qualified source before production deployment.**
+110	
+111	Rotation: active hadith = `week_order[week_number % count]` — global per week, every user sees the same hadith.
+112
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:29Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="Agent"><details>
+<summary>Tool use: **Agent**</summary>
+Spec review of diff
+
+```text
+Async agent launched successfully. (This tool result is internal metadata — never quote or paste any part of it, including the agentId below, into a user-facing reply.)
+agentId: afc776a0cf594a8ab (internal ID - do not mention to user. Use SendMessage with to: 'afc776a0cf594a8ab', summary: '<5-10 word recap>' to continue this agent.)
+The agent is working in the background. You will be notified automatically when it completes. You know nothing about its results until that notification arrives — do not report, assume, or predict them; continue other work or respond to the user in the meantime.
+Do not duplicate this agent's work — avoid working with the same files or topics it is using.
+output_file: C:\Users\eshan\AppData\Local\Temp\claude\D--Projects-al-kahf-bot\93e3c44b-6689-44b4-ab8a-742cd7cc1995\tasks\afc776a0cf594a8ab.output
+Do NOT Read or tail this file via the shell tool — it is the full subagent JSONL transcript and reading it will overflow your context. If the user asks for progress, say the agent is still running; you'll get a completion notification.
+```
+</details></tool-use>
+
+_**Agent - sidechain (2026-08-16 19:28:29Z)**_
+
+You are reviewing whether the diff between git ref 01e6c15 and HEAD in the repo at D:\Projects\al-kahf_bot (branch main) faithfully implements its spec. Run this to see the changes:
+
+```
+git -C D:\Projects\al-kahf_bot diff 01e6c15...HEAD
+```
+
+The spec sources are:
+1. D:\Projects\al-kahf_bot\SPEC.md — the full product specification (read it).
+2. GitHub issues #1–#7 on repo https://github.com/m-johany/magrib_reminder-bot. Fetch each with `gh issue view <n> --json title,body` (gh is authenticated). The commits map to issues: 53448ad→#1, 1c1df42→#2, 3a73c61→#3, 23fc0f3→#4, 3570f27→#5, 1337102→#6, 8761fe7→#7.
+
+Report: (a) requirements the spec/issues asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line / issue acceptance criterion for each finding. Pay special attention to the issues' "Acceptance criteria" checklists — go through each issue's criteria one by one. Under 400 words.
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:29Z)**_
+
+<think><details><summary>Thought Process</summary>
+The git command failed due to path escaping. The backslashes got mangled. Let me use forward slashes.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:29Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show diff stat between refs
+
+`git -C "D:/Projects/al-kahf_bot" diff 01e6c15...HEAD --stat`
+
+```text
+ .cursorindexingignore                              |    3 +
+ .gitignore                                         |    6 +-
+ .specstory/.project.json                           |    7 +
+ .specstory/cli/config.toml                         |  109 +
+ .../history/2026-08-09_09-25-07Z-continue.md       | 2504 ++++++
+ .specstory/history/2026-08-09_09-25-07Z.md         |  187 +
+ .../history/2026-08-16_19-01-15Z-how-far-are-we.md |  511 ++
+ .specstory/history/2026-08-16_19-03-01Z.md         | 8279 ++++++++++++++++++++
+ .specstory/statistics.json                         |   31 +
+ .vscode/settings.json                              |    3 +
+ AGENTS.md                                          |    9 +-
+ README.md                                          |  111 +
+ assets/NotoNaskhArabic-Regular.ttf                 |  Bin 0 -> 307592 bytes
+ db/seed.sql                                        |   70 +
+ migrations/0001_users.sql                          |   10 +
+ migrations/0002_hadith_sent_log.sql                |   20 +
+ package-lock.json                                  | 3782 +++++++++
+ package.json                                       |   30 +
+ scripts/embed-font.mjs                             |   10 +
+ src/aladhan.ts                                     |   65 +
+ src/card.ts                                        |  132 +
+ src/commands.ts                                    |  104 +
+ src/cron.ts                                        |  152 +
+ src/font.ts                                        |    3 +
+ src/image.ts                                       |   19 +
+ src/index.ts                                       |  213 +
+ src/messages.ts                                    |  175 +
+ src/rotation.ts                                    |   19 +
+ src/store.ts                                       |   49 +
+ src/types.d.ts                                     |    4 +
+ src/week.ts                                        |    9 +
+ src/window.ts                                      |   38 +
+ test/aladhan.test.ts                               |   71 +
+ test/card.test.ts                                  |   90 +
+ test/commands.test.ts                              |  148 +
+ test/cron.test.ts                                  |  363 +
+ test/image.test.ts                                 |   36 +
+ test/messages.test.ts                              |  156 +
+ test/rotation.test.ts                              |   32 +
+ test/week.test.ts                                  |   20 +
+ test/window.test.ts                                |   42 +
+ tsconfig.json                                      |   15 +
+ wrangler.jsonc                                     |   25 +
+ 43 files changed, 17656 insertions(+), 6 deletions(-)
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:30Z)**_
+
+<think><details><summary>Thought Process</summary>
+Let me start by running the diff and reading the spec, plus fetching the issues. I can do several of these in parallel.
+
+Let me:
+1. Run `git -C D:\Projects\al-kahf_bot diff 01e6c15...HEAD`
+2. Read SPEC.md
+3. Fetch issues #1-#7 via gh
+
+Let me do these in parallel.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show diff between 01e6c15 and HEAD
+
+`git -C D:\Projects\al-kahf_bot diff 01e6c15...HEAD`
+
+```text
+Exit code 128
+fatal: cannot change to 'D:Projectsal-kahf_bot': No such file or directory
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:31Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\SPEC.md`
+
+```text
+1	# Al-Kahf Bot — Specification
+2	
+3	A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recite Surah al-Kahf, with dynamically generated images featuring a rotating hadith on the surah's virtues.
+4	
+5	## Problem Statement
+6	
+7	The previous Al-Kahf reminder bot is defunct. Users who relied on it to remember reciting Surah al-Kahf on Fridays (which begins Thursday after Maghrib) have no automated reminder. The new bot must handle per-user timezone-aware Maghrib calculation, present hadith on the surah's virtues with a rotating weekly cycle, and produce visually fitting imagery — all without manual upkeep.
+8	
+9	## Solution
+10	
+11	A multi-user Telegram bot running on Cloudflare Workers. Each user sets their city and preferred language. A Cron Trigger runs every 10 minutes, fetches Maghrib times from the Aladhan API for each user's city, and sends a reminder when Maghrib has just passed on a Thursday. Each reminder includes a dynamically generated image card with the week's rotating hadith virtue rendered over an Islamic/natural template background. The bot speaks in a warm, spiritual tone and supports both English and Arabic.
+12	
+13	## User Stories
+14	
+15	### Core Flow
+16	1. As a user, I want to add the bot on Telegram and receive a welcome message explaining its purpose, so that I understand what the bot does.
+17	2. As a user, I want to set my city so that the bot sends reminders at the correct Maghrib time for my location.
+18	3. As a user, I want to choose English or Arabic as my preferred language, so that I receive reminders in a language I understand.
+19	4. As a user, I want to receive a reminder every Thursday after my local Maghrib time, so that I remember to recite Surah al-Kahf.
+20	5. As a user, I want each reminder to include an image with a hadith about the virtues of Surah al-Kahf, so that I am motivated by the authentic teachings.
+21	6. As a user, I want the hadith virtue to rotate each week, so that I learn different virtues over time.
+22	7. As a user, I want the image to have an Islamic or natural aesthetic, so that it befits the sacred content.
+23	
+24	### Settings & Control
+25	8. As a user, I want to change my city later, so that the bot stays accurate when I move or travel.
+26	9. As a user, I want to change my language preference later, so that I can switch between English and Arabic.
+27	10. As a user, I want to pause reminders temporarily, so that I am not disturbed during travel or unusual schedules.
+28	11. As a user, I want to resume reminders after pausing, so that I don't miss future reminders.
+29	12. As a user, I want to check my current settings (city, language, reminder status), so that I can confirm they are correct.
+30	
+31	### Discoverability
+32	13. As a user, I want a help command listing all available commands, so that I can discover functionality without memorizing them.
+33	14. As a new user, I want the start command to guide me through setup (city + language), so that I am not confused about what to do first.
+34	
+35	### Reliability
+36	15. As a user, I want the bot to handle unknown or misspelled cities gracefully with a helpful error message, so that I can correct my input.
+37	16. As a user, I want the bot to work even when Aladhan API is slow or temporarily unavailable, so that I don't miss a reminder due to a transient error.
+38	
+39	## Implementation Decisions
+40	
+41	### Architecture
+42	- **Platform:** Cloudflare Workers, deployed via Wrangler.
+43	- **Language:** TypeScript with `@cloudflare/workers-types`.
+44	- **Database:** Cloudflare D1 (SQLite). Schema:
+45	  - `users` table: `id` (PK), `telegram_chat_id` (unique), `city`, `country`, `language` (`'en'` | `'ar'`), `paused` (boolean), `created_at`, `updated_at`.
+46	  - `hadith` table: `id` (PK), `week_number` (integer), `text_en`, `text_ar`, `source_en`, `source_ar`.
+47	  - `sent_log` table: `id` (PK), `user_id` (FK), `hadith_id` (FK), `sent_at`.
+48	- **Scheduling:** Cloudflare Workers Cron Trigger, every 10 minutes. On each tick: query D1 for unpaused users, fetch Maghrib for each unique city (cached per tick), identify users whose Maghrib just passed on a Thursday, generate + send reminders.
+49	- **Telegram integration:** Webhook mode. Worker registers webhook with Telegram on deploy. Handles updates from Telegram for commands.
+50	
+51	### Prayer Times
+52	- **API:** Aladhan API (`api.aladhan.com`), free tier, no authentication.
+53	- **Endpoint:** `/timingsByCity?city=London&country=UK&method=2` (ISNA method default, configurable per-city later if needed).
+54	- **Caching:** Per 10-minute tick, deduplicate city lookups. Store timestamp of lookup so duplicate cities in same tick hit cache, not the API.
+55	- **Thursday detection:** Server-side. After fetching timings, check `DateObject.gregorian.weekday.en` === "Thursday" from the Aladhan response. Only send if both conditions hold: Maghrib just passed AND today is Thursday.
+56	
+57	### Image Generation
+58	- **Approach:** Single static Islamic/natural template background image. Hadith text overlaid dynamically at send time.
+59	- **Rendering:** SVG composed programmatically, converted to PNG via `@resvg/resvg-wasm` in the Worker. Arabic text rendered with appropriate font (e.g., Noto Naskh Arabic) bundled as a base64 font in the Worker.
+60	- **Template design:** Calm natural motif (floral/geometric Islamic pattern or nature landscape), muted warm tones. Arabic text prominently with English below. Source citation in small text at bottom.
+61	- **Dimensions:** 1080×1080 (square, Telegram-optimized).
+62	
+63	### Bot Commands & Interaction
+64	Bot responds to the following commands. Commands are registered via Telegram's `setMyCommands` API.
+65	
+66	| Command | Behavior |
+67	|---------|----------|
+68	| `/start` | Welcome message with bot purpose, prompt to set city + language. |
+69	| `/setcity <city>, <country>` | Store user's city/country. Validates against Aladhan. On failure, asks user to retry. |
+70	| `/setlanguage` | Inline keyboard: "English" / "العربية". Stores preference. |
+71	| `/pause` | Sets `paused = true`. Confirms with message. |
+72	| `/resume` | Sets `paused = false`. Confirms with message. |
+73	| `/status` | Replies with current city, language, and paused state. |
+74	| `/help` | Lists all commands with brief descriptions. |
+75	
+76	### Hadith Rotation
+77	- **Rotation logic:** Weekly cycle. The active hadith for a given ISO week number = `week_number % total_hadith_count`. This deterministically maps each week to a hadith, rotating through all entries.
+78	- **Seed data:** 10-20 curated authentic hadith on Surah al-Kahf virtues. Each entry has Arabic text, English translation, and source reference. Stored in the `hadith` table, populated via a seed SQL file.
+79	- **Future extensibility:** The `hadith` table schema supports adding new entries or swapping to an API-backed source later. The rotation logic is agnostic to data origin.
+80	
+81	### Tone & Language
+82	- **English messages:** Warm, spiritual tone. Uses "ﷺ" after mentioning the Prophet. Opens with Islamic greetings (As-salamu alaykum) where appropriate.
+83	- **Arabic messages:** Matching warm spiritual tone, with appropriate Islamic phrasing.
+84	- **Hadith images:** Always show both Arabic text (original hadith) and the user's chosen language for translation. If user chose Arabic, Arabic-only card is acceptable with the matn (text) being the primary content.
+85	
+86	### Error Handling
+87	- **Aladhan API failure:** Retry once after 30s. If still failing, skip that tick. Log error. Next tick (10 min later) retries.
+88	- **Invalid city:** Aladhan returns error → bot replies: "I couldn't find that city. Please try again with format: `/setcity London, UK`".
+89	- **Telegram API failure:** Log error. Send failure for one user does not block others.
+90	- **Image generation failure:** Fallback to text-only reminder message with the hadith in plain text.
+91	
+92	## Testing Decisions
+93	
+94	- **What makes a good test:** Test external behavior only — given a user with city X, when the cron fires at a Thursday Maghrib time, the bot sends a message. Mock Aladhan and Telegram APIs at the boundary. Never test internal Worker plumbing.
+95	- **Integration tests:** Use `wrangler dev` with a local D1 binding. Mock Aladhan responses via `undici` MockAgent or `msw`. Assert the bot calls Telegram's `sendPhoto` with correct chat ID, image, and caption.
+96	- **Unit tests:**
+97	  - Rotation logic: given week numbers and hadith counts, assert correct index.
+98	  - Time window logic: given a Maghrib timestamp and current timestamp, assert whether reminder should fire.
+99	  - City deduplication: given multiple users in same city, assert one API call.
+100	- **No tests for:** Template rendering output (visual regression), Telegram Bot API wire format (tested by their SDK/server), Worker deployment pipeline.
+101	
+102	## Out of Scope
+103	
+104	- Admin dashboard or web UI.
+105	- Analytics or usage tracking beyond the `sent_log` table.
+106	- User-facing hadith management interface — hadith are seeded via SQL and manageably curated by the maintainer.
+107	- Group chat support — direct messages only for initial release.
+108	- Multiple calculation methods (Hanafi vs. standard) — ISNA method only. Can parameterize later.
+109	- Push notifications outside Telegram.
+110	- Dynamic hadith API integration — designed for but not built now.
+111	- Payment or donation features.
+112	- Multi-language beyond English and Arabic.
+113	
+114	## Further Notes
+115	
+116	- **Hadith authenticity:** All hadith in the seed data must be verified authentic (sahih or hasan) from recognized collections (Bukhari, Muslim, Tirmidhi, Abu Dawud, etc.). Include full reference chain in source fields.
+117	- **Islamic date consideration:** The bot uses Gregorian calendar (Thursday detection). Hijri calendar integration is out of scope but the Aladhan API returns Hijri date data if needed later.
+118	- **Deployment flow:** `wrangler deploy` from local machine. Set Telegram bot token as Worker secret (`wrangler secret put TELEGRAM_BOT_TOKEN`). D1 database created via `wrangler d1 create al-kahf-db`. Seed with `wrangler d1 execute al-kahf-db --file=./db/seed.sql`.
+119	- **Cold start:** Workers cold-start in <5ms for scheduled triggers. No warm-up needed.
+120	- **Free tier fit:** ~8,640 cron invocations/month + negligible D1 reads. Well within Cloudflare free tier. Aladhan API is free with no rate limits (reasonable use).
+121
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:31Z)**_
+
+<think><details><summary>Thought Process</summary>
+The diff is large — mostly new files. Let me get the full diff of the source files, excluding specstory. Let me fetch the source diff.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:36Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Fetch issues 1-7 from GitHub
+
+`for n in 1 2 3 4 5 6 7; do echo "===== ISSUE $n ====="; gh issue view $n --repo m-johany/magrib_reminder-bot --json title,body; done`
+
+```text
+===== ISSUE 1 =====
+{"body":"## What to build\n\nScaffold the Cloudflare Workers project with TypeScript, D1 binding, and Telegram webhook handler. Bot responds to /start with a warm welcome message explaining the bot's purpose and guiding new users to set city and language. /help lists all available commands. Deployable via wrangler deploy.\n\n## Blocked by\n\nNone — can start immediately.\n\n## Acceptance criteria\n\n- [ ] wrangler init project with TypeScript, D1 binding configured\n- [ ] Telegram webhook handler receives updates\n- [ ] /start replies with welcome message (Islamic greeting, bot purpose, prompt to /setcity and /setlanguage)\n- [ ] /help replies with list of all commands and brief descriptions\n- [ ] Bot token set as Worker secret (TELEGRAM_BOT_TOKEN)\n- [ ] Deployable via wrangler deploy and responds on Telegram\n- [ ] Commands registered via Telegram setMyCommands API\n","title":"1. Project scaffold + /start + /help"}
+===== ISSUE 2 =====
+{"body":"## What to build\n\nUsers table in D1. /setcity London, UK validates the city against Aladhan API — on success stores city/country in D1, on failure returns helpful retry message. /status replies with user's current city and country. City lookup is cached per cron tick to avoid duplicate API calls.\n\n## Blocked by\n\n- #1 Project scaffold + /start + /help\n\n## Acceptance criteria\n\n- [ ] D1 users table with columns: id (PK), telegram_chat_id (unique), city, country, created_at, updated_at\n- [ ] /setcity London, UK fetches Aladhan /timingsByCity, verifies the city exists\n- [ ] Valid city: stores in D1, replies confirming \"Your city is set to London, UK\"\n- [ ] Invalid city: replies with helpful error — \"I couldn't find that city. Please try again with format: /setcity London, UK\"\n- [ ] /status shows current city and country\n- [ ] Unset city: /status replies \"No city set. Use /setcity to configure\"\n- [ ] Wrangler deploy with D1 binding and migrations working\n","title":"2. User city + /setcity + /status"}
+===== ISSUE 3 =====
+{"body":"## What to build\n\nLanguage column and pause/resume columns added to users table. /setlanguage shows inline keyboard with \"English\" / \"العربية\" — tapping stores preference. /pause halts reminders for the user, /resume re-enables them. /status shows all current settings: city, language, paused state.\n\n## Blocked by\n\n- #2 User city + /setcity + /status\n\n## Acceptance criteria\n\n- [ ] users table extended: language (en|ar, default en), paused (boolean, default false)\n- [ ] /setlanguage sends inline keyboard with two buttons: \"English\" / \"العربية\"\n- [ ] Language selection stored in D1, confirmed with reply message\n- [ ] /pause sets paused=true, replies with confirmation\n- [ ] /resume sets paused=false, replies with confirmation\n- [ ] /status shows city, language, and paused/active state\n- [ ] Warm spiritual tone in both languages — English: \"As-salamu alaykum\" openings, Arabic: appropriate Islamic phrasing\n","title":"3. Language + pause/resume"}
+===== ISSUE 4 =====
+{"body":"## What to build\n\nCron Trigger every 10 minutes. On each tick: query D1 for unpaused users with a city set, deduplicate cities, fetch Maghrib time from Aladhan for each unique city, identify users whose Maghrib just passed AND today is Thursday, send personalized reminder. sent_log D1 table records each send to prevent duplicates.\n\n## Blocked by\n\n- #3 Language + pause/resume\n\n## Acceptance criteria\n\n- [ ] Cloudflare Cron Trigger configured for every 10 minutes\n- [ ] Deduplicated Aladhan calls — one per unique city per tick\n- [ ] Thursday detection: check Aladhan response weekday field, only proceed on Thursday\n- [ ] Maghrib window: send to user if Maghrib just passed within the current 10-minute window\n- [ ] Text-only reminder sent via Telegram (hadith text to come in next ticket)\n- [ ] sent_log D1 table: id, user_id, hadith_id, sent_at — prevents duplicate sends\n- [ ] Paused users and users without city are skipped\n- [ ] Per-user error isolation: one user failure does not block others\n","title":"4. Cron scheduler + reminder dispatch"}
+===== ISSUE 5 =====
+{"body":"## What to build\n\nhadith D1 table with 10-20 curated authentic hadith on Surah al-Kahf virtues. SQL seed file with Arabic text, English translation, and source reference. Weekly rotation logic: current ISO week number modulo total hadith count determines which hadith to show. Cron reminder messages now include the hadith text.\n\n## Blocked by\n\n- #4 Cron scheduler + reminder dispatch\n\n## Acceptance criteria\n\n- [ ] hadith D1 table: id, week_order (integer), text_en, text_ar, source_en, source_ar\n- [ ] Seed SQL file with 10-20 authentic hadith (sahih/hasan) from recognized collections\n- [ ] Rotation: active_hadith = week_order[week_number % count], cycling through all entries\n- [ ] Hadith included in the reminder message text\n- [ ] Source citation included (e.g., \"Sahih al-Bukhari, Book of Friday Prayer\")\n- [ ] Each user sees the same hadith globally each week (not per-user rotation offset)\n","title":"5. Hadith seed data + rotation"}
+===== ISSUE 6 =====
+{"body":"## What to build\n\nDynamic image generation for hadith cards. A single Islamic/natural template background (SVG), hadith text overlaid programmatically in Arabic with English translation below. @resvg/resvg-wasm renders SVG to PNG in the Worker. Bot sends sendPhoto with the generated image instead of plain text. Arabic font (Noto Naskh Arabic or similar) bundled as base64.\n\n## Blocked by\n\n- #5 Hadith seed data + rotation\n\n## Acceptance criteria\n\n- [ ] Single SVG template with Islamic geometric / natural motif background, warm muted tones\n- [ ] Arabic hadith text overlaid prominently, English translation below, source citation at bottom\n- [ ] Noto Naskh Arabic (or similar) font bundled as base64 in Worker for Arabic rendering\n- [ ] @resvg/resvg-wasm renders SVG to PNG at 1080x1080\n- [ ] Bot sends via Telegram sendPhoto (not text) with hadith image\n- [ ] Caption includes warm spiritual message alongside the image\n- [ ] Image respects user language preference for the caption\n- [ ] Rendering completes within Worker CPU limits (10ms CPU per request)\n","title":"6. Image generation"}
+===== ISSUE 7 =====
+{"body":"## What to build\n\nProduction hardening. Aladhan API failures retry once after 30s then skip tick. Image generation failure falls back to text-only reminder. Clear error messages for all edge cases. Per-user failure isolation verified end-to-end. No silent failures.\n\n## Blocked by\n\n- #6 Image generation\n\n## Acceptance criteria\n\n- [ ] Aladhan API failure: retry once after 30s, log error, skip tick; next tick retries fresh\n- [ ] Image generation failure: fallback to text-only hadith reminder, log error\n- [ ] Telegram API failure for one user does not block other users in same tick\n- [ ] Invalid city input gives clear guidance on format: /setcity City, Country\n- [ ] Cold start time measured — under 5ms for scheduled triggers\n- [ ] All Worker logs structured with user-identifiable context (chat_id, not personal data)\n- [ ] wrangler deploy secret handling documented (TELEGRAM_BOT_TOKEN, any API keys)\n","title":"7. Hardening"}
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:32Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show diff of source files
+
+`git -C "D:/Projects/al-kahf_bot" diff 01e6c15...HEAD -- src/ db/ migrations/ scripts/ package.json wrangler.jsonc test/ 2>&1 | head -2000`
+
+```text
+<persisted-output>
+Output too large (470KB). Full output saved to: C:\Users\eshan\.claude\projects\D--Projects-al-kahf-bot\93e3c44b-6689-44b4-ab8a-742cd7cc1995\tool-results\b9q008xt9.txt
+
+Preview (first 2KB):
+diff --git a/db/seed.sql b/db/seed.sql
+new file mode 100644
+index 0000000..224191a
+--- /dev/null
++++ b/db/seed.sql
+@@ -0,0 +1,70 @@
++-- Hadith seed data — virtues of Surah al-Kahf.
++--
++-- All entries are authentic (sahih or hasan) narrations from recognized
++-- collections (Sahih Muslim, Sahih al-Bukhari, Sunan Abi Dawud, al-Mustadrak,
++-- Sunan al-Darimi) with gradings as noted in the source fields.
++--
++-- ⚠️ Before production deployment, please have these texts re-verified by a
++-- qualified source — accuracy of the Arabic matn and translations matters.
++-- week_order runs 0..N-1; rotation = week_number % count.
++
++INSERT INTO hadith (week_order, text_en, text_ar, source_en, source_ar) VALUES
++(0,
++ 'Whoever memorizes the first ten verses of Surah al-Kahf will be protected from the Dajjal.',
++ 'مَنْ حَفِظَ عَشْرَ آيَاتٍ مِنْ أَوَّلِ سُورَةِ الْكَهْفِ عُصِمَ مِنَ الدَّجَّالِ',
++ 'Narrated by Abu Darda'' (may Allah be pleased with him); Sahih Muslim 809',
++ 'رواه أبو الدرداء رضي الله عنه؛ صحيح مسلم ٨٠٩'),
++
++(1,
++ 'Whoever recites the last ten verses of Surah al-Kahf will be protected from the trial of the Dajjal.',
++ 'مَنْ قَرَأَ الْعَشْرَ الْأَوَاخِرَ مِنْ سُورَةِ الْكَهْفِ عُصِمَ مِنْ فِتْنَةِ الدَّجَّالِ',
++ 'Narrated by Abu Darda'' (may Allah be pleased with him); Sahih Muslim 809',
++ 'رواه أبو الدرداء رضي الله عنه؛ صحيح مسلم ٨٠٩'),
++
++(2,
++ 'Whoever memorizes ten verses from the beginning of Surah al-Kahf will be protected from the trial of the Dajjal.',
++ 'مَنْ حَفِظَ عَشْرَ آيَاتٍ مِنْ أَوَّلِ سُورَةِ الْكَهْفِ عُصِمَ مِنْ فِتْنَةِ الدَّجَّالِ',
++ 'Sunan Abi Dawud 4323; graded sahih by al-Albani',
++ 'سنن أبي داود ٤٣٢٣؛ وصححه الألباني'),
++
++(3,
++ 'Whoever recites Surah al-Kahf as it was revealed, it will be a light for him on the Day of Resurrection from his place to Makkah.',
++ 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ كَمَا أُنْزِلَتْ كَانَتْ لَهُ نُورًا يَوْمَ الْقِيَامَةِ مِنْ مَقَامِهِ إِلَى مَكَّةَ',
++ 'Sunan Abi Dawud 4324; graded sahih by al-Albani',
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:31Z)**_
+
+<think><details><summary>Thought Process</summary>
+Both review agents running in background. While waiting, mark #7 completed. Wait for notifications — don't predict results.
+</details></think>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:32Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="TaskUpdate"><details>
+<summary>Tool use: **TaskUpdate**</summary>
+
+```text
+Updated task #7 status
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:33Z)**_
+
+<think><details><summary>Thought Process</summary>
+The output is large. Let me read the persisted output file, or better — read the source files directly since they're all new. The diff is essentially the full content of new files. Let me read the key source files directly: src/index.ts, src/cron.ts, src/commands.ts, src/messages.ts, src/card.ts, src/aladhan.ts, src/store.ts, src/rotation.ts, src/window.ts, src/week.ts, src/image.ts, src/font.ts, src/types.d.ts, plus package.json, wrangler.jsonc, migrations.
+
+Also need to check AGENTS.md diff (9 lines changed). Let me read those files.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:34Z)**_
+
+The diff is mostly new files. Let me read the source files directly.
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:34Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show diff of config and AGENTS.md
+
+`git -C "D:/Projects/al-kahf_bot" diff 01e6c15...HEAD -- AGENTS.md .gitignore package.json wrangler.jsonc`
+
+```text
+diff --git a/.gitignore b/.gitignore
+index 33ea276..e069b78 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,5 +1,7 @@
+ node_modules/
+-dist/
+-.dev.vars
+ .wrangler/
++dist/
+ *.log
++.env
++.env.*
++.DS_Store
+diff --git a/AGENTS.md b/AGENTS.md
+index d8d30a6..4850fb3 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -58,8 +58,8 @@ Cron Trigger (every 10 min) → Worker (scheduled handler)
+ CREATE TABLE users (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   telegram_chat_id TEXT UNIQUE NOT NULL,
+-  city TEXT NOT NULL,
+-  country TEXT NOT NULL,
++  city TEXT,               -- nullable: language can be set before city
++  country TEXT,
+   language TEXT NOT NULL DEFAULT 'en' CHECK(language IN ('en', 'ar')),
+   paused INTEGER NOT NULL DEFAULT 0,
+   created_at TEXT NOT NULL DEFAULT (datetime('now')),
+@@ -68,7 +68,7 @@ CREATE TABLE users (
+ 
+ CREATE TABLE hadith (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+-  week_order INTEGER NOT NULL,
++  week_order INTEGER NOT NULL UNIQUE,   -- 0..N-1, rotation = week_number % count
+   text_en TEXT NOT NULL,
+   text_ar TEXT NOT NULL,
+   source_en TEXT NOT NULL,
+@@ -78,7 +78,8 @@ CREATE TABLE hadith (
+ CREATE TABLE sent_log (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   user_id INTEGER NOT NULL REFERENCES users(id),
+-  hadith_id INTEGER NOT NULL REFERENCES hadith(id),
++  hadith_id INTEGER REFERENCES hadith(id),  -- nullable pre-seed
++  week_key TEXT NOT NULL,                  -- ISO week "2026-W33", dedup key
+   sent_at TEXT NOT NULL DEFAULT (datetime('now'))
+ );
+ ```
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..753c832
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,30 @@
++{
++  "name": "al-kahf-bot",
++  "version": "0.1.0",
++  "private": true,
++  "type": "module",
++  "scripts": {
++    "dev": "wrangler dev",
++    "deploy": "wrangler deploy",
++    "typecheck": "tsc --noEmit",
++    "test": "vitest run",
++    "test:watch": "vitest",
++    "db:migrate:local": "wrangler d1 migrations apply al-kahf-db --local",
++    "db:migrate:remote": "wrangler d1 migrations apply al-kahf-db --remote",
++    "db:seed:local": "wrangler d1 execute al-kahf-db --local --file=./db/seed.sql",
++    "db:seed:remote": "wrangler d1 execute al-kahf-db --remote --file=./db/seed.sql"
++  },
++  "dependencies": {
++    "@resvg/resvg-wasm": "^2.6.2",
++    "grammy": "^1.45.1"
++  },
++  "devDependencies": {
++    "@cloudflare/workers-types": "^5.20260816.1",
++    "@types/node": "^26.2.0",
++    "msw": "^2.15.0",
++    "typescript": "^7.0.2",
++    "undici": "^8.10.0",
++    "vitest": "^4.1.10",
++    "wrangler": "^4.123.0"
++  }
++}
+diff --git a/wrangler.jsonc b/wrangler.jsonc
+new file mode 100644
+index 0000000..6bbb01f
+--- /dev/null
++++ b/wrangler.jsonc
+@@ -0,0 +1,25 @@
++{
++  "name": "al-kahf-bot",
++  "main": "src/index.ts",
++  "compatibility_date": "2026-08-01",
++  "observability": {
++    "enabled": true
++  },
++  "d1_databases": [
++    {
++      "binding": "DB",
++      "database_name": "al-kahf-db",
++      "database_id": "REPLACE_ME_after_wrangler_d1_create"
++    }
++  ],
++  "migrations": [
++    {
++      "tag": "v1",
++      "database_name": "al-kahf-db",
++      "migrations_dir": "migrations"
++    }
++  ],
++  "triggers": {
++    "crons": ["*/10 * * * *"]
++  }
++}
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:34Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\index.ts`
+
+```text
+1	import { Bot, InlineKeyboard, InputFile, webhookCallback } from "grammy";
+2	import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
+3	import { fetchPrayerTimes } from "./aladhan";
+4	import { buildCardSvg } from "./card";
+5	import {
+6	  pauseCommand,
+7	  resumeCommand,
+8	  setCityCommand,
+9	  setLanguageCommand,
+10	  statusCommand,
+11	} from "./commands";
+12	import { runTick, type TickDeps } from "./cron";
+13	import { helpText, type HadithText, type Language, welcomeText } from "./messages";
+14	import { renderCardPng } from "./image";
+15	import { d1UserStore } from "./store";
+16	
+17	export interface Env {
+18	  TELEGRAM_BOT_TOKEN: string;
+19	  DB: D1Database;
+20	}
+21	
+22	const COMMANDS = [
+23	  { command: "start", description: "Welcome message and setup guide" },
+24	  { command: "setcity", description: "Set your city, e.g. /setcity London, UK" },
+25	  { command: "setlanguage", description: "Choose English or العربية" },
+26	  { command: "pause", description: "Pause reminders" },
+27	  { command: "resume", description: "Resume reminders" },
+28	  { command: "status", description: "Show your current settings" },
+29	  { command: "help", description: "List all commands" },
+30	];
+31	
+32	function createBot(token: string, env: Env): Bot {
+33	  const bot = new Bot(token);
+34	  const store = d1UserStore(env.DB);
+35	
+36	  bot.command("start", async (ctx) => {
+37	    const user = await store.get(String(ctx.chat.id));
+38	    await ctx.reply(welcomeText(user?.language ?? "en"));
+39	  });
+40	  bot.command("help", async (ctx) => {
+41	    const user = await store.get(String(ctx.chat.id));
+42	    await ctx.reply(helpText(user?.language ?? "en"));
+43	  });
+44	  bot.command("setcity", async (ctx) => {
+45	    const reply = await setCityCommand(ctx.match, String(ctx.chat.id), {
+46	      store,
+47	      fetchPrayerTimes: (city, country) => fetchPrayerTimes(city, country),
+48	    });
+49	    await ctx.reply(reply);
+50	  });
+51	  bot.command("setlanguage", async (ctx) => {
+52	    const keyboard = new InlineKeyboard()
+53	      .text("English", "lang:en")
+54	      .text("العربية", "lang:ar");
+55	    const user = await store.get(String(ctx.chat.id));
+56	    const prompt =
+57	      user?.language === "ar"
+58	        ? "اختر لغتك المفضلة:"
+59	        : "Choose your preferred language:";
+60	    await ctx.reply(prompt, { reply_markup: keyboard });
+61	  });
+62	  bot.callbackQuery(/^lang:(en|ar)$/, async (ctx) => {
+63	    if (!ctx.chat) {
+64	      await ctx.answerCallbackQuery({ text: "Error: no chat" });
+65	      return;
+66	    }
+67	    const lang = ctx.match[1] as Language;
+68	    const reply = await setLanguageCommand(lang, String(ctx.chat.id), { store });
+69	    await ctx.answerCallbackQuery();
+70	    await ctx.reply(reply);
+71	  });
+72	  bot.command("pause", async (ctx) => {
+73	    const reply = await pauseCommand(String(ctx.chat.id), { store });
+74	    await ctx.reply(reply);
+75	  });
+76	  bot.command("resume", async (ctx) => {
+77	    const reply = await resumeCommand(String(ctx.chat.id), { store });
+78	    await ctx.reply(reply);
+79	  });
+80	  bot.command("status", async (ctx) => {
+81	    const reply = await statusCommand(String(ctx.chat.id), { store });
+82	    await ctx.reply(reply);
+83	  });
+84	
+85	  // Register commands with Telegram so they appear in the client UI.
+86	  void bot.api
+87	    .setMyCommands(COMMANDS)
+88	    .catch((err: unknown) => console.error("setMyCommands failed", err));
+89	
+90	  return bot;
+91	}
+92	
+93	function makeTickDeps(
+94	  env: Env,
+95	  sendMessage: (chatId: string, text: string, photo?: Uint8Array) => Promise<unknown>
+96	): TickDeps {
+97	  const logError = (message: string, err?: unknown, context?: { chat_id?: string }) =>
+98	    console.error(
+99	      JSON.stringify({ level: "error", message, error: String(err ?? ""), ...context })
+100	    );
+101	  const logWarn = (message: string, err?: unknown) =>
+102	    console.warn(JSON.stringify({ level: "warn", message, error: String(err ?? "") }));
+103	
+104	  return {
+105	    async listActiveUsers() {
+106	      const { results } = await env.DB.prepare(
+107	        `SELECT id, telegram_chat_id, city, country, language, paused
+108	         FROM users
+109	         WHERE paused = 0 AND city IS NOT NULL AND city != ''`
+110	      ).all<{
+111	        id: number;
+112	        telegram_chat_id: string;
+113	        city: string;
+114	        country: string;
+115	        language: string;
+116	        paused: number;
+117	      }>();
+118	      return results.map((r) => ({
+119	        id: r.id,
+120	        telegram_chat_id: r.telegram_chat_id,
+121	        city: r.city,
+122	        country: r.country,
+123	        language: r.language === "ar" ? "ar" : "en",
+124	        paused: r.paused !== 0,
+125	      }));
+126	    },
+127	    fetchTimings(city, country, dateEn) {
+128	      return fetchPrayerTimes(city, country, dateEn ?? undefined);
+129	    },
+130	    async sendReminder(chatId, text, photo) {
+131	      await sendMessage(chatId, text, photo);
+132	    },
+133	    async createImage(hadith: HadithText, lang: Language) {
+134	      return renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm));
+135	    },
+136	    async alreadySent(userId, weekKey) {
+137	      const row = await env.DB.prepare(
+138	        "SELECT COUNT(*) AS n FROM sent_log WHERE user_id = ? AND week_key = ?"
+139	      )
+140	        .bind(userId, weekKey)
+141	        .first<{ n: number }>();
+142	      return (row?.n ?? 0) > 0;
+143	    },
+144	    async recordSend(userId, hadithId, weekKey) {
+145	      await env.DB.prepare(
+146	        "INSERT INTO sent_log (user_id, hadith_id, week_key) VALUES (?, ?, ?)"
+147	      )
+148	        .bind(userId, hadithId, weekKey)
+149	        .run();
+150	    },
+151	    async countHadith() {
+152	      const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM hadith").first<{ n: number }>();
+153	      return row?.n ?? 0;
+154	    },
+155	    async getHadithByWeekOrder(weekOrder) {
+156	      const row = await env.DB.prepare(
+157	        "SELECT id, text_en, text_ar, source_en, source_ar FROM hadith WHERE week_order = ?"
+158	      )
+159	        .bind(weekOrder)
+160	        .first<{
+161	          id: number;
+162	          text_en: string;
+163	          text_ar: string;
+164	          source_en: string;
+165	          source_ar: string;
+166	        }>();
+167	      return row
+168	        ? {
+169	            id: row.id,
+170	            textEn: row.text_en,
+171	            textAr: row.text_ar,
+172	            sourceEn: row.source_en,
+173	            sourceAr: row.source_ar,
+174	          }
+175	        : null;
+176	    },
+177	    sleep(ms) {
+178	      return new Promise((resolve) => setTimeout(resolve, ms));
+179	    },
+180	    logError,
+181	    logWarn,
+182	  };
+183	}
+184	
+185	let bot: Bot | undefined;
+186	let botToken: string | undefined;
+187	
+188	function getBot(env: Env): Bot {
+189	  if (bot === undefined || botToken !== env.TELEGRAM_BOT_TOKEN) {
+190	    bot = createBot(env.TELEGRAM_BOT_TOKEN, env);
+191	    botToken = env.TELEGRAM_BOT_TOKEN;
+192	  }
+193	  return bot;
+194	}
+195	
+196	export default {
+197	  async fetch(request: Request, env: Env): Promise<Response> {
+198	    return webhookCallback(getBot(env), "cloudflare-mod")(request);
+199	  },
+200	  scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): void {
+201	    const activeBot = getBot(env);
+202	    ctx.waitUntil(
+203	      runTick(
+204	        new Date(),
+205	        makeTickDeps(env, (chatId, text, photo) =>
+206	          photo
+207	            ? activeBot.api.sendPhoto(chatId, new InputFile(photo, "al-kahf.png"), { caption: text })
+208	            : activeBot.api.sendMessage(chatId, text)
+209	        )
+210	      )
+211	    );
+212	  },
+213	};
+214
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:34Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\cron.ts`
+
+```text
+1	import type { PrayerTimes } from "./aladhan";
+2	import { reminderText, type HadithText, type Language } from "./messages";
+3	import { parseWeekNumber, pickHadithIndex } from "./rotation";
+4	import { isoWeekKey } from "./week";
+5	import {
+6	  formatHHMM,
+7	  minutesSinceMaghrib,
+8	  previousDateEn,
+9	  previousWeekdayEn,
+10	} from "./window";
+11	
+12	/** How long after Maghrib a tick may still fire the reminder (10-min cadence + jitter margin). */
+13	export const REMINDER_WINDOW_MIN = 15;
+14	
+15	/** How long after midnight we still check the previous day's Maghrib (late Maghribs). */
+16	const EARLY_MORNING_CUTOFF = "00:30";
+17	
+18	export interface ActiveUser {
+19	  id: number;
+20	  telegram_chat_id: string;
+21	  city: string;
+22	  country: string;
+23	  language: Language;
+24	  paused: boolean;
+25	}
+26	
+27	export interface Hadith extends HadithText {
+28	  id: number;
+29	}
+30	
+31	export interface LogContext {
+32	  chat_id?: string;
+33	  city?: string;
+34	}
+35	
+36	export interface TickDeps {
+37	  listActiveUsers(): Promise<ActiveUser[]>;
+38	  fetchTimings(city: string, country: string, dateEn: string | null): Promise<PrayerTimes>;
+39	  sendReminder(chatId: string, text: string, photo?: Uint8Array): Promise<void>;
+40	  createImage(hadith: HadithText, lang: Language): Promise<Uint8Array>;
+41	  alreadySent(userId: number, weekKey: string): Promise<boolean>;
+42	  recordSend(userId: number, hadithId: number | null, weekKey: string): Promise<void>;
+43	  countHadith(): Promise<number>;
+44	  getHadithByWeekOrder(weekOrder: number): Promise<Hadith | null>;
+45	  sleep(ms: number): Promise<void>;
+46	  logError(message: string, err?: unknown, context?: LogContext): void;
+47	  logWarn(message: string, err?: unknown): void;
+48	}
+49	
+50	/** Aladhan retry delay, per spec: retry once after 30s, then skip this tick. */
+51	export const ALADHAN_RETRY_DELAY_MS = 30_000;
+52	
+53	export async function runTick(now: Date, deps: TickDeps): Promise<void> {
+54	  const users = (await deps.listActiveUsers()).filter((u) => !u.paused && u.city && u.country);
+55	  const weekKey = isoWeekKey(now);
+56	
+57	  // Global weekly rotation: every user gets the same hadith each week.
+58	  const hadithCount = await deps.countHadith();
+59	  const hadith =
+60	    hadithCount > 0
+61	      ? await deps.getHadithByWeekOrder(pickHadithIndex(parseWeekNumber(weekKey), hadithCount))
+62	      : null;
+63	
+64	  // Group users by unique city so each city hits the Aladhan API once per date.
+65	  const cities = new Map<string, ActiveUser[]>();
+66	  for (const u of users) {
+67	    const key = `${u.city}|${u.country}`;
+68	    const list = cities.get(key) ?? [];
+69	    list.push(u);
+70	    cities.set(key, list);
+71	  }
+72	
+73	  const timingsCache = new Map<string, Promise<PrayerTimes>>();
+74	  const fetchTimings = (city: string, country: string, dateEn: string | null) => {
+75	    const key = `${city}|${country}|${dateEn ?? "today"}`;
+76	    let p = timingsCache.get(key);
+77	    if (!p) {
+78	      p = (async (): Promise<PrayerTimes> => {
+79	        try {
+80	          return await deps.fetchTimings(city, country, dateEn);
+81	        } catch (err) {
+82	          deps.logWarn(`Aladhan fetch failed for ${city}|${country}, retrying in ${ALADHAN_RETRY_DELAY_MS}ms`, err);
+83	          await deps.sleep(ALADHAN_RETRY_DELAY_MS);
+84	          return await deps.fetchTimings(city, country, dateEn);
+85	        }
+86	      })();
+87	      // Purge rejected promises so a later city or the next tick retries fresh.
+88	      p.catch(() => timingsCache.delete(key));
+89	      timingsCache.set(key, p);
+90	    }
+91	    return p;
+92	  };
+93	
+94	  const due: ActiveUser[] = [];
+95	
+96	  for (const [cityKey, cityUsers] of cities) {
+97	    try {
+98	      const [city, country] = cityKey.split("|") as [string, string];
+99	      const today = await fetchTimings(city, country, null);
+100	      const nowHHMM = formatHHMM(now, today.timezone);
+101	
+102	      let passed = false;
+103	      if (today.weekdayEn === "Thursday") {
+104	        passed = minutesSinceMaghrib(today.maghrib, nowHHMM) <= REMINDER_WINDOW_MIN;
+105	      } else if (nowHHMM < EARLY_MORNING_CUTOFF && previousWeekdayEn(now, today.timezone) === "Thursday") {
+106	        // Thursday's Maghrib may still be inside the window just after midnight.
+107	        const yesterday = await fetchTimings(city, country, previousDateEn(now, today.timezone));
+108	        passed = minutesSinceMaghrib(yesterday.maghrib, nowHHMM) <= REMINDER_WINDOW_MIN;
+109	      }
+110	      if (passed) {
+111	        due.push(...cityUsers);
+112	      }
+113	    } catch (err) {
+114	      deps.logError(`Aladhan fetch failed for ${cityKey}`, err);
+115	    }
+116	  }
+117	
+118	  // Render each language variant once per tick (max 2 renders).
+119	  const imageCache = new Map<string, Promise<Uint8Array>>();
+120	  const imageFor = (lang: Language): Promise<Uint8Array> => {
+121	    let p = imageCache.get(lang);
+122	    if (!p) {
+123	      p = deps.createImage(hadith as HadithText, lang);
+124	      imageCache.set(lang, p);
+125	    }
+126	    return p;
+127	  };
+128	
+129	  for (const user of due) {
+130	    try {
+131	      if (await deps.alreadySent(user.id, weekKey)) {
+132	        continue;
+133	      }
+134	      const text = reminderText(user.language, user.city as string, hadith);
+135	      let photo: Uint8Array | undefined;
+136	      if (hadith) {
+137	        try {
+138	          photo = await imageFor(user.language);
+139	        } catch (err) {
+140	          // Image failure never blocks the reminder — fall back to text-only.
+141	          deps.logError(`Image generation failed for lang ${user.language}`, err);
+142	        }
+143	      }
+144	      await deps.sendReminder(user.telegram_chat_id, text, photo);
+145	      await deps.recordSend(user.id, hadith?.id ?? null, weekKey);
+146	    } catch (err) {
+147	      deps.logError(`Reminder send failed for user ${user.id}`, err, {
+148	        chat_id: user.telegram_chat_id,
+149	      });
+150	    }
+151	  }
+152	}
+153
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:35Z)**_
+
+All 7 issues done, committed. Code review running — two sub-agents (Standards + Spec axes) checking diff vs `01e6c15`. Waiting on results.
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:36Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="CronCreate"><details>
+<summary>Tool use: **CronCreate**</summary>
+
+```text
+Scheduled recurring job cf804375 (Every 3 minutes). Session-only (not written to disk, dies when Claude exits). Auto-expires after 7 days. Use CronDelete to cancel sooner.
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:36Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now let me read the rest of the source files.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:36Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\commands.ts`
+
+```text
+1	import { CityNotFoundError, type PrayerTimes } from "./aladhan";
+2	import {
+3	  cityNotFoundText,
+4	  citySetText,
+5	  languageSetText,
+6	  noCityText,
+7	  pausedText,
+8	  resumedText,
+9	  statusText,
+10	  type Language,
+11	} from "./messages";
+12	
+13	export interface User {
+14	  telegram_chat_id: string;
+15	  city: string | null;
+16	  country: string | null;
+17	  language: Language;
+18	  paused: boolean;
+19	}
+20	
+21	export type UserPatch = Partial<Omit<User, "telegram_chat_id">>;
+22	
+23	export interface UserStore {
+24	  save(chatId: string, fields: UserPatch): Promise<void>;
+25	  get(chatId: string): Promise<User | null>;
+26	}
+27	
+28	export interface CommandDeps {
+29	  store: UserStore;
+30	  fetchPrayerTimes: (city: string, country: string) => Promise<PrayerTimes>;
+31	}
+32	
+33	export async function setCityCommand(
+34	  raw: string,
+35	  chatId: string,
+36	  deps: CommandDeps
+37	): Promise<string> {
+38	  const comma = raw.indexOf(",");
+39	  if (comma === -1) {
+40	    return cityNotFoundText("en");
+41	  }
+42	  const city = raw.slice(0, comma).trim();
+43	  const country = raw.slice(comma + 1).trim();
+44	  if (!city || !country) {
+45	    return cityNotFoundText("en");
+46	  }
+47	
+48	  try {
+49	    await deps.fetchPrayerTimes(city, country);
+50	  } catch (err) {
+51	    if (err instanceof CityNotFoundError) {
+52	      return cityNotFoundText("en");
+53	    }
+54	    // Service unavailable — ask the user to retry later (hardened in #7).
+55	    return "I couldn't reach the prayer times service. Please try again in a moment.";
+56	  }
+57	
+58	  await deps.store.save(chatId, { city, country });
+59	  const user = await deps.store.get(chatId);
+60	  return citySetText(user?.language ?? "en", city, country);
+61	}
+62	
+63	export async function statusCommand(
+64	  chatId: string,
+65	  deps: Pick<CommandDeps, "store">
+66	): Promise<string> {
+67	  const user = await deps.store.get(chatId);
+68	  if (!user || !user.city || !user.country) {
+69	    return noCityText(user?.language ?? "en");
+70	  }
+71	  return statusText(user.language, {
+72	    city: user.city,
+73	    country: user.country,
+74	    language: user.language,
+75	    paused: user.paused,
+76	  });
+77	}
+78	
+79	export async function setLanguageCommand(
+80	  lang: Language,
+81	  chatId: string,
+82	  deps: Pick<CommandDeps, "store">
+83	): Promise<string> {
+84	  await deps.store.save(chatId, { language: lang });
+85	  return languageSetText(lang);
+86	}
+87	
+88	export async function pauseCommand(
+89	  chatId: string,
+90	  deps: Pick<CommandDeps, "store">
+91	): Promise<string> {
+92	  await deps.store.save(chatId, { paused: true });
+93	  const user = await deps.store.get(chatId);
+94	  return pausedText(user?.language ?? "en");
+95	}
+96	
+97	export async function resumeCommand(
+98	  chatId: string,
+99	  deps: Pick<CommandDeps, "store">
+100	): Promise<string> {
+101	  await deps.store.save(chatId, { paused: false });
+102	  const user = await deps.store.get(chatId);
+103	  return resumedText(user?.language ?? "en");
+104	}
+105
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:36Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\messages.ts`
+
+```text
+1	export type Language = "en" | "ar";
+2	
+3	const COMMAND_LIST_EN = [
+4	  ["/start", "Welcome message and setup guide"],
+5	  ["/setcity London, UK", "Set your city for accurate Maghrib times"],
+6	  ["/setlanguage", "Choose English or العربية"],
+7	  ["/pause", "Pause reminders temporarily"],
+8	  ["/resume", "Resume reminders"],
+9	  ["/status", "Show your current settings"],
+10	  ["/help", "List all commands"],
+11	] as const;
+12	
+13	const COMMAND_LIST_AR: readonly (readonly [string, string])[] = [
+14	  ["/start", "رسالة ترحيبية ودليل الإعداد"],
+15	  ["/setcity لندن, UK", "حدد مدينتك لأوقات المغرب الصحيحة"],
+16	  ["/setlanguage", "اختر English أو العربية"],
+17	  ["/pause", "إيقاف التذكيرات مؤقتًا"],
+18	  ["/resume", "استئناف التذكيرات"],
+19	  ["/status", "عرض إعداداتك الحالية"],
+20	  ["/help", "عرض جميع الأوامر"],
+21	];
+22	
+23	export function welcomeText(lang: Language): string {
+24	  if (lang === "ar") {
+25	    return [
+26	      "السلام عليكم ورحمة الله وبركاته 🌙",
+27	      "",
+28	      "أنا بوت الكهف — أذكّرك بقراءة سورة الكهف كل يوم جمعة، ويبدأ الوقت من ليلة الجمعة بعد المغرب.",
+29	      "",
+30	      "للبدء:",
+31	      "1. حدّد مدينتك: /setcity",
+32	      "2. اختر لغتك المفضلة: /setlanguage",
+33	      "",
+34	      "ثم اترك الباقي لي، وسأرسل لك تذكيرًا أسبوعيًا في وقته بإذن الله.",
+35	    ].join("\n");
+36	  }
+37	
+38	  return [
+39	    "As-salamu alaykum 👋",
+40	    "",
+41	    "I'm Al-Kahf Bot — I remind you to recite Surah al-Kahf every Friday, which begins Thursday after Maghrib.",
+42	    "",
+43	    "To get started:",
+44	    "1. Set your city: /setcity",
+45	    "2. Choose your preferred language: /setlanguage",
+46	    "",
+47	    "Then leave the rest to me — I'll send you a weekly reminder at the right time, insha'Allah.",
+48	  ].join("\n");
+49	}
+50	
+51	export function helpText(lang: Language): string {
+52	  const lines = (lang === "ar" ? COMMAND_LIST_AR : COMMAND_LIST_EN).map(
+53	    ([cmd, desc]) => `${cmd} — ${desc}`
+54	  );
+55	  const header =
+56	    lang === "ar"
+57	      ? "الأوامر المتاحة:"
+58	      : "Here's what I can do:";
+59	  return [header, "", ...lines].join("\n");
+60	}
+61	
+62	export function citySetText(lang: Language, city: string, country: string): string {
+63	  if (lang === "ar") {
+64	    return `تم حفظ مدينتك: ${city}, ${country} ✅`;
+65	  }
+66	  return `Your city is set to ${city}, ${country}`;
+67	}
+68	
+69	export function cityNotFoundText(lang: Language): string {
+70	  if (lang === "ar") {
+71	    return "لم أجد هذه المدينة. جرّب مرة أخرى بهذه الصيغة: /setcity لندن, UK";
+72	  }
+73	  return "I couldn't find that city. Please try again with format: /setcity London, UK";
+74	}
+75	
+76	export function noCityText(lang: Language): string {
+77	  if (lang === "ar") {
+78	    return "لم تحدد مدينة بعد. استخدم /setcity للضبط";
+79	  }
+80	  return "No city set. Use /setcity to configure";
+81	}
+82	
+83	export function statusText(
+84	  lang: Language,
+85	  user: { city: string; country: string; language: Language; paused: boolean }
+86	): string {
+87	  const langName = user.language === "ar" ? "العربية" : "English";
+88	  if (lang === "ar") {
+89	    const state = user.paused ? "متوقفة" : "مفعّلة";
+90	    return [
+91	      `🏙️ المدينة: ${user.city}, ${user.country}`,
+92	      `🗣️ اللغة: ${langName}`,
+93	      `⏸️ التذكيرات: ${state}`,
+94	    ].join("\n");
+95	  }
+96	  const state = user.paused ? "Paused" : "Active";
+97	  return [
+98	    `🏙️ City: ${user.city}, ${user.country}`,
+99	    `🗣️ Language: ${langName}`,
+100	    `⏸️ Reminders: ${state}`,
+101	  ].join("\n");
+102	}
+103	
+104	export function languageSetText(lang: Language): string {
+105	  if (lang === "ar") {
+106	    return "تم اختيار اللغة: العربية ✅";
+107	  }
+108	  return "Language set to English ✅";
+109	}
+110	
+111	export function pausedText(lang: Language): string {
+112	  if (lang === "ar") {
+113	    return "تم إيقاف التذكيرات مؤقتًا. أرسل /resume لاستئنافها في أي وقت.";
+114	  }
+115	  return "Reminders paused. Send /resume anytime to restart them.";
+116	}
+117	
+118	export function resumedText(lang: Language): string {
+119	  if (lang === "ar") {
+120	    return "تم استئناف التذكيرات ✅. نلتقي ليلة الجمعة بعد المغرب بإذن الله 🌙";
+121	  }
+122	  return "Reminders resumed ✅. See you Thursday after Maghrib, insha'Allah 🌙";
+123	}
+124	
+125	export interface HadithText {
+126	  textEn: string;
+127	  textAr: string;
+128	  sourceEn: string;
+129	  sourceAr: string;
+130	}
+131	
+132	export function reminderText(lang: Language, city: string, hadith: HadithText | null = null): string {
+133	  const hadithBlock = hadith
+134	    ? lang === "ar"
+135	      ? [
+136	          "",
+137	          "━━━━━━━━━━━━━",
+138	          "📜 حديث الأسبوع:",
+139	          "",
+140	          hadith.textAr,
+141	          "",
+142	          `المصدر: ${hadith.sourceAr}`,
+143	        ].join("\n")
+144	      : [
+145	          "",
+146	          "━━━━━━━━━━━━━",
+147	          "📜 Hadith of the week:",
+148	          "",
+149	          hadith.textAr,
+150	          "",
+151	          `"${hadith.textEn}"`,
+152	          "",
+153	          `— ${hadith.sourceEn}`,
+154	        ].join("\n")
+155	    : "";
+156	
+157	  if (lang === "ar") {
+158	    return [
+159	      "السلام عليكم ورحمة الله وبركاته 🌙",
+160	      "",
+161	      `حان وقت قراءة سورة الكهف — إنها ليلة الجمعة في ${city} بعد المغرب.`,
+162	      "",
+163	      "لا تنسَ قراءة سورة الكهف اليوم، فقد حثّ عليها النبي ﷺ. تقبّل الله منا ومنكم.",
+164	      hadithBlock,
+165	    ].join("\n");
+166	  }
+167	  return [
+168	    "As-salamu alaykum 🌙",
+169	    "",
+170	    `It's Thursday after Maghrib in ${city} — the night of Jumu'ah has begun.`,
+171	    "",
+172	    "Don't forget to recite Surah al-Kahf today, as the Prophet ﷺ encouraged. May Allah accept it from you.",
+173	    hadithBlock,
+174	  ].join("\n");
+175	}
+176
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:36Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\aladhan.ts`
+
+```text
+1	export interface PrayerTimes {
+2	  maghrib: string; // "HH:MM" 24-hour, e.g. "19:45"
+3	  weekdayEn: string; // e.g. "Thursday"
+4	  dateEn: string; // "DD-MM-YYYY" gregorian
+5	  timezone: string; // IANA, e.g. "Europe/London"
+6	}
+7	
+8	export class AladhanError extends Error {}
+9	export class CityNotFoundError extends Error {}
+10	
+11	interface AladhanResponse {
+12	  code: number;
+13	  status: string;
+14	  data?: {
+15	    timings?: { Maghrib?: string };
+16	    date?: { gregorian?: { date?: string; weekday?: { en?: string } } };
+17	    meta?: { timezone?: string };
+18	  };
+19	}
+20	
+21	export async function fetchPrayerTimes(
+22	  city: string,
+23	  country: string,
+24	  dateEn?: string,
+25	  fetchFn: typeof fetch = fetch
+26	): Promise<PrayerTimes> {
+27	  const url = new URL("https://api.aladhan.com/v1/timingsByCity");
+28	  url.searchParams.set("city", city);
+29	  url.searchParams.set("country", country);
+30	  url.searchParams.set("method", "2"); // ISNA
+31	  if (dateEn) {
+32	    url.searchParams.set("date", dateEn);
+33	  }
+34	
+35	  const res = await fetchFn(url);
+36	  let body: AladhanResponse | string;
+37	  try {
+38	    body = (await res.json()) as AladhanResponse;
+39	  } catch {
+40	    throw new AladhanError(`Aladhan returned non-JSON (HTTP ${res.status})`);
+41	  }
+42	
+43	  if (res.status === 400) {
+44	    throw new CityNotFoundError();
+45	  }
+46	  if (!res.ok) {
+47	    throw new AladhanError(`Aladhan HTTP ${res.status}`);
+48	  }
+49	  if (typeof body === "string") {
+50	    throw new AladhanError("Aladhan returned unexpected body");
+51	  }
+52	  if (body.code !== 200 || body.status !== "OK" || !body.data) {
+53	    throw new CityNotFoundError();
+54	  }
+55	
+56	  const { timings, date, meta } = body.data;
+57	  const maghrib = timings?.Maghrib;
+58	  const weekdayEn = date?.gregorian?.weekday?.en;
+59	  const dateEnOut = date?.gregorian?.date;
+60	  const timezone = meta?.timezone;
+61	  if (!maghrib || !weekdayEn || !dateEnOut || !timezone) {
+62	    throw new AladhanError("Aladhan response missing timings/date fields");
+63	  }
+64	  return { maghrib, weekdayEn, dateEn: dateEnOut, timezone };
+65	}
+66
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:38Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now let me read the remaining source files: card.ts, image.ts, font.ts, store.ts, rotation.ts, week.ts, window.ts, types.d.ts, migrations, and the test files quickly.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:38Z)**_
+
+<think><details><summary>Thought Process</summary>
+The git diff command failed due to path issues. On Windows Git Bash, `D:\Projects\al-kahf_bot` gets mangled. Let me use forward slashes: `git -C /d/Projects/al-kahf_bot diff 01e6c15...HEAD` or just cd. Actually, the tool says working directory is D:\Projects\al-kahf_bot. Let me try with forward slashes.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:38Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\card.ts`
+
+```text
+1	import { NOTO_NASKH_ARABIC_B64 } from "./font";
+2	import type { HadithText, Language } from "./messages";
+3	
+4	const WIDTH = 1080;
+5	const HEIGHT = 1080;
+6	
+7	const COLORS = {
+8	  bgTop: "#23483F",
+9	  bgBottom: "#1B362F",
+10	  gold: "#D4B36A",
+11	  cream: "#F7F1E3",
+12	  creamSoft: "#E8DECB",
+13	} as const;
+14	
+15	export function escapeXml(text: string): string {
+16	  return text
+17	    .replace(/&/g, "&amp;")
+18	    .replace(/</g, "&lt;")
+19	    .replace(/>/g, "&gt;")
+20	    .replace(/"/g, "&quot;")
+21	    .replace(/'/g, "&apos;");
+22	}
+23	
+24	/** Greedy word-wrap by character budget; long words are hard-broken. */
+25	export function wrapText(text: string, maxChars: number): string[] {
+26	  const words = text.split(/\s+/).filter(Boolean);
+27	  const lines: string[] = [];
+28	  let current = "";
+29	  for (let word of words) {
+30	    while (word.length > maxChars) {
+31	      lines.push(word.slice(0, maxChars));
+32	      word = word.slice(maxChars);
+33	    }
+34	    if (!current) {
+35	      current = word;
+36	    } else if (current.length + 1 + word.length <= maxChars) {
+37	      current += ` ${word}`;
+38	    } else {
+39	      lines.push(current);
+40	      current = word;
+41	    }
+42	  }
+43	  if (current) {
+44	    lines.push(current);
+45	  }
+46	  return lines;
+47	}
+48	
+49	function textLines(
+50	  lines: string[],
+51	  x: number,
+52	  startY: number,
+53	  lineHeight: number,
+54	  fontSize: number,
+55	  opts: { rtl?: boolean; fill?: string; opacity?: number } = {}
+56	): string {
+57	  const { rtl = false, fill = COLORS.cream, opacity } = opts;
+58	  return lines
+59	    .map((line, i) => {
+60	      const attrs = [
+61	        `x="${x}"`,
+62	        `y="${startY + i * lineHeight}"`,
+63	        'text-anchor="middle"',
+64	        `fill="${fill}"`,
+65	        `font-family="Noto Naskh Arabic"`,
+66	        `font-size="${fontSize}"`,
+67	        ...(rtl ? ['direction="rtl"'] : []),
+68	        ...(opacity !== undefined ? [`opacity="${opacity}"`] : []),
+69	      ].join(" ");
+70	      return `<text ${attrs}>${escapeXml(line)}</text>`;
+71	    })
+72	    .join("\n");
+73	}
+74	
+75	/** Builds the 1080x1080 hadith card SVG. Arabic matn prominent, translation + source below. */
+76	export function buildCardSvg(hadith: HadithText, lang: Language): string {
+77	  const arLines = wrapText(hadith.textAr, 26);
+78	  // Shrink the matn when it is long so everything fits the card.
+79	  const matnSize = Math.min(42, Math.floor(340 / Math.max(arLines.length, 3)));
+80	  const matnLineHeight = Math.round(matnSize * 1.7);
+81	
+82	  const enLines = lang === "en" ? wrapText(hadith.textEn, 52) : [];
+83	  const sourceLines = wrapText(lang === "ar" ? hadith.sourceAr : hadith.sourceEn, 60);
+84	
+85	  const titleY = 150;
+86	  const matnStartY = 320;
+87	  const matnEndY = matnStartY + (arLines.length - 1) * matnLineHeight;
+88	  const enStartY = matnEndY + 90;
+89	  const enEndY = enStartY + (enLines.length - 1) * 40;
+90	  const sourceY = enLines.length > 0 ? enEndY + 110 : matnEndY + 110;
+91	
+92	  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
+93	  <defs>
+94	    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+95	      <stop offset="0%" stop-color="${COLORS.bgTop}"/>
+96	      <stop offset="100%" stop-color="${COLORS.bgBottom}"/>
+97	    </linearGradient>
+98	    <pattern id="star" width="120" height="120" patternUnits="userSpaceOnUse">
+99	      <g fill="none" stroke="${COLORS.gold}" stroke-opacity="0.07" stroke-width="1.5">
+100	        <rect x="36" y="36" width="48" height="48"/>
+101	        <rect x="36" y="36" width="48" height="48" transform="rotate(45 60 60)"/>
+102	      </g>
+103	    </pattern>
+104	    <style>
+105	      @font-face {
+106	        font-family: "Noto Naskh Arabic";
+107	        src: url(data:font/ttf;base64,${NOTO_NASKH_ARABIC_B64}) format("truetype");
+108	      }
+109	    </style>
+110	  </defs>
+111	
+112	  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#bg)"/>
+113	  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#star)"/>
+114	  <rect x="40" y="40" width="${WIDTH - 80}" height="${HEIGHT - 80}" rx="24"
+115	        fill="none" stroke="${COLORS.gold}" stroke-opacity="0.5" stroke-width="2"/>
+116	  <rect x="56" y="56" width="${WIDTH - 112}" height="${HEIGHT - 112}" rx="16"
+117	        fill="none" stroke="${COLORS.gold}" stroke-opacity="0.2" stroke-width="1"/>
+118	
+119	  ${textLines(["سُورَةُ الْكَهْفِ"], WIDTH / 2, titleY, 0, 34, { fill: COLORS.gold })}
+120	  ${textLines(["Surah al-Kahf"], WIDTH / 2, titleY + 48, 0, 22, { fill: COLORS.creamSoft, opacity: 0.9 })}
+121	  <line x1="${WIDTH / 2 - 140}" y1="${titleY + 86}" x2="${WIDTH / 2 + 140}" y2="${titleY + 86}"
+122	        stroke="${COLORS.gold}" stroke-opacity="0.6" stroke-width="1.5"/>
+123	  <circle cx="${WIDTH / 2}" cy="${titleY + 86}" r="5" fill="${COLORS.gold}" stroke="${COLORS.bgTop}" stroke-width="2"/>
+124	
+125	  ${textLines(arLines, WIDTH / 2, matnStartY + matnSize, matnLineHeight, matnSize, { rtl: true })}
+126	  ${enLines.length > 0 ? textLines(enLines, WIDTH / 2, enStartY + 26, 40, 26, { fill: COLORS.creamSoft }) : ""}
+127	
+128	  <line x1="${WIDTH / 2 - 100}" y1="${sourceY - 40}" x2="${WIDTH / 2 + 100}" y2="${sourceY - 40}"
+129	        stroke="${COLORS.gold}" stroke-opacity="0.4" stroke-width="1"/>
+130	  ${textLines(sourceLines, WIDTH / 2, sourceY + 4, 32, 20, { fill: COLORS.gold, opacity: 0.95 })}
+131	</svg>`;
+132	}
+133
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:38Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\window.ts`
+
+```text
+1	/** Minutes from `maghribHHMM` to `nowHHMM` within the same evening, crossing midnight. */
+2	export function minutesSinceMaghrib(maghribHHMM: string, nowHHMM: string): number {
+3	  const toMinutes = (hhmm: string): number => {
+4	    const [h, m] = hhmm.split(":").map((p) => Number.parseInt(p, 10));
+5	    return (h ?? 0) * 60 + (m ?? 0);
+6	  };
+7	  const diff = toMinutes(nowHHMM) - toMinutes(maghribHHMM);
+8	  return (diff + 1440) % 1440;
+9	}
+10	
+11	function tzParts(date: Date, timeZone: string, parts: Intl.DateTimeFormatOptions): Intl.DateTimeFormatPart[] {
+12	  return new Intl.DateTimeFormat("en-GB", { timeZone, ...parts }).formatToParts(date);
+13	}
+14	
+15	/** Local wall-clock "HH:MM" (h23) of an instant in the given IANA timezone. */
+16	export function formatHHMM(date: Date, timeZone: string): string {
+17	  const p = tzParts(date, timeZone, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+18	  const get = (t: Intl.DateTimeFormatPartTypes) => p.find((x) => x.type === t)?.value ?? "00";
+19	  return `${get("hour")}:${get("minute")}`;
+20	}
+21	
+22	/** Local "DD-MM-YYYY" of an instant in the given IANA timezone (Aladhan's date format). */
+23	export function formatDateEn(date: Date, timeZone: string): string {
+24	  const p = tzParts(date, timeZone, { day: "2-digit", month: "2-digit", year: "numeric" });
+25	  const get = (t: Intl.DateTimeFormatPartTypes) => p.find((x) => x.type === t)?.value ?? "";
+26	  return `${get("day")}-${get("month")}-${get("year")}`;
+27	}
+28	
+29	/** Local date of the previous day as "DD-MM-YYYY". */
+30	export function previousDateEn(date: Date, timeZone: string): string {
+31	  return formatDateEn(new Date(date.getTime() - 86_400_000), timeZone);
+32	}
+33	
+34	/** Local weekday name of the previous day, e.g. "Thursday". */
+35	export function previousWeekdayEn(date: Date, timeZone: string): string {
+36	  const p = tzParts(new Date(date.getTime() - 86_400_000), timeZone, { weekday: "long" });
+37	  return p.find((x) => x.type === "weekday")?.value ?? "";
+38	}
+39
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:38Z)**_
+
+<think><details><summary>Thought Process</summary>
+Actually no — sub-agent completion sends automatic task-notification which re-invokes me. The cron job is unnecessary and wasteful. Delete it.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:38Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\store.ts`
+
+```text
+1	import type { User, UserPatch, UserStore } from "./commands";
+2	
+3	interface DbUserRow {
+4	  telegram_chat_id: string;
+5	  city: string | null;
+6	  country: string | null;
+7	  language: string;
+8	  paused: number;
+9	}
+10	
+11	function toUser(row: DbUserRow): User {
+12	  return {
+13	    telegram_chat_id: row.telegram_chat_id,
+14	    city: row.city,
+15	    country: row.country,
+16	    language: row.language === "ar" ? "ar" : "en",
+17	    paused: row.paused !== 0,
+18	  };
+19	}
+20	
+21	export function d1UserStore(db: D1Database): UserStore {
+22	  async function save(chatId: string, fields: UserPatch): Promise<void> {
+23	    // Build a dynamic upsert over only the provided fields.
+24	    const keys = Object.keys(fields) as (keyof UserPatch)[];
+25	    const columns = keys.join(", ");
+26	    const placeholders = keys.map(() => "?").join(", ");
+27	    const updates = keys
+28	      .map((k) => `${k} = excluded.${k}`)
+29	      .join(", ");
+30	    await db
+31	      .prepare(
+32	        `INSERT INTO users (telegram_chat_id, ${columns}) VALUES (?, ${placeholders})
+33	         ON CONFLICT(telegram_chat_id) DO UPDATE SET ${updates}, updated_at = datetime('now')`
+34	      )
+35	      .bind(chatId, ...keys.map((k) => fields[k] as string | number))
+36	      .run();
+37	  }
+38	
+39	  return {
+40	    save,
+41	    async get(chatId) {
+42	      const row = await db
+43	        .prepare("SELECT * FROM users WHERE telegram_chat_id = ?")
+44	        .bind(chatId)
+45	        .first<DbUserRow>();
+46	      return row ? toUser(row) : null;
+47	    },
+48	  };
+49	}
+50
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:39Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show diff between 01e6c15 and HEAD with stat
+
+`git -C /d/Projects/al-kahf_bot diff 01e6c15...HEAD --stat; echo "----FULL DIFF----"; git -C /d/Projects/al-kahf_bot diff 01e6c15...HEAD`
+
+```text
+<persisted-output>
+Output too large (1.2MB). Full output saved to: C:\Users\eshan\.claude\projects\D--Projects-al-kahf-bot\93e3c44b-6689-44b4-ab8a-742cd7cc1995\tool-results\bpsqwfvcv.txt
+
+Preview (first 2KB):
+ .cursorindexingignore                              |    3 +
+ .gitignore                                         |    6 +-
+ .specstory/.project.json                           |    7 +
+ .specstory/cli/config.toml                         |  109 +
+ .../history/2026-08-09_09-25-07Z-continue.md       | 2504 ++++++
+ .specstory/history/2026-08-09_09-25-07Z.md         |  187 +
+ .../history/2026-08-16_19-01-15Z-how-far-are-we.md |  511 ++
+ .specstory/history/2026-08-16_19-03-01Z.md         | 8279 ++++++++++++++++++++
+ .specstory/statistics.json                         |   31 +
+ .vscode/settings.json                              |    3 +
+ AGENTS.md                                          |    9 +-
+ README.md                                          |  111 +
+ assets/NotoNaskhArabic-Regular.ttf                 |  Bin 0 -> 307592 bytes
+ db/seed.sql                                        |   70 +
+ migrations/0001_users.sql                          |   10 +
+ migrations/0002_hadith_sent_log.sql                |   20 +
+ package-lock.json                                  | 3782 +++++++++
+ package.json                                       |   30 +
+ scripts/embed-font.mjs                             |   10 +
+ src/aladhan.ts                                     |   65 +
+ src/card.ts                                        |  132 +
+ src/commands.ts                                    |  104 +
+ src/cron.ts                                        |  152 +
+ src/font.ts                                        |    3 +
+ src/image.ts                                       |   19 +
+ src/index.ts                                       |  213 +
+ src/messages.ts                                    |  175 +
+ src/rotation.ts                                    |   19 +
+ src/store.ts                                       |   49 +
+ src/types.d.ts                                     |    4 +
+ src/week.ts                                        |    9 +
+...
+</persisted-output>
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:39Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="CronDelete"><details>
+<summary>Tool use: **CronDelete**</summary>
+
+```text
+Cancelled job cf804375.
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:39Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\rotation.ts`
+
+```text
+1	/** Extract the integer week number from an ISO week key like "2026-W33". */
+2	export function parseWeekNumber(weekKey: string): number {
+3	  const n = Number.parseInt(weekKey.split("-W")[1] ?? "", 10);
+4	  if (Number.isNaN(n)) {
+5	    throw new Error(`Invalid ISO week key: ${weekKey}`);
+6	  }
+7	  return n;
+8	}
+9	
+10	/**
+11	 * Deterministic weekly rotation: the active hadith is
+12	 * `week_number % hadith_count`, cycling through all entries.
+13	 */
+14	export function pickHadithIndex(weekNumber: number, hadithCount: number): number {
+15	  if (hadithCount <= 0) {
+16	    throw new Error("Hadith count must be positive");
+17	  }
+18	  return weekNumber % hadithCount;
+19	}
+20
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:39Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\week.ts`
+
+```text
+1	/** ISO week key like "2026-W33" (Monday-first weeks, per ISO 8601). */
+2	export function isoWeekKey(date: Date): string {
+3	  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+4	  const dayNum = d.getUTCDay() || 7; // Sunday = 7
+5	  d.setUTCDate(d.getUTCDate() + 4 - dayNum); // move to Thursday of the same week
+6	  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+7	  const week = Math.ceil(((d.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
+8	  return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+9	}
+10
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:40Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now let me read the remaining files: image.ts, font.ts, types.d.ts, migrations, and quickly scan tests. Also scripts/embed-font.mjs.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:40Z)**_
+
+<think><details><summary>Thought Process</summary>
+The diff is large (1.2MB) — mostly because of .specstory history files. Let me read the actual source files instead, and get the rest of the stat to see what files exist. Let me read the full diff excluding the specstory noise, or better, just read the key source files directly.
+
+Let me check the full stat output and then read the source files.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:40Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\image.ts`
+
+```text
+1	import { Resvg, initWasm } from "@resvg/resvg-wasm";
+2	
+3	export type WasmSource = () => Promise<BufferSource | WebAssembly.Module>;
+4	
+5	let initPromise: Promise<void> | null = null;
+6	
+7	/** Renders an SVG string to PNG bytes (1080x1080 for the hadith card). */
+8	export async function renderCardPng(svg: string, wasmSource: WasmSource): Promise<Uint8Array> {
+9	  if (!initPromise) {
+10	    initPromise = initWasm(await wasmSource());
+11	  }
+12	  await initPromise;
+13	
+14	  const resvg = new Resvg(svg, {
+15	    fitTo: { mode: "width", value: 1080 },
+16	  });
+17	  const rendered = resvg.render();
+18	  return rendered.asPng();
+19	}
+20
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:41Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\font.ts`
+
+```text
+File content (400.6KB) exceeds maximum allowed size (256KB). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show remaining diff stat and commit log
+
+`git -C /d/Projects/al-kahf_bot diff 01e6c15...HEAD --stat | tail -40; echo "=====LOG====="; git -C /d/Projects/al-kahf_bot log --oneline 01e6c15..HEAD`
+
+```text
+ .../history/2026-08-09_09-25-07Z-continue.md       | 2504 ++++++
+ .specstory/history/2026-08-09_09-25-07Z.md         |  187 +
+ .../history/2026-08-16_19-01-15Z-how-far-are-we.md |  511 ++
+ .specstory/history/2026-08-16_19-03-01Z.md         | 8279 ++++++++++++++++++++
+ .specstory/statistics.json                         |   31 +
+ .vscode/settings.json                              |    3 +
+ AGENTS.md                                          |    9 +-
+ README.md                                          |  111 +
+ assets/NotoNaskhArabic-Regular.ttf                 |  Bin 0 -> 307592 bytes
+ db/seed.sql                                        |   70 +
+ migrations/0001_users.sql                          |   10 +
+ migrations/0002_hadith_sent_log.sql                |   20 +
+ package-lock.json                                  | 3782 +++++++++
+ package.json                                       |   30 +
+ scripts/embed-font.mjs                             |   10 +
+ src/aladhan.ts                                     |   65 +
+ src/card.ts                                        |  132 +
+ src/commands.ts                                    |  104 +
+ src/cron.ts                                        |  152 +
+ src/font.ts                                        |    3 +
+ src/image.ts                                       |   19 +
+ src/index.ts                                       |  213 +
+ src/messages.ts                                    |  175 +
+ src/rotation.ts                                    |   19 +
+ src/store.ts                                       |   49 +
+ src/types.d.ts                                     |    4 +
+ src/week.ts                                        |    9 +
+ src/window.ts                                      |   38 +
+ test/aladhan.test.ts                               |   71 +
+ test/card.test.ts                                  |   90 +
+ test/commands.test.ts                              |  148 +
+ test/cron.test.ts                                  |  363 +
+ test/image.test.ts                                 |   36 +
+ test/messages.test.ts                              |  156 +
+ test/rotation.test.ts                              |   32 +
+ test/week.test.ts                                  |   20 +
+ test/window.test.ts                                |   42 +
+ tsconfig.json                                      |   15 +
+ wrangler.jsonc                                     |   25 +
+ 43 files changed, 17656 insertions(+), 6 deletions(-)
+=====LOG=====
+8761fe7 Harden production paths + document deployment
+1337102 Add hadith card image generation
+3570f27 Add hadith seed data + weekly rotation
+23fc0f3 Add 10-minute cron scheduler + reminder dispatch
+3a73c61 Add language + pause/resume
+1c1df42 Add users table + /setcity + /status
+53448ad Scaffold Cloudflare Worker + Telegram webhook + /start + /help
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:41Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\types.d.ts`
+
+```text
+1	declare module "*.wasm" {
+2	  const module: WebAssembly.Module;
+3	  export default module;
+4	}
+5
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:41Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\migrations\0001_users.sql`
+
+```text
+1	CREATE TABLE users (
+2	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+3	  telegram_chat_id TEXT UNIQUE NOT NULL,
+4	  city TEXT,
+5	  country TEXT,
+6	  language TEXT NOT NULL DEFAULT 'en' CHECK(language IN ('en', 'ar')),
+7	  paused INTEGER NOT NULL DEFAULT 0,
+8	  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+9	  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+10	);
+11
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:41Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\migrations\0002_hadith_sent_log.sql`
+
+```text
+1	CREATE TABLE hadith (
+2	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+3	  week_order INTEGER NOT NULL UNIQUE,
+4	  text_en TEXT NOT NULL,
+5	  text_ar TEXT NOT NULL,
+6	  source_en TEXT NOT NULL,
+7	  source_ar TEXT NOT NULL
+8	);
+9	
+10	-- hadith_id is nullable: reminders sent before hadith seed landed have none.
+11	-- week_key (ISO week, e.g. "2026-W33") makes dedup exact without parsing sent_at.
+12	CREATE TABLE sent_log (
+13	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+14	  user_id INTEGER NOT NULL REFERENCES users(id),
+15	  hadith_id INTEGER REFERENCES hadith(id),
+16	  week_key TEXT NOT NULL,
+17	  sent_at TEXT NOT NULL DEFAULT (datetime('now'))
+18	);
+19	
+20	CREATE INDEX idx_sent_log_user_week ON sent_log (user_id, week_key);
+21
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:41Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\scripts\embed-font.mjs`
+
+```text
+1	// Embeds assets/NotoNaskhArabic-Regular.ttf as base64 in src/font.ts.
+2	// Run: node scripts/embed-font.mjs
+3	import { readFileSync, writeFileSync } from "node:fs";
+4	
+5	const b64 = readFileSync(new URL("../assets/NotoNaskhArabic-Regular.ttf", import.meta.url)).toString("base64");
+6	writeFileSync(
+7	  new URL("../src/font.ts", import.meta.url),
+8	  `// Generated by scripts/embed-font.mjs — do not edit.\nexport const NOTO_NASKH_ARABIC_B64 =\n  "${b64}";\n`
+9	);
+10	console.log(`Embedded font: ${b64.length} base64 chars`);
+11
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:42Z)**_
+
+<think><details><summary>Thought Process</summary>
+Cron deleted — harness notifies on agent completion automatically. Just wait. Status summary for user now.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:43Z)**_
+
+<think><details><summary>Thought Process</summary>
+The source files are small enough to read directly. Let me read all the key source files in parallel:
+- src/index.ts
+- src/commands.ts
+- src/cron.ts
+- src/aladhan.ts
+- src/store.ts
+- src/card.ts
+- src/image.ts
+- src/font.ts
+- src/messages.ts
+- src/rotation.ts
+- src/week.ts
+- src/window.ts
+- src/types.d.ts
+- migrations/0001_users.sql
+- migrations/0002_hadith_sent_log.sql
+- db/seed.sql
+- wrangler.jsonc
+- package.json
+- README.md
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:43Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\index.ts`
+
+```text
+1	import { Bot, InlineKeyboard, InputFile, webhookCallback } from "grammy";
+2	import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
+3	import { fetchPrayerTimes } from "./aladhan";
+4	import { buildCardSvg } from "./card";
+5	import {
+6	  pauseCommand,
+7	  resumeCommand,
+8	  setCityCommand,
+9	  setLanguageCommand,
+10	  statusCommand,
+11	} from "./commands";
+12	import { runTick, type TickDeps } from "./cron";
+13	import { helpText, type HadithText, type Language, welcomeText } from "./messages";
+14	import { renderCardPng } from "./image";
+15	import { d1UserStore } from "./store";
+16	
+17	export interface Env {
+18	  TELEGRAM_BOT_TOKEN: string;
+19	  DB: D1Database;
+20	}
+21	
+22	const COMMANDS = [
+23	  { command: "start", description: "Welcome message and setup guide" },
+24	  { command: "setcity", description: "Set your city, e.g. /setcity London, UK" },
+25	  { command: "setlanguage", description: "Choose English or العربية" },
+26	  { command: "pause", description: "Pause reminders" },
+27	  { command: "resume", description: "Resume reminders" },
+28	  { command: "status", description: "Show your current settings" },
+29	  { command: "help", description: "List all commands" },
+30	];
+31	
+32	function createBot(token: string, env: Env): Bot {
+33	  const bot = new Bot(token);
+34	  const store = d1UserStore(env.DB);
+35	
+36	  bot.command("start", async (ctx) => {
+37	    const user = await store.get(String(ctx.chat.id));
+38	    await ctx.reply(welcomeText(user?.language ?? "en"));
+39	  });
+40	  bot.command("help", async (ctx) => {
+41	    const user = await store.get(String(ctx.chat.id));
+42	    await ctx.reply(helpText(user?.language ?? "en"));
+43	  });
+44	  bot.command("setcity", async (ctx) => {
+45	    const reply = await setCityCommand(ctx.match, String(ctx.chat.id), {
+46	      store,
+47	      fetchPrayerTimes: (city, country) => fetchPrayerTimes(city, country),
+48	    });
+49	    await ctx.reply(reply);
+50	  });
+51	  bot.command("setlanguage", async (ctx) => {
+52	    const keyboard = new InlineKeyboard()
+53	      .text("English", "lang:en")
+54	      .text("العربية", "lang:ar");
+55	    const user = await store.get(String(ctx.chat.id));
+56	    const prompt =
+57	      user?.language === "ar"
+58	        ? "اختر لغتك المفضلة:"
+59	        : "Choose your preferred language:";
+60	    await ctx.reply(prompt, { reply_markup: keyboard });
+61	  });
+62	  bot.callbackQuery(/^lang:(en|ar)$/, async (ctx) => {
+63	    if (!ctx.chat) {
+64	      await ctx.answerCallbackQuery({ text: "Error: no chat" });
+65	      return;
+66	    }
+67	    const lang = ctx.match[1] as Language;
+68	    const reply = await setLanguageCommand(lang, String(ctx.chat.id), { store });
+69	    await ctx.answerCallbackQuery();
+70	    await ctx.reply(reply);
+71	  });
+72	  bot.command("pause", async (ctx) => {
+73	    const reply = await pauseCommand(String(ctx.chat.id), { store });
+74	    await ctx.reply(reply);
+75	  });
+76	  bot.command("resume", async (ctx) => {
+77	    const reply = await resumeCommand(String(ctx.chat.id), { store });
+78	    await ctx.reply(reply);
+79	  });
+80	  bot.command("status", async (ctx) => {
+81	    const reply = await statusCommand(String(ctx.chat.id), { store });
+82	    await ctx.reply(reply);
+83	  });
+84	
+85	  // Register commands with Telegram so they appear in the client UI.
+86	  void bot.api
+87	    .setMyCommands(COMMANDS)
+88	    .catch((err: unknown) => console.error("setMyCommands failed", err));
+89	
+90	  return bot;
+91	}
+92	
+93	function makeTickDeps(
+94	  env: Env,
+95	  sendMessage: (chatId: string, text: string, photo?: Uint8Array) => Promise<unknown>
+96	): TickDeps {
+97	  const logError = (message: string, err?: unknown, context?: { chat_id?: string }) =>
+98	    console.error(
+99	      JSON.stringify({ level: "error", message, error: String(err ?? ""), ...context })
+100	    );
+101	  const logWarn = (message: string, err?: unknown) =>
+102	    console.warn(JSON.stringify({ level: "warn", message, error: String(err ?? "") }));
+103	
+104	  return {
+105	    async listActiveUsers() {
+106	      const { results } = await env.DB.prepare(
+107	        `SELECT id, telegram_chat_id, city, country, language, paused
+108	         FROM users
+109	         WHERE paused = 0 AND city IS NOT NULL AND city != ''`
+110	      ).all<{
+111	        id: number;
+112	        telegram_chat_id: string;
+113	        city: string;
+114	        country: string;
+115	        language: string;
+116	        paused: number;
+117	      }>();
+118	      return results.map((r) => ({
+119	        id: r.id,
+120	        telegram_chat_id: r.telegram_chat_id,
+121	        city: r.city,
+122	        country: r.country,
+123	        language: r.language === "ar" ? "ar" : "en",
+124	        paused: r.paused !== 0,
+125	      }));
+126	    },
+127	    fetchTimings(city, country, dateEn) {
+128	      return fetchPrayerTimes(city, country, dateEn ?? undefined);
+129	    },
+130	    async sendReminder(chatId, text, photo) {
+131	      await sendMessage(chatId, text, photo);
+132	    },
+133	    async createImage(hadith: HadithText, lang: Language) {
+134	      return renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm));
+135	    },
+136	    async alreadySent(userId, weekKey) {
+137	      const row = await env.DB.prepare(
+138	        "SELECT COUNT(*) AS n FROM sent_log WHERE user_id = ? AND week_key = ?"
+139	      )
+140	        .bind(userId, weekKey)
+141	        .first<{ n: number }>();
+142	      return (row?.n ?? 0) > 0;
+143	    },
+144	    async recordSend(userId, hadithId, weekKey) {
+145	      await env.DB.prepare(
+146	        "INSERT INTO sent_log (user_id, hadith_id, week_key) VALUES (?, ?, ?)"
+147	      )
+148	        .bind(userId, hadithId, weekKey)
+149	        .run();
+150	    },
+151	    async countHadith() {
+152	      const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM hadith").first<{ n: number }>();
+153	      return row?.n ?? 0;
+154	    },
+155	    async getHadithByWeekOrder(weekOrder) {
+156	      const row = await env.DB.prepare(
+157	        "SELECT id, text_en, text_ar, source_en, source_ar FROM hadith WHERE week_order = ?"
+158	      )
+159	        .bind(weekOrder)
+160	        .first<{
+161	          id: number;
+162	          text_en: string;
+163	          text_ar: string;
+164	          source_en: string;
+165	          source_ar: string;
+166	        }>();
+167	      return row
+168	        ? {
+169	            id: row.id,
+170	            textEn: row.text_en,
+171	            textAr: row.text_ar,
+172	            sourceEn: row.source_en,
+173	            sourceAr: row.source_ar,
+174	          }
+175	        : null;
+176	    },
+177	    sleep(ms) {
+178	      return new Promise((resolve) => setTimeout(resolve, ms));
+179	    },
+180	    logError,
+181	    logWarn,
+182	  };
+183	}
+184	
+185	let bot: Bot | undefined;
+186	let botToken: string | undefined;
+187	
+188	function getBot(env: Env): Bot {
+189	  if (bot === undefined || botToken !== env.TELEGRAM_BOT_TOKEN) {
+190	    bot = createBot(env.TELEGRAM_BOT_TOKEN, env);
+191	    botToken = env.TELEGRAM_BOT_TOKEN;
+192	  }
+193	  return bot;
+194	}
+195	
+196	export default {
+197	  async fetch(request: Request, env: Env): Promise<Response> {
+198	    return webhookCallback(getBot(env), "cloudflare-mod")(request);
+199	  },
+200	  scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): void {
+201	    const activeBot = getBot(env);
+202	    ctx.waitUntil(
+203	      runTick(
+204	        new Date(),
+205	        makeTickDeps(env, (chatId, text, photo) =>
+206	          photo
+207	            ? activeBot.api.sendPhoto(chatId, new InputFile(photo, "al-kahf.png"), { caption: text })
+208	            : activeBot.api.sendMessage(chatId, text)
+209	        )
+210	      )
+211	    );
+212	  },
+213	};
+214
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:43Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\commands.ts`
+
+```text
+1	import { CityNotFoundError, type PrayerTimes } from "./aladhan";
+2	import {
+3	  cityNotFoundText,
+4	  citySetText,
+5	  languageSetText,
+6	  noCityText,
+7	  pausedText,
+8	  resumedText,
+9	  statusText,
+10	  type Language,
+11	} from "./messages";
+12	
+13	export interface User {
+14	  telegram_chat_id: string;
+15	  city: string | null;
+16	  country: string | null;
+17	  language: Language;
+18	  paused: boolean;
+19	}
+20	
+21	export type UserPatch = Partial<Omit<User, "telegram_chat_id">>;
+22	
+23	export interface UserStore {
+24	  save(chatId: string, fields: UserPatch): Promise<void>;
+25	  get(chatId: string): Promise<User | null>;
+26	}
+27	
+28	export interface CommandDeps {
+29	  store: UserStore;
+30	  fetchPrayerTimes: (city: string, country: string) => Promise<PrayerTimes>;
+31	}
+32	
+33	export async function setCityCommand(
+34	  raw: string,
+35	  chatId: string,
+36	  deps: CommandDeps
+37	): Promise<string> {
+38	  const comma = raw.indexOf(",");
+39	  if (comma === -1) {
+40	    return cityNotFoundText("en");
+41	  }
+42	  const city = raw.slice(0, comma).trim();
+43	  const country = raw.slice(comma + 1).trim();
+44	  if (!city || !country) {
+45	    return cityNotFoundText("en");
+46	  }
+47	
+48	  try {
+49	    await deps.fetchPrayerTimes(city, country);
+50	  } catch (err) {
+51	    if (err instanceof CityNotFoundError) {
+52	      return cityNotFoundText("en");
+53	    }
+54	    // Service unavailable — ask the user to retry later (hardened in #7).
+55	    return "I couldn't reach the prayer times service. Please try again in a moment.";
+56	  }
+57	
+58	  await deps.store.save(chatId, { city, country });
+59	  const user = await deps.store.get(chatId);
+60	  return citySetText(user?.language ?? "en", city, country);
+61	}
+62	
+63	export async function statusCommand(
+64	  chatId: string,
+65	  deps: Pick<CommandDeps, "store">
+66	): Promise<string> {
+67	  const user = await deps.store.get(chatId);
+68	  if (!user || !user.city || !user.country) {
+69	    return noCityText(user?.language ?? "en");
+70	  }
+71	  return statusText(user.language, {
+72	    city: user.city,
+73	    country: user.country,
+74	    language: user.language,
+75	    paused: user.paused,
+76	  });
+77	}
+78	
+79	export async function setLanguageCommand(
+80	  lang: Language,
+81	  chatId: string,
+82	  deps: Pick<CommandDeps, "store">
+83	): Promise<string> {
+84	  await deps.store.save(chatId, { language: lang });
+85	  return languageSetText(lang);
+86	}
+87	
+88	export async function pauseCommand(
+89	  chatId: string,
+90	  deps: Pick<CommandDeps, "store">
+91	): Promise<string> {
+92	  await deps.store.save(chatId, { paused: true });
+93	  const user = await deps.store.get(chatId);
+94	  return pausedText(user?.language ?? "en");
+95	}
+96	
+97	export async function resumeCommand(
+98	  chatId: string,
+99	  deps: Pick<CommandDeps, "store">
+100	): Promise<string> {
+101	  await deps.store.save(chatId, { paused: false });
+102	  const user = await deps.store.get(chatId);
+103	  return resumedText(user?.language ?? "en");
+104	}
+105
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:43Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\cron.ts`
+
+```text
+1	import type { PrayerTimes } from "./aladhan";
+2	import { reminderText, type HadithText, type Language } from "./messages";
+3	import { parseWeekNumber, pickHadithIndex } from "./rotation";
+4	import { isoWeekKey } from "./week";
+5	import {
+6	  formatHHMM,
+7	  minutesSinceMaghrib,
+8	  previousDateEn,
+9	  previousWeekdayEn,
+10	} from "./window";
+11	
+12	/** How long after Maghrib a tick may still fire the reminder (10-min cadence + jitter margin). */
+13	export const REMINDER_WINDOW_MIN = 15;
+14	
+15	/** How long after midnight we still check the previous day's Maghrib (late Maghribs). */
+16	const EARLY_MORNING_CUTOFF = "00:30";
+17	
+18	export interface ActiveUser {
+19	  id: number;
+20	  telegram_chat_id: string;
+21	  city: string;
+22	  country: string;
+23	  language: Language;
+24	  paused: boolean;
+25	}
+26	
+27	export interface Hadith extends HadithText {
+28	  id: number;
+29	}
+30	
+31	export interface LogContext {
+32	  chat_id?: string;
+33	  city?: string;
+34	}
+35	
+36	export interface TickDeps {
+37	  listActiveUsers(): Promise<ActiveUser[]>;
+38	  fetchTimings(city: string, country: string, dateEn: string | null): Promise<PrayerTimes>;
+39	  sendReminder(chatId: string, text: string, photo?: Uint8Array): Promise<void>;
+40	  createImage(hadith: HadithText, lang: Language): Promise<Uint8Array>;
+41	  alreadySent(userId: number, weekKey: string): Promise<boolean>;
+42	  recordSend(userId: number, hadithId: number | null, weekKey: string): Promise<void>;
+43	  countHadith(): Promise<number>;
+44	  getHadithByWeekOrder(weekOrder: number): Promise<Hadith | null>;
+45	  sleep(ms: number): Promise<void>;
+46	  logError(message: string, err?: unknown, context?: LogContext): void;
+47	  logWarn(message: string, err?: unknown): void;
+48	}
+49	
+50	/** Aladhan retry delay, per spec: retry once after 30s, then skip this tick. */
+51	export const ALADHAN_RETRY_DELAY_MS = 30_000;
+52	
+53	export async function runTick(now: Date, deps: TickDeps): Promise<void> {
+54	  const users = (await deps.listActiveUsers()).filter((u) => !u.paused && u.city && u.country);
+55	  const weekKey = isoWeekKey(now);
+56	
+57	  // Global weekly rotation: every user gets the same hadith each week.
+58	  const hadithCount = await deps.countHadith();
+59	  const hadith =
+60	    hadithCount > 0
+61	      ? await deps.getHadithByWeekOrder(pickHadithIndex(parseWeekNumber(weekKey), hadithCount))
+62	      : null;
+63	
+64	  // Group users by unique city so each city hits the Aladhan API once per date.
+65	  const cities = new Map<string, ActiveUser[]>();
+66	  for (const u of users) {
+67	    const key = `${u.city}|${u.country}`;
+68	    const list = cities.get(key) ?? [];
+69	    list.push(u);
+70	    cities.set(key, list);
+71	  }
+72	
+73	  const timingsCache = new Map<string, Promise<PrayerTimes>>();
+74	  const fetchTimings = (city: string, country: string, dateEn: string | null) => {
+75	    const key = `${city}|${country}|${dateEn ?? "today"}`;
+76	    let p = timingsCache.get(key);
+77	    if (!p) {
+78	      p = (async (): Promise<PrayerTimes> => {
+79	        try {
+80	          return await deps.fetchTimings(city, country, dateEn);
+81	        } catch (err) {
+82	          deps.logWarn(`Aladhan fetch failed for ${city}|${country}, retrying in ${ALADHAN_RETRY_DELAY_MS}ms`, err);
+83	          await deps.sleep(ALADHAN_RETRY_DELAY_MS);
+84	          return await deps.fetchTimings(city, country, dateEn);
+85	        }
+86	      })();
+87	      // Purge rejected promises so a later city or the next tick retries fresh.
+88	      p.catch(() => timingsCache.delete(key));
+89	      timingsCache.set(key, p);
+90	    }
+91	    return p;
+92	  };
+93	
+94	  const due: ActiveUser[] = [];
+95	
+96	  for (const [cityKey, cityUsers] of cities) {
+97	    try {
+98	      const [city, country] = cityKey.split("|") as [string, string];
+99	      const today = await fetchTimings(city, country, null);
+100	      const nowHHMM = formatHHMM(now, today.timezone);
+101	
+102	      let passed = false;
+103	      if (today.weekdayEn === "Thursday") {
+104	        passed = minutesSinceMaghrib(today.maghrib, nowHHMM) <= REMINDER_WINDOW_MIN;
+105	      } else if (nowHHMM < EARLY_MORNING_CUTOFF && previousWeekdayEn(now, today.timezone) === "Thursday") {
+106	        // Thursday's Maghrib may still be inside the window just after midnight.
+107	        const yesterday = await fetchTimings(city, country, previousDateEn(now, today.timezone));
+108	        passed = minutesSinceMaghrib(yesterday.maghrib, nowHHMM) <= REMINDER_WINDOW_MIN;
+109	      }
+110	      if (passed) {
+111	        due.push(...cityUsers);
+112	      }
+113	    } catch (err) {
+114	      deps.logError(`Aladhan fetch failed for ${cityKey}`, err);
+115	    }
+116	  }
+117	
+118	  // Render each language variant once per tick (max 2 renders).
+119	  const imageCache = new Map<string, Promise<Uint8Array>>();
+120	  const imageFor = (lang: Language): Promise<Uint8Array> => {
+121	    let p = imageCache.get(lang);
+122	    if (!p) {
+123	      p = deps.createImage(hadith as HadithText, lang);
+124	      imageCache.set(lang, p);
+125	    }
+126	    return p;
+127	  };
+128	
+129	  for (const user of due) {
+130	    try {
+131	      if (await deps.alreadySent(user.id, weekKey)) {
+132	        continue;
+133	      }
+134	      const text = reminderText(user.language, user.city as string, hadith);
+135	      let photo: Uint8Array | undefined;
+136	      if (hadith) {
+137	        try {
+138	          photo = await imageFor(user.language);
+139	        } catch (err) {
+140	          // Image failure never blocks the reminder — fall back to text-only.
+141	          deps.logError(`Image generation failed for lang ${user.language}`, err);
+142	        }
+143	      }
+144	      await deps.sendReminder(user.telegram_chat_id, text, photo);
+145	      await deps.recordSend(user.id, hadith?.id ?? null, weekKey);
+146	    } catch (err) {
+147	      deps.logError(`Reminder send failed for user ${user.id}`, err, {
+148	        chat_id: user.telegram_chat_id,
+149	      });
+150	    }
+151	  }
+152	}
+153
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:44Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\aladhan.ts`
+
+```text
+1	export interface PrayerTimes {
+2	  maghrib: string; // "HH:MM" 24-hour, e.g. "19:45"
+3	  weekdayEn: string; // e.g. "Thursday"
+4	  dateEn: string; // "DD-MM-YYYY" gregorian
+5	  timezone: string; // IANA, e.g. "Europe/London"
+6	}
+7	
+8	export class AladhanError extends Error {}
+9	export class CityNotFoundError extends Error {}
+10	
+11	interface AladhanResponse {
+12	  code: number;
+13	  status: string;
+14	  data?: {
+15	    timings?: { Maghrib?: string };
+16	    date?: { gregorian?: { date?: string; weekday?: { en?: string } } };
+17	    meta?: { timezone?: string };
+18	  };
+19	}
+20	
+21	export async function fetchPrayerTimes(
+22	  city: string,
+23	  country: string,
+24	  dateEn?: string,
+25	  fetchFn: typeof fetch = fetch
+26	): Promise<PrayerTimes> {
+27	  const url = new URL("https://api.aladhan.com/v1/timingsByCity");
+28	  url.searchParams.set("city", city);
+29	  url.searchParams.set("country", country);
+30	  url.searchParams.set("method", "2"); // ISNA
+31	  if (dateEn) {
+32	    url.searchParams.set("date", dateEn);
+33	  }
+34	
+35	  const res = await fetchFn(url);
+36	  let body: AladhanResponse | string;
+37	  try {
+38	    body = (await res.json()) as AladhanResponse;
+39	  } catch {
+40	    throw new AladhanError(`Aladhan returned non-JSON (HTTP ${res.status})`);
+41	  }
+42	
+43	  if (res.status === 400) {
+44	    throw new CityNotFoundError();
+45	  }
+46	  if (!res.ok) {
+47	    throw new AladhanError(`Aladhan HTTP ${res.status}`);
+48	  }
+49	  if (typeof body === "string") {
+50	    throw new AladhanError("Aladhan returned unexpected body");
+51	  }
+52	  if (body.code !== 200 || body.status !== "OK" || !body.data) {
+53	    throw new CityNotFoundError();
+54	  }
+55	
+56	  const { timings, date, meta } = body.data;
+57	  const maghrib = timings?.Maghrib;
+58	  const weekdayEn = date?.gregorian?.weekday?.en;
+59	  const dateEnOut = date?.gregorian?.date;
+60	  const timezone = meta?.timezone;
+61	  if (!maghrib || !weekdayEn || !dateEnOut || !timezone) {
+62	    throw new AladhanError("Aladhan response missing timings/date fields");
+63	  }
+64	  return { maghrib, weekdayEn, dateEn: dateEnOut, timezone };
+65	}
+66
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:44Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\store.ts`
+
+```text
+1	import type { User, UserPatch, UserStore } from "./commands";
+2	
+3	interface DbUserRow {
+4	  telegram_chat_id: string;
+5	  city: string | null;
+6	  country: string | null;
+7	  language: string;
+8	  paused: number;
+9	}
+10	
+11	function toUser(row: DbUserRow): User {
+12	  return {
+13	    telegram_chat_id: row.telegram_chat_id,
+14	    city: row.city,
+15	    country: row.country,
+16	    language: row.language === "ar" ? "ar" : "en",
+17	    paused: row.paused !== 0,
+18	  };
+19	}
+20	
+21	export function d1UserStore(db: D1Database): UserStore {
+22	  async function save(chatId: string, fields: UserPatch): Promise<void> {
+23	    // Build a dynamic upsert over only the provided fields.
+24	    const keys = Object.keys(fields) as (keyof UserPatch)[];
+25	    const columns = keys.join(", ");
+26	    const placeholders = keys.map(() => "?").join(", ");
+27	    const updates = keys
+28	      .map((k) => `${k} = excluded.${k}`)
+29	      .join(", ");
+30	    await db
+31	      .prepare(
+32	        `INSERT INTO users (telegram_chat_id, ${columns}) VALUES (?, ${placeholders})
+33	         ON CONFLICT(telegram_chat_id) DO UPDATE SET ${updates}, updated_at = datetime('now')`
+34	      )
+35	      .bind(chatId, ...keys.map((k) => fields[k] as string | number))
+36	      .run();
+37	  }
+38	
+39	  return {
+40	    save,
+41	    async get(chatId) {
+42	      const row = await db
+43	        .prepare("SELECT * FROM users WHERE telegram_chat_id = ?")
+44	        .bind(chatId)
+45	        .first<DbUserRow>();
+46	      return row ? toUser(row) : null;
+47	    },
+48	  };
+49	}
+50
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:44Z)**_
+
+<think><details><summary>Thought Process</summary>
+Let me quickly scan the tests to see if there are smells there, and check seed.sql's week_order values, and the .cursorindexingignore, .vscode/settings.json. Let me also check seed.sql fully — I saw part of it. Let me check for the count (10 entries?) and week_order values 0..9.
+
+Also I want to double-check the diff for the parts I haven't seen — the persisted output file for the rest of the diff. Let me grep the persisted output for test files and seed.sql rest. Actually, let me read the seed.sql tail and glance at tests.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:44Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Count seed entries and show tail of seed.sql
+
+`grep -c "week_order" "D:/Projects/al-kahf_bot/db/seed.sql"; tail -15 "D:/Projects/al-kahf_bot/db/seed.sql"`
+
+```text
+2
+ 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ فِي يَوْمِ الْجُمُعَةِ سَطَعَ لَهُ نُورٌ مِنْ تَحْتِ قَدَمِهِ إِلَى عَنَانِ السَّمَاءِ يُضِيءُ لَهُ يَوْمَ الْقِيَامَةِ، وَغُفِرَ لَهُ مَا بَيْنَ الْجُمُعَتَيْنِ',
+ 'Reported by Ibn Mardawayh; graded hasan by al-Mundhiri, at-Targhib wa''l-Tarhib 1/298',
+ 'رواه ابن مردويه؛ وحسّنه المنذري في الترغيب والترهيب ١/٢٩٨'),
+
+(8,
+ 'Whoever recites Surah al-Kahf as it was revealed, it will be a light for him on the Day of Resurrection.',
+ 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ كَمَا أُنْزِلَتْ كَانَتْ لَهُ نُورًا يَوْمَ الْقِيَامَةِ',
+ 'Al-Mustadrak 2/399; graded sahih by al-Albani, Sahih al-Jami'' 6471',
+ 'المستدرك ٢/٣٩٩؛ وصححه الألباني في صحيح الجامع ٦٤٧١'),
+
+(9,
+ 'Whoever recites Surah al-Kahf on the night of Friday, a light will shine for him between him and the Ancient House (the Ka''bah).',
+ 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ لَيْلَةَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ فِيمَا بَيْنَهُ وَبَيْنَ الْبَيْتِ الْعَتِيقِ',
+ 'Sunan al-Darimi 3273; graded sahih by al-Albani, Sahih al-Targhib 736',
+ 'سنن الدارمي ٣٢٧٣؛ وصححه الألباني في صحيح الترغيب ٧٣٦');
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:44Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\test\cron.test.ts`
+
+```text
+1	import { describe, expect, it } from "vitest";
+2	import type { PrayerTimes } from "../src/aladhan";
+3	import { runTick, type ActiveUser, type Hadith, type TickDeps } from "../src/cron";
+4	
+5	interface FetchedTimings {
+6	  city: string;
+7	  dateEn: string | null;
+8	  timings: PrayerTimes;
+9	}
+10	
+11	const weekHadith: Hadith = {
+12	  id: 3,
+13	  textEn: "Whoever recites Surah al-Kahf on Friday, a light will shine for him between the two Fridays.",
+14	  textAr: "مَنْ قَرَأَ سُورَةَ الْكَهْفِ يَوْمَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ مَا بَيْنَ الْجُمُعَتَيْنِ",
+15	  sourceEn: "Al-Mustadrak 2/399; graded sahih by al-Albani",
+16	  sourceAr: "المستدرك ٢/٣٩٩ وصححه الألباني",
+17	};
+18	
+19	function makeDeps(
+20	  users: ActiveUser[],
+21	  fetchResults: FetchedTimings[],
+22	  hadiths: Hadith[] = [weekHadith]
+23	) {
+24	  const fetchCalls: { city: string; dateEn: string | null }[] = [];
+25	  const sends: { chatId: string; text: string; photo?: Uint8Array }[] = [];
+26	  const records: { userId: number; hadithId: number | null; weekKey: string }[] = [];
+27	  const errors: string[] = [];
+28	  const hadithOrders: number[] = [];
+29	  const imageBuilds: string[] = [];
+30	
+31	  const deps: TickDeps = {
+32	    async listActiveUsers() {
+33	      return users;
+34	    },
+35	    async fetchTimings(city, _country, dateEn) {
+36	      fetchCalls.push({ city, dateEn });
+37	      const hit = fetchResults.find(
+38	        (r) => r.city === city && (r.dateEn ?? null) === dateEn
+39	      );
+40	      if (!hit) throw new Error(`no fixture for ${city} date=${dateEn}`);
+41	      return hit.timings;
+42	    },
+43	    async sendReminder(chatId, text, photo) {
+44	      sends.push({ chatId, text, photo });
+45	    },
+46	    async createImage(_hadith, lang) {
+47	      imageBuilds.push(lang);
+48	      return new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+49	    },
+50	    async alreadySent() {
+51	      return false;
+52	    },
+53	    async recordSend(userId, hadithId, weekKey) {
+54	      records.push({ userId, hadithId, weekKey });
+55	    },
+56	    async countHadith() {
+57	      return hadiths.length;
+58	    },
+59	    async getHadithByWeekOrder(weekOrder) {
+60	      hadithOrders.push(weekOrder);
+61	      return hadiths[weekOrder % hadiths.length] ?? null;
+62	    },
+63	    async sleep(_ms) {
+64	      // tests that care about the delay override this
+65	    },
+66	    logError(msg) {
+67	      errors.push(msg);
+68	    },
+69	    logWarn(_msg) {
+70	      // warnings (e.g. Aladhan retry notices) are not errors
+71	    },
+72	  };
+73	
+74	  return { deps, fetchCalls, sends, records, errors, hadithOrders, imageBuilds };
+75	}
+76	
+77	const londonActive: ActiveUser = {
+78	  id: 1,
+79	  telegram_chat_id: "111",
+80	  city: "London",
+81	  country: "UK",
+82	  language: "en",
+83	  paused: false,
+84	};
+85	const londonActive2: ActiveUser = {
+86	  id: 2,
+87	  telegram_chat_id: "222",
+88	  city: "London",
+89	  country: "UK",
+90	  language: "en",
+91	  paused: false,
+92	};
+93	const cairoActive: ActiveUser = {
+94	  id: 3,
+95	  telegram_chat_id: "333",
+96	  city: "Cairo",
+97	  country: "EG",
+98	  language: "en",
+99	  paused: false,
+100	};
+101	const londonPaused: ActiveUser = { ...londonActive, id: 4, telegram_chat_id: "444", paused: true };
+102	
+103	const thursdayLondon: PrayerTimes = {
+104	  maghrib: "20:00",
+105	  weekdayEn: "Thursday",
+106	  dateEn: "13-08-2026",
+107	  timezone: "Europe/London",
+108	};
+109	const thursdayCairo: PrayerTimes = {
+110	  maghrib: "19:30",
+111	  weekdayEn: "Thursday",
+112	  dateEn: "13-08-2026",
+113	  timezone: "Africa/Cairo",
+114	};
+115	const fridayLondon: PrayerTimes = {
+116	  maghrib: "20:01",
+117	  weekdayEn: "Friday",
+118	  dateEn: "14-08-2026",
+119	  timezone: "Europe/London",
+120	};
+121	
+122	describe("runTick", () => {
+123	  it("deduplicates Aladhan calls: one per unique city per date", async () => {
+124	    const { deps, fetchCalls } = makeDeps([londonActive, londonActive2, cairoActive], [
+125	      { city: "London", dateEn: null, timings: thursdayLondon },
+126	      { city: "Cairo", dateEn: null, timings: thursdayCairo },
+127	    ]);
+128	
+129	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+130	
+131	    expect(fetchCalls.filter((c) => c.city === "London")).toHaveLength(1);
+132	    expect(fetchCalls.filter((c) => c.city === "Cairo")).toHaveLength(1);
+133	  });
+134	
+135	  it("sends reminders to users whose Maghrib passed within the window on Thursday", async () => {
+136	    const { deps, sends, records } = makeDeps([londonActive, londonActive2, cairoActive], [
+137	      { city: "London", dateEn: null, timings: thursdayLondon },
+138	      { city: "Cairo", dateEn: null, timings: thursdayCairo },
+139	    ]);
+140	
+141	    // 19:05 UTC = 20:05 London BST (maghrib 20:00, 5 min passed). Cairo 22:05 EEST (maghrib 19:30 → 155 min passed).
+142	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+143	
+144	    expect(sends.map((s) => s.chatId).sort()).toEqual(["111", "222"]);
+145	    expect(sends[0]?.text).toContain("Surah al-Kahf");
+146	    expect(records).toHaveLength(2);
+147	  });
+148	
+149	  it("skips paused users", async () => {
+150	    const { deps, sends } = makeDeps([londonActive, londonPaused], [
+151	      { city: "London", dateEn: null, timings: thursdayLondon },
+152	    ]);
+153	
+154	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+155	
+156	    expect(sends.map((s) => s.chatId)).toEqual(["111"]);
+157	  });
+158	
+159	  it("does not send when Maghrib has not passed yet", async () => {
+160	    const { deps, sends } = makeDeps([londonActive], [
+161	      { city: "London", dateEn: null, timings: thursdayLondon },
+162	    ]);
+163	
+164	    await runTick(new Date("2026-08-13T19:30:00Z"), deps);
+165	
+166	    expect(sends).toHaveLength(0);
+167	  });
+168	
+169	  it("does not send on other days even if a Maghrib time matches the window", async () => {
+170	    const { deps, sends } = makeDeps([londonActive], [
+171	      { city: "London", dateEn: null, timings: fridayLondon },
+172	    ]);
+173	
+174	    // Friday 20:10 local — 9 min after Friday's Maghrib, but not Thursday.
+175	    await runTick(new Date("2026-08-14T19:10:00Z"), deps);
+176	
+177	    expect(sends).toHaveLength(0);
+178	  });
+179	
+180	  it("sends just after midnight for a late Thursday Maghrib, checking yesterday's timings", async () => {
+181	    const lateMaghrib: PrayerTimes = {
+182	      maghrib: "23:55",
+183	      weekdayEn: "Thursday",
+184	      dateEn: "13-08-2026",
+185	      timezone: "Europe/London",
+186	    };
+187	    const { deps, sends, fetchCalls } = makeDeps([londonActive], [
+188	      { city: "London", dateEn: null, timings: fridayLondon },
+189	      { city: "London", dateEn: "13-08-2026", timings: lateMaghrib },
+190	    ]);
+191	
+192	    // Friday 00:05 local (23:05 UTC) — Thursday's Maghrib was 10 minutes ago.
+193	    await runTick(new Date("2026-08-13T23:05:00Z"), deps);
+194	
+195	    expect(fetchCalls).toContainEqual({ city: "London", dateEn: "13-08-2026" });
+196	    expect(sends.map((s) => s.chatId)).toEqual(["111"]);
+197	  });
+198	
+199	  it("does not resend within the same ISO week (sent_log dedup)", async () => {
+200	    const { deps, sends, records } = makeDeps([londonActive], [
+201	      { city: "London", dateEn: null, timings: thursdayLondon },
+202	    ]);
+203	    let sent = false;
+204	    deps.alreadySent = async () => sent;
+205	    deps.recordSend = async () => {
+206	      sent = true;
+207	      records.push({ userId: 1, hadithId: null, weekKey: "2026-W33" });
+208	    };
+209	
+210	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+211	    await runTick(new Date("2026-08-13T19:06:00Z"), deps);
+212	
+213	    expect(sends).toHaveLength(1);
+214	  });
+215	
+216	  it("isolates per-user send failures", async () => {
+217	    const { deps, sends, errors } = makeDeps([londonActive, londonActive2], [
+218	      { city: "London", dateEn: null, timings: thursdayLondon },
+219	    ]);
+220	    deps.sendReminder = async (chatId, text) => {
+221	      if (chatId === "111") throw new Error("telegram down for this user");
+222	      sends.push({ chatId, text });
+223	    };
+224	
+225	    await expect(runTick(new Date("2026-08-13T19:05:00Z"), deps)).resolves.toBeUndefined();
+226	
+227	    expect(sends.map((s) => s.chatId)).toEqual(["222"]);
+228	    expect(errors).toHaveLength(1);
+229	  });
+230	
+231	  it("includes the week's hadith in the reminder and records its id", async () => {
+232	    // 2026-08-13 is ISO week 33; weekOrder = 33 % 1 = 0.
+233	    const { deps, sends, records, hadithOrders } = makeDeps([londonActive], [
+234	      { city: "London", dateEn: null, timings: thursdayLondon },
+235	    ]);
+236	
+237	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+238	
+239	    expect(hadithOrders).toEqual([33 % 1]);
+240	    expect(sends[0]?.text).toContain("light will shine");
+241	    expect(records[0]).toMatchObject({ userId: 1, hadithId: 3 });
+242	  });
+243	
+244	  it("picks the same hadith for every user in the same week (single lookup per tick)", async () => {
+245	    const { deps, hadithOrders } = makeDeps([londonActive, londonActive2], [
+246	      { city: "London", dateEn: null, timings: thursdayLondon },
+247	    ]);
+248	
+249	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+250	
+251	    expect(hadithOrders).toHaveLength(1);
+252	  });
+253	
+254	  it("falls back to a plain reminder when no hadith are seeded", async () => {
+255	    const { deps, sends, records } = makeDeps([londonActive], [
+256	      { city: "London", dateEn: null, timings: thursdayLondon },
+257	    ], []);
+258	
+259	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+260	
+261	    expect(sends[0]?.text).not.toContain("Hadith");
+262	    expect(sends[0]?.photo).toBeUndefined();
+263	    expect(records[0]?.hadithId).toBeNull();
+264	  });
+265	
+266	  it("sends the hadith card image as a photo with the warm message as caption", async () => {
+267	    const { deps, sends } = makeDeps([londonActive], [
+268	      { city: "London", dateEn: null, timings: thursdayLondon },
+269	    ]);
+270	
+271	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+272	
+273	    expect(sends[0]?.photo).toBeInstanceOf(Uint8Array);
+274	    expect(sends[0]?.text).toContain("Surah al-Kahf");
+275	  });
+276	
+277	  it("renders each language variant of the image at most once per tick", async () => {
+278	    const arUser: ActiveUser = { ...londonActive2, id: 9, telegram_chat_id: "999", language: "ar" };
+279	    const { deps, imageBuilds } = makeDeps([londonActive, londonActive2, arUser], [
+280	      { city: "London", dateEn: null, timings: thursdayLondon },
+281	    ]);
+282	
+283	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+284	
+285	    expect(imageBuilds.filter((l) => l === "en")).toHaveLength(1);
+286	    expect(imageBuilds.filter((l) => l === "ar")).toHaveLength(1);
+287	  });
+288	
+289	  it("falls back to text-only when image generation fails", async () => {
+290	    const { deps, sends, errors } = makeDeps([londonActive], [
+291	      { city: "London", dateEn: null, timings: thursdayLondon },
+292	    ]);
+293	    deps.createImage = async () => {
+294	      throw new Error("wasm boom");
+295	    };
+296	
+297	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+298	
+299	    expect(sends[0]?.photo).toBeUndefined();
+300	    expect(sends[0]?.text).toContain("light will shine");
+301	    expect(errors).toHaveLength(1);
+302	  });
+303	
+304	  it("retries a failed Aladhan fetch once after a delay", async () => {
+305	    const { deps, sends, fetchCalls, errors } = makeDeps([londonActive], [
+306	      { city: "London", dateEn: null, timings: thursdayLondon },
+307	    ]);
+308	    const sleeps: number[] = [];
+309	    deps.sleep = async (ms) => {
+310	      sleeps.push(ms);
+311	    };
+312	    let attempts = 0;
+313	    deps.fetchTimings = async (city, _country, dateEn) => {
+314	      fetchCalls.push({ city, dateEn });
+315	      attempts += 1;
+316	      if (attempts === 1) throw new Error("Aladhan 500");
+317	      return thursdayLondon;
+318	    };
+319	
+320	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+321	
+322	    expect(fetchCalls.filter((c) => c.city === "London")).toHaveLength(2);
+323	    expect(sleeps).toEqual([30_000]);
+324	    expect(sends.map((s) => s.chatId)).toEqual(["111"]);
+325	    expect(errors).toHaveLength(0);
+326	  });
+327	
+328	  it("skips the city after the retry also fails, logging the error", async () => {
+329	    const { deps, sends, errors } = makeDeps([londonActive], [
+330	      { city: "London", dateEn: null, timings: thursdayLondon },
+331	    ]);
+332	    const sleeps: number[] = [];
+333	    deps.sleep = async (ms) => {
+334	      sleeps.push(ms);
+335	    };
+336	    deps.fetchTimings = async () => {
+337	      throw new Error("Aladhan down");
+338	    };
+339	
+340	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+341	
+342	    expect(sleeps).toEqual([30_000]);
+343	    expect(sends).toHaveLength(0);
+344	    expect(errors).toHaveLength(1);
+345	  });
+346	
+347	  it("logs chat_id context on per-user send failures", async () => {
+348	    const { deps } = makeDeps([londonActive], [
+349	      { city: "London", dateEn: null, timings: thursdayLondon },
+350	    ]);
+351	    const logged: (string | undefined)[] = [];
+352	    deps.sendReminder = async () => {
+353	      throw new Error("telegram down");
+354	    };
+355	    deps.logError = (_msg, _err, ctx) => {
+356	      logged.push(ctx?.chat_id);
+357	    };
+358	
+359	    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+360	
+361	    expect(logged).toEqual(["111"]);
+362	  });
+363	});
+364
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:45Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now let me read the remaining source files: card.ts, image.ts, font.ts, messages.ts, rotation.ts, week.ts, window.ts, types.d.ts, migrations, seed.sql, wrangler.jsonc, package.json, README.md. Also check the tests briefly for scope.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\card.ts`
+
+```text
+1	import { NOTO_NASKH_ARABIC_B64 } from "./font";
+2	import type { HadithText, Language } from "./messages";
+3	
+4	const WIDTH = 1080;
+5	const HEIGHT = 1080;
+6	
+7	const COLORS = {
+8	  bgTop: "#23483F",
+9	  bgBottom: "#1B362F",
+10	  gold: "#D4B36A",
+11	  cream: "#F7F1E3",
+12	  creamSoft: "#E8DECB",
+13	} as const;
+14	
+15	export function escapeXml(text: string): string {
+16	  return text
+17	    .replace(/&/g, "&amp;")
+18	    .replace(/</g, "&lt;")
+19	    .replace(/>/g, "&gt;")
+20	    .replace(/"/g, "&quot;")
+21	    .replace(/'/g, "&apos;");
+22	}
+23	
+24	/** Greedy word-wrap by character budget; long words are hard-broken. */
+25	export function wrapText(text: string, maxChars: number): string[] {
+26	  const words = text.split(/\s+/).filter(Boolean);
+27	  const lines: string[] = [];
+28	  let current = "";
+29	  for (let word of words) {
+30	    while (word.length > maxChars) {
+31	      lines.push(word.slice(0, maxChars));
+32	      word = word.slice(maxChars);
+33	    }
+34	    if (!current) {
+35	      current = word;
+36	    } else if (current.length + 1 + word.length <= maxChars) {
+37	      current += ` ${word}`;
+38	    } else {
+39	      lines.push(current);
+40	      current = word;
+41	    }
+42	  }
+43	  if (current) {
+44	    lines.push(current);
+45	  }
+46	  return lines;
+47	}
+48	
+49	function textLines(
+50	  lines: string[],
+51	  x: number,
+52	  startY: number,
+53	  lineHeight: number,
+54	  fontSize: number,
+55	  opts: { rtl?: boolean; fill?: string; opacity?: number } = {}
+56	): string {
+57	  const { rtl = false, fill = COLORS.cream, opacity } = opts;
+58	  return lines
+59	    .map((line, i) => {
+60	      const attrs = [
+61	        `x="${x}"`,
+62	        `y="${startY + i * lineHeight}"`,
+63	        'text-anchor="middle"',
+64	        `fill="${fill}"`,
+65	        `font-family="Noto Naskh Arabic"`,
+66	        `font-size="${fontSize}"`,
+67	        ...(rtl ? ['direction="rtl"'] : []),
+68	        ...(opacity !== undefined ? [`opacity="${opacity}"`] : []),
+69	      ].join(" ");
+70	      return `<text ${attrs}>${escapeXml(line)}</text>`;
+71	    })
+72	    .join("\n");
+73	}
+74	
+75	/** Builds the 1080x1080 hadith card SVG. Arabic matn prominent, translation + source below. */
+76	export function buildCardSvg(hadith: HadithText, lang: Language): string {
+77	  const arLines = wrapText(hadith.textAr, 26);
+78	  // Shrink the matn when it is long so everything fits the card.
+79	  const matnSize = Math.min(42, Math.floor(340 / Math.max(arLines.length, 3)));
+80	  const matnLineHeight = Math.round(matnSize * 1.7);
+81	
+82	  const enLines = lang === "en" ? wrapText(hadith.textEn, 52) : [];
+83	  const sourceLines = wrapText(lang === "ar" ? hadith.sourceAr : hadith.sourceEn, 60);
+84	
+85	  const titleY = 150;
+86	  const matnStartY = 320;
+87	  const matnEndY = matnStartY + (arLines.length - 1) * matnLineHeight;
+88	  const enStartY = matnEndY + 90;
+89	  const enEndY = enStartY + (enLines.length - 1) * 40;
+90	  const sourceY = enLines.length > 0 ? enEndY + 110 : matnEndY + 110;
+91	
+92	  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
+93	  <defs>
+94	    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+95	      <stop offset="0%" stop-color="${COLORS.bgTop}"/>
+96	      <stop offset="100%" stop-color="${COLORS.bgBottom}"/>
+97	    </linearGradient>
+98	    <pattern id="star" width="120" height="120" patternUnits="userSpaceOnUse">
+99	      <g fill="none" stroke="${COLORS.gold}" stroke-opacity="0.07" stroke-width="1.5">
+100	        <rect x="36" y="36" width="48" height="48"/>
+101	        <rect x="36" y="36" width="48" height="48" transform="rotate(45 60 60)"/>
+102	      </g>
+103	    </pattern>
+104	    <style>
+105	      @font-face {
+106	        font-family: "Noto Naskh Arabic";
+107	        src: url(data:font/ttf;base64,${NOTO_NASKH_ARABIC_B64}) format("truetype");
+108	      }
+109	    </style>
+110	  </defs>
+111	
+112	  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#bg)"/>
+113	  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#star)"/>
+114	  <rect x="40" y="40" width="${WIDTH - 80}" height="${HEIGHT - 80}" rx="24"
+115	        fill="none" stroke="${COLORS.gold}" stroke-opacity="0.5" stroke-width="2"/>
+116	  <rect x="56" y="56" width="${WIDTH - 112}" height="${HEIGHT - 112}" rx="16"
+117	        fill="none" stroke="${COLORS.gold}" stroke-opacity="0.2" stroke-width="1"/>
+118	
+119	  ${textLines(["سُورَةُ الْكَهْفِ"], WIDTH / 2, titleY, 0, 34, { fill: COLORS.gold })}
+120	  ${textLines(["Surah al-Kahf"], WIDTH / 2, titleY + 48, 0, 22, { fill: COLORS.creamSoft, opacity: 0.9 })}
+121	  <line x1="${WIDTH / 2 - 140}" y1="${titleY + 86}" x2="${WIDTH / 2 + 140}" y2="${titleY + 86}"
+122	        stroke="${COLORS.gold}" stroke-opacity="0.6" stroke-width="1.5"/>
+123	  <circle cx="${WIDTH / 2}" cy="${titleY + 86}" r="5" fill="${COLORS.gold}" stroke="${COLORS.bgTop}" stroke-width="2"/>
+124	
+125	  ${textLines(arLines, WIDTH / 2, matnStartY + matnSize, matnLineHeight, matnSize, { rtl: true })}
+126	  ${enLines.length > 0 ? textLines(enLines, WIDTH / 2, enStartY + 26, 40, 26, { fill: COLORS.creamSoft }) : ""}
+127	
+128	  <line x1="${WIDTH / 2 - 100}" y1="${sourceY - 40}" x2="${WIDTH / 2 + 100}" y2="${sourceY - 40}"
+129	        stroke="${COLORS.gold}" stroke-opacity="0.4" stroke-width="1"/>
+130	  ${textLines(sourceLines, WIDTH / 2, sourceY + 4, 32, 20, { fill: COLORS.gold, opacity: 0.95 })}
+131	</svg>`;
+132	}
+133
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\image.ts`
+
+```text
+1	import { Resvg, initWasm } from "@resvg/resvg-wasm";
+2	
+3	export type WasmSource = () => Promise<BufferSource | WebAssembly.Module>;
+4	
+5	let initPromise: Promise<void> | null = null;
+6	
+7	/** Renders an SVG string to PNG bytes (1080x1080 for the hadith card). */
+8	export async function renderCardPng(svg: string, wasmSource: WasmSource): Promise<Uint8Array> {
+9	  if (!initPromise) {
+10	    initPromise = initWasm(await wasmSource());
+11	  }
+12	  await initPromise;
+13	
+14	  const resvg = new Resvg(svg, {
+15	    fitTo: { mode: "width", value: 1080 },
+16	  });
+17	  const rendered = resvg.render();
+18	  return rendered.asPng();
+19	}
+20
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:28:46Z)**_
+
+Implement complete. Summary:
+
+**7 issues → 7 commits on `main`:**
+
+| # | Issue | Commit |
+|---|-------|--------|
+| 1 | Scaffold + /start + /help | `53448ad` |
+| 2 | users table + /setcity + /status | `1c1df42` |
+| 3 | Language + pause/resume | `3a73c61` |
+| 4 | Cron scheduler + dispatch | `23fc0f3` |
+| 5 | Hadith seed + rotation | `3570f27` |
+| 6 | Image generation | `1337102` |
+| 7 | Hardening | `8761fe7` |
+
+**State:** 83 tests green, typecheck clean, migrations apply locally, `wrangler deploy --dry-run` bundles at 3MB/1.17MB gzip. Local D1 migrated + seeded.
+
+**Design notes:**
+- `city` column nullable (spec had NOT NULL) — user can set language before city; cron filters `city IS NOT NULL`
+- `sent_log` has extra `week_key` column — exact ISO-week dedup, avoids strftime parsing bugs
+- Maghrib window 15min (10-min cadence + trigger-jitter margin), midnight rollover handled by fetching yesterday's timings in early-morning ticks
+- Image: SVG → `@resvg/resvg-wasm` PNG, Noto Naskh Arabic embedded base64, rtl matn + translation + source
+
+**⚠️ Before deploy:** re-verify the 10 hadith texts in `db/seed.sql` with a qualified source, and visually check one rendered card (Arabic shaping) — `README.md` has the deploy steps.
+
+Code review running (Standards + Spec axes) — will report when done.
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\font.ts`
+
+```text
+File content (400.6KB) exceeds maximum allowed size (256KB). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\messages.ts`
+
+```text
+1	export type Language = "en" | "ar";
+2	
+3	const COMMAND_LIST_EN = [
+4	  ["/start", "Welcome message and setup guide"],
+5	  ["/setcity London, UK", "Set your city for accurate Maghrib times"],
+6	  ["/setlanguage", "Choose English or العربية"],
+7	  ["/pause", "Pause reminders temporarily"],
+8	  ["/resume", "Resume reminders"],
+9	  ["/status", "Show your current settings"],
+10	  ["/help", "List all commands"],
+11	] as const;
+12	
+13	const COMMAND_LIST_AR: readonly (readonly [string, string])[] = [
+14	  ["/start", "رسالة ترحيبية ودليل الإعداد"],
+15	  ["/setcity لندن, UK", "حدد مدينتك لأوقات المغرب الصحيحة"],
+16	  ["/setlanguage", "اختر English أو العربية"],
+17	  ["/pause", "إيقاف التذكيرات مؤقتًا"],
+18	  ["/resume", "استئناف التذكيرات"],
+19	  ["/status", "عرض إعداداتك الحالية"],
+20	  ["/help", "عرض جميع الأوامر"],
+21	];
+22	
+23	export function welcomeText(lang: Language): string {
+24	  if (lang === "ar") {
+25	    return [
+26	      "السلام عليكم ورحمة الله وبركاته 🌙",
+27	      "",
+28	      "أنا بوت الكهف — أذكّرك بقراءة سورة الكهف كل يوم جمعة، ويبدأ الوقت من ليلة الجمعة بعد المغرب.",
+29	      "",
+30	      "للبدء:",
+31	      "1. حدّد مدينتك: /setcity",
+32	      "2. اختر لغتك المفضلة: /setlanguage",
+33	      "",
+34	      "ثم اترك الباقي لي، وسأرسل لك تذكيرًا أسبوعيًا في وقته بإذن الله.",
+35	    ].join("\n");
+36	  }
+37	
+38	  return [
+39	    "As-salamu alaykum 👋",
+40	    "",
+41	    "I'm Al-Kahf Bot — I remind you to recite Surah al-Kahf every Friday, which begins Thursday after Maghrib.",
+42	    "",
+43	    "To get started:",
+44	    "1. Set your city: /setcity",
+45	    "2. Choose your preferred language: /setlanguage",
+46	    "",
+47	    "Then leave the rest to me — I'll send you a weekly reminder at the right time, insha'Allah.",
+48	  ].join("\n");
+49	}
+50	
+51	export function helpText(lang: Language): string {
+52	  const lines = (lang === "ar" ? COMMAND_LIST_AR : COMMAND_LIST_EN).map(
+53	    ([cmd, desc]) => `${cmd} — ${desc}`
+54	  );
+55	  const header =
+56	    lang === "ar"
+57	      ? "الأوامر المتاحة:"
+58	      : "Here's what I can do:";
+59	  return [header, "", ...lines].join("\n");
+60	}
+61	
+62	export function citySetText(lang: Language, city: string, country: string): string {
+63	  if (lang === "ar") {
+64	    return `تم حفظ مدينتك: ${city}, ${country} ✅`;
+65	  }
+66	  return `Your city is set to ${city}, ${country}`;
+67	}
+68	
+69	export function cityNotFoundText(lang: Language): string {
+70	  if (lang === "ar") {
+71	    return "لم أجد هذه المدينة. جرّب مرة أخرى بهذه الصيغة: /setcity لندن, UK";
+72	  }
+73	  return "I couldn't find that city. Please try again with format: /setcity London, UK";
+74	}
+75	
+76	export function noCityText(lang: Language): string {
+77	  if (lang === "ar") {
+78	    return "لم تحدد مدينة بعد. استخدم /setcity للضبط";
+79	  }
+80	  return "No city set. Use /setcity to configure";
+81	}
+82	
+83	export function statusText(
+84	  lang: Language,
+85	  user: { city: string; country: string; language: Language; paused: boolean }
+86	): string {
+87	  const langName = user.language === "ar" ? "العربية" : "English";
+88	  if (lang === "ar") {
+89	    const state = user.paused ? "متوقفة" : "مفعّلة";
+90	    return [
+91	      `🏙️ المدينة: ${user.city}, ${user.country}`,
+92	      `🗣️ اللغة: ${langName}`,
+93	      `⏸️ التذكيرات: ${state}`,
+94	    ].join("\n");
+95	  }
+96	  const state = user.paused ? "Paused" : "Active";
+97	  return [
+98	    `🏙️ City: ${user.city}, ${user.country}`,
+99	    `🗣️ Language: ${langName}`,
+100	    `⏸️ Reminders: ${state}`,
+101	  ].join("\n");
+102	}
+103	
+104	export function languageSetText(lang: Language): string {
+105	  if (lang === "ar") {
+106	    return "تم اختيار اللغة: العربية ✅";
+107	  }
+108	  return "Language set to English ✅";
+109	}
+110	
+111	export function pausedText(lang: Language): string {
+112	  if (lang === "ar") {
+113	    return "تم إيقاف التذكيرات مؤقتًا. أرسل /resume لاستئنافها في أي وقت.";
+114	  }
+115	  return "Reminders paused. Send /resume anytime to restart them.";
+116	}
+117	
+118	export function resumedText(lang: Language): string {
+119	  if (lang === "ar") {
+120	    return "تم استئناف التذكيرات ✅. نلتقي ليلة الجمعة بعد المغرب بإذن الله 🌙";
+121	  }
+122	  return "Reminders resumed ✅. See you Thursday after Maghrib, insha'Allah 🌙";
+123	}
+124	
+125	export interface HadithText {
+126	  textEn: string;
+127	  textAr: string;
+128	  sourceEn: string;
+129	  sourceAr: string;
+130	}
+131	
+132	export function reminderText(lang: Language, city: string, hadith: HadithText | null = null): string {
+133	  const hadithBlock = hadith
+134	    ? lang === "ar"
+135	      ? [
+136	          "",
+137	          "━━━━━━━━━━━━━",
+138	          "📜 حديث الأسبوع:",
+139	          "",
+140	          hadith.textAr,
+141	          "",
+142	          `المصدر: ${hadith.sourceAr}`,
+143	        ].join("\n")
+144	      : [
+145	          "",
+146	          "━━━━━━━━━━━━━",
+147	          "📜 Hadith of the week:",
+148	          "",
+149	          hadith.textAr,
+150	          "",
+151	          `"${hadith.textEn}"`,
+152	          "",
+153	          `— ${hadith.sourceEn}`,
+154	        ].join("\n")
+155	    : "";
+156	
+157	  if (lang === "ar") {
+158	    return [
+159	      "السلام عليكم ورحمة الله وبركاته 🌙",
+160	      "",
+161	      `حان وقت قراءة سورة الكهف — إنها ليلة الجمعة في ${city} بعد المغرب.`,
+162	      "",
+163	      "لا تنسَ قراءة سورة الكهف اليوم، فقد حثّ عليها النبي ﷺ. تقبّل الله منا ومنكم.",
+164	      hadithBlock,
+165	    ].join("\n");
+166	  }
+167	  return [
+168	    "As-salamu alaykum 🌙",
+169	    "",
+170	    `It's Thursday after Maghrib in ${city} — the night of Jumu'ah has begun.`,
+171	    "",
+172	    "Don't forget to recite Surah al-Kahf today, as the Prophet ﷺ encouraged. May Allah accept it from you.",
+173	    hadithBlock,
+174	  ].join("\n");
+175	}
+176
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\rotation.ts`
+
+```text
+1	/** Extract the integer week number from an ISO week key like "2026-W33". */
+2	export function parseWeekNumber(weekKey: string): number {
+3	  const n = Number.parseInt(weekKey.split("-W")[1] ?? "", 10);
+4	  if (Number.isNaN(n)) {
+5	    throw new Error(`Invalid ISO week key: ${weekKey}`);
+6	  }
+7	  return n;
+8	}
+9	
+10	/**
+11	 * Deterministic weekly rotation: the active hadith is
+12	 * `week_number % hadith_count`, cycling through all entries.
+13	 */
+14	export function pickHadithIndex(weekNumber: number, hadithCount: number): number {
+15	  if (hadithCount <= 0) {
+16	    throw new Error("Hadith count must be positive");
+17	  }
+18	  return weekNumber % hadithCount;
+19	}
+20
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\week.ts`
+
+```text
+1	/** ISO week key like "2026-W33" (Monday-first weeks, per ISO 8601). */
+2	export function isoWeekKey(date: Date): string {
+3	  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+4	  const dayNum = d.getUTCDay() || 7; // Sunday = 7
+5	  d.setUTCDate(d.getUTCDate() + 4 - dayNum); // move to Thursday of the same week
+6	  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+7	  const week = Math.ceil(((d.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
+8	  return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+9	}
+10
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:47Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\window.ts`
+
+```text
+1	/** Minutes from `maghribHHMM` to `nowHHMM` within the same evening, crossing midnight. */
+2	export function minutesSinceMaghrib(maghribHHMM: string, nowHHMM: string): number {
+3	  const toMinutes = (hhmm: string): number => {
+4	    const [h, m] = hhmm.split(":").map((p) => Number.parseInt(p, 10));
+5	    return (h ?? 0) * 60 + (m ?? 0);
+6	  };
+7	  const diff = toMinutes(nowHHMM) - toMinutes(maghribHHMM);
+8	  return (diff + 1440) % 1440;
+9	}
+10	
+11	function tzParts(date: Date, timeZone: string, parts: Intl.DateTimeFormatOptions): Intl.DateTimeFormatPart[] {
+12	  return new Intl.DateTimeFormat("en-GB", { timeZone, ...parts }).formatToParts(date);
+13	}
+14	
+15	/** Local wall-clock "HH:MM" (h23) of an instant in the given IANA timezone. */
+16	export function formatHHMM(date: Date, timeZone: string): string {
+17	  const p = tzParts(date, timeZone, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+18	  const get = (t: Intl.DateTimeFormatPartTypes) => p.find((x) => x.type === t)?.value ?? "00";
+19	  return `${get("hour")}:${get("minute")}`;
+20	}
+21	
+22	/** Local "DD-MM-YYYY" of an instant in the given IANA timezone (Aladhan's date format). */
+23	export function formatDateEn(date: Date, timeZone: string): string {
+24	  const p = tzParts(date, timeZone, { day: "2-digit", month: "2-digit", year: "numeric" });
+25	  const get = (t: Intl.DateTimeFormatPartTypes) => p.find((x) => x.type === t)?.value ?? "";
+26	  return `${get("day")}-${get("month")}-${get("year")}`;
+27	}
+28	
+29	/** Local date of the previous day as "DD-MM-YYYY". */
+30	export function previousDateEn(date: Date, timeZone: string): string {
+31	  return formatDateEn(new Date(date.getTime() - 86_400_000), timeZone);
+32	}
+33	
+34	/** Local weekday name of the previous day, e.g. "Thursday". */
+35	export function previousWeekdayEn(date: Date, timeZone: string): string {
+36	  const p = tzParts(new Date(date.getTime() - 86_400_000), timeZone, { weekday: "long" });
+37	  return p.find((x) => x.type === "weekday")?.value ?? "";
+38	}
+39
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:47Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\src\types.d.ts`
+
+```text
+1	declare module "*.wasm" {
+2	  const module: WebAssembly.Module;
+3	  export default module;
+4	}
+5
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:49Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now let me read migrations, seed.sql, wrangler.jsonc, package.json, README, and font.ts head. Also check the `font.ts` (400KB, base64). Just read a bit.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:49Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\migrations\0001_users.sql`
+
+```text
+1	CREATE TABLE users (
+2	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+3	  telegram_chat_id TEXT UNIQUE NOT NULL,
+4	  city TEXT,
+5	  country TEXT,
+6	  language TEXT NOT NULL DEFAULT 'en' CHECK(language IN ('en', 'ar')),
+7	  paused INTEGER NOT NULL DEFAULT 0,
+8	  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+9	  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+10	);
+11
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:49Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\migrations\0002_hadith_sent_log.sql`
+
+```text
+1	CREATE TABLE hadith (
+2	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+3	  week_order INTEGER NOT NULL UNIQUE,
+4	  text_en TEXT NOT NULL,
+5	  text_ar TEXT NOT NULL,
+6	  source_en TEXT NOT NULL,
+7	  source_ar TEXT NOT NULL
+8	);
+9	
+10	-- hadith_id is nullable: reminders sent before hadith seed landed have none.
+11	-- week_key (ISO week, e.g. "2026-W33") makes dedup exact without parsing sent_at.
+12	CREATE TABLE sent_log (
+13	  id INTEGER PRIMARY KEY AUTOINCREMENT,
+14	  user_id INTEGER NOT NULL REFERENCES users(id),
+15	  hadith_id INTEGER REFERENCES hadith(id),
+16	  week_key TEXT NOT NULL,
+17	  sent_at TEXT NOT NULL DEFAULT (datetime('now'))
+18	);
+19	
+20	CREATE INDEX idx_sent_log_user_week ON sent_log (user_id, week_key);
+21
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:50Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\db\seed.sql`
+
+```text
+1	-- Hadith seed data — virtues of Surah al-Kahf.
+2	--
+3	-- All entries are authentic (sahih or hasan) narrations from recognized
+4	-- collections (Sahih Muslim, Sahih al-Bukhari, Sunan Abi Dawud, al-Mustadrak,
+5	-- Sunan al-Darimi) with gradings as noted in the source fields.
+6	--
+7	-- ⚠️ Before production deployment, please have these texts re-verified by a
+8	-- qualified source — accuracy of the Arabic matn and translations matters.
+9	-- week_order runs 0..N-1; rotation = week_number % count.
+10	
+11	INSERT INTO hadith (week_order, text_en, text_ar, source_en, source_ar) VALUES
+12	(0,
+13	 'Whoever memorizes the first ten verses of Surah al-Kahf will be protected from the Dajjal.',
+14	 'مَنْ حَفِظَ عَشْرَ آيَاتٍ مِنْ أَوَّلِ سُورَةِ الْكَهْفِ عُصِمَ مِنَ الدَّجَّالِ',
+15	 'Narrated by Abu Darda'' (may Allah be pleased with him); Sahih Muslim 809',
+16	 'رواه أبو الدرداء رضي الله عنه؛ صحيح مسلم ٨٠٩'),
+17	
+18	(1,
+19	 'Whoever recites the last ten verses of Surah al-Kahf will be protected from the trial of the Dajjal.',
+20	 'مَنْ قَرَأَ الْعَشْرَ الْأَوَاخِرَ مِنْ سُورَةِ الْكَهْفِ عُصِمَ مِنْ فِتْنَةِ الدَّجَّالِ',
+21	 'Narrated by Abu Darda'' (may Allah be pleased with him); Sahih Muslim 809',
+22	 'رواه أبو الدرداء رضي الله عنه؛ صحيح مسلم ٨٠٩'),
+23	
+24	(2,
+25	 'Whoever memorizes ten verses from the beginning of Surah al-Kahf will be protected from the trial of the Dajjal.',
+26	 'مَنْ حَفِظَ عَشْرَ آيَاتٍ مِنْ أَوَّلِ سُورَةِ الْكَهْفِ عُصِمَ مِنْ فِتْنَةِ الدَّجَّالِ',
+27	 'Sunan Abi Dawud 4323; graded sahih by al-Albani',
+28	 'سنن أبي داود ٤٣٢٣؛ وصححه الألباني'),
+29	
+30	(3,
+31	 'Whoever recites Surah al-Kahf as it was revealed, it will be a light for him on the Day of Resurrection from his place to Makkah.',
+32	 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ كَمَا أُنْزِلَتْ كَانَتْ لَهُ نُورًا يَوْمَ الْقِيَامَةِ مِنْ مَقَامِهِ إِلَى مَكَّةَ',
+33	 'Sunan Abi Dawud 4324; graded sahih by al-Albani',
+34	 'سنن أبي داود ٤٣٢٤؛ وصححه الألباني'),
+35	
+36	(4,
+37	 'The sakinah (tranquility) descended for the Quran — the Prophet ﷺ said this after a man reciting Surah al-Kahf found a cloud shading him and his horse.',
+38	 '«تِلْكَ السَّكِينَةُ تَنَزَّلَتْ لِلْقُرْآنِ»',
+39	 'Sahih al-Bukhari 3614; Sahih Muslim 795',
+40	 'صحيح البخاري ٣٦١٤؛ صحيح مسلم ٧٩٥'),
+41	
+42	(5,
+43	 'Whoever of you reaches him (the Dajjal), let him recite upon him the opening verses of Surah al-Kahf.',
+44	 'فَمَنْ أَدْرَكَهُ مِنْكُمْ فَلْيَقْرَأْ عَلَيْهِ فَوَاتِحَ سُورَةِ الْكَهْفِ',
+45	 'From the long hadith of al-Nawwas ibn Sam''an; Sahih Muslim 2937',
+46	 'من حديث النواس بن سمعان الطويل؛ صحيح مسلم ٢٩٣٧'),
+47	
+48	(6,
+49	 'Whoever recites Surah al-Kahf on Friday will have a light shining for him between the two Fridays.',
+50	 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ يَوْمَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ مَا بَيْنَ الْجُمُعَتَيْنِ',
+51	 'Al-Mustadrak 2/399; graded sahih by al-Albani, Sahih al-Jami'' 6470',
+52	 'المستدرك ٢/٣٩٩؛ وصححه الألباني في صحيح الجامع ٦٤٧٠'),
+53	
+54	(7,
+55	 'Whoever recites Surah al-Kahf on Friday, a light will shine for him from beneath his feet to the clouds of the sky, lighting him on the Day of Resurrection, and he will be forgiven between the two Fridays.',
+56	 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ فِي يَوْمِ الْجُمُعَةِ سَطَعَ لَهُ نُورٌ مِنْ تَحْتِ قَدَمِهِ إِلَى عَنَانِ السَّمَاءِ يُضِيءُ لَهُ يَوْمَ الْقِيَامَةِ، وَغُفِرَ لَهُ مَا بَيْنَ الْجُمُعَتَيْنِ',
+57	 'Reported by Ibn Mardawayh; graded hasan by al-Mundhiri, at-Targhib wa''l-Tarhib 1/298',
+58	 'رواه ابن مردويه؛ وحسّنه المنذري في الترغيب والترهيب ١/٢٩٨'),
+59	
+60	(8,
+61	 'Whoever recites Surah al-Kahf as it was revealed, it will be a light for him on the Day of Resurrection.',
+62	 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ كَمَا أُنْزِلَتْ كَانَتْ لَهُ نُورًا يَوْمَ الْقِيَامَةِ',
+63	 'Al-Mustadrak 2/399; graded sahih by al-Albani, Sahih al-Jami'' 6471',
+64	 'المستدرك ٢/٣٩٩؛ وصححه الألباني في صحيح الجامع ٦٤٧١'),
+65	
+66	(9,
+67	 'Whoever recites Surah al-Kahf on the night of Friday, a light will shine for him between him and the Ancient House (the Ka''bah).',
+68	 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ لَيْلَةَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ فِيمَا بَيْنَهُ وَبَيْنَ الْبَيْتِ الْعَتِيقِ',
+69	 'Sunan al-Darimi 3273; graded sahih by al-Albani, Sahih al-Targhib 736',
+70	 'سنن الدارمي ٣٢٧٣؛ وصححه الألباني في صحيح الترغيب ٧٣٦');
+71
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:50Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\wrangler.jsonc`
+
+```text
+1	{
+2	  "name": "al-kahf-bot",
+3	  "main": "src/index.ts",
+4	  "compatibility_date": "2026-08-01",
+5	  "observability": {
+6	    "enabled": true
+7	  },
+8	  "d1_databases": [
+9	    {
+10	      "binding": "DB",
+11	      "database_name": "al-kahf-db",
+12	      "database_id": "REPLACE_ME_after_wrangler_d1_create"
+13	    }
+14	  ],
+15	  "migrations": [
+16	    {
+17	      "tag": "v1",
+18	      "database_name": "al-kahf-db",
+19	      "migrations_dir": "migrations"
+20	    }
+21	  ],
+22	  "triggers": {
+23	    "crons": ["*/10 * * * *"]
+24	  }
+25	}
+26
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:50Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\package.json`
+
+```text
+1	{
+2	  "name": "al-kahf-bot",
+3	  "version": "0.1.0",
+4	  "private": true,
+5	  "type": "module",
+6	  "scripts": {
+7	    "dev": "wrangler dev",
+8	    "deploy": "wrangler deploy",
+9	    "typecheck": "tsc --noEmit",
+10	    "test": "vitest run",
+11	    "test:watch": "vitest",
+12	    "db:migrate:local": "wrangler d1 migrations apply al-kahf-db --local",
+13	    "db:migrate:remote": "wrangler d1 migrations apply al-kahf-db --remote",
+14	    "db:seed:local": "wrangler d1 execute al-kahf-db --local --file=./db/seed.sql",
+15	    "db:seed:remote": "wrangler d1 execute al-kahf-db --remote --file=./db/seed.sql"
+16	  },
+17	  "dependencies": {
+18	    "@resvg/resvg-wasm": "^2.6.2",
+19	    "grammy": "^1.45.1"
+20	  },
+21	  "devDependencies": {
+22	    "@cloudflare/workers-types": "^5.20260816.1",
+23	    "@types/node": "^26.2.0",
+24	    "msw": "^2.15.0",
+25	    "typescript": "^7.0.2",
+26	    "undici": "^8.10.0",
+27	    "vitest": "^4.1.10",
+28	    "wrangler": "^4.123.0"
+29	  }
+30	}
+31
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:28:50Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\README.md`
+
+```text
+1	# Al-Kahf Bot 🌙
+2	
+3	A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recite Surah al-Kahf, with dynamically generated image cards featuring a rotating hadith on the surah's virtues.
+4	
+5	Runs on Cloudflare Workers with D1 (SQLite), Cron Triggers, and the Aladhan API. Full spec: [SPEC.md](SPEC.md).
+6	
+7	## Architecture
+8	
+9	```
+10	Telegram user → Webhook → Worker (fetch handler)
+11	                              ├── /start /help /setcity /setlanguage
+12	                              ├── /pause /resume /status
+13	                              └── language keyboard callbacks
+14	
+15	Cron Trigger (every 10 min) → Worker (scheduled handler)
+16	  ├── Unpaused users with a city set (D1)
+17	  ├── Deduplicated Aladhan fetches (one per city per date)
+18	  ├── Thursday + 15-minute Maghrib window detection
+19	  ├── Weekly hadith rotation: week_number % hadith_count
+20	  ├── SVG card rendered to PNG (resvg-wasm, Noto Naskh Arabic)
+21	  └── sendPhoto with warm caption (text-only fallback on image failure)
+22	```
+23	
+24	## Commands
+25	
+26	| Command | Behavior |
+27	|---------|----------|
+28	| `/start` | Welcome + setup guide |
+29	| `/setcity London, UK` | Validate city via Aladhan, store, confirm |
+30	| `/setlanguage` | Inline keyboard: English / العربية |
+31	| `/pause` / `/resume` | Toggle reminders |
+32	| `/status` | City, language, paused state |
+33	| `/help` | List all commands |
+34	
+35	Commands are registered via Telegram `setMyCommands` on cold start.
+36	
+37	## Local development
+38	
+39	```bash
+40	npm install
+41	npm run db:migrate:local    # apply D1 migrations to local DB
+42	npm run db:seed:local       # seed the hadith table
+43	npm test                    # vitest unit tests
+44	npm run typecheck
+45	npm run dev                 # wrangler dev (webhook needs a tunnel for Telegram)
+46	```
+47	
+48	## Deployment
+49	
+50	1. **Create the D1 database** (once):
+51	   ```bash
+52	   npx wrangler d1 create al-kahf-db
+53	   ```
+54	   Copy the printed `database_id` into `wrangler.jsonc` (`d1_databases[0].database_id`).
+55	
+56	2. **Set the bot token secret** (once, or to rotate):
+57	   ```bash
+58	   npx wrangler secret put TELEGRAM_BOT_TOKEN
+59	   ```
+60	   Get the token from [@BotFather](https://t.me/BotFather). It never leaves Workers as a secret — no other API keys are used (Aladhan is open).
+61	
+62	3. **Deploy + migrate + seed**:
+63	   ```bash
+64	   npm run deploy
+65	   npm run db:migrate:remote
+66	   npm run db:seed:remote
+67	   ```
+68	
+69	4. **Register the webhook** (once, after first deploy):
+70	   ```bash
+71	   curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://<your-worker-url>/"
+72	   ```
+73	
+74	## Reliability behavior
+75	
+76	- **Aladhan failure:** each city fetch retries once after 30s; if it still fails the city is skipped for that tick and logged. The next tick (10 min later) retries fresh.
+77	- **Image generation failure:** the reminder falls back to text-only with the hadith in plain text — never silent.
+78	- **Per-user isolation:** one user's Telegram failure never blocks another user's send in the same tick.
+79	- **Duplicate prevention:** `sent_log` records the ISO week key per user; a user never receives two reminders in the same week.
+80	- **Invalid city:** `/setcity` replies with the format guide: `/setcity London, UK`.
+81	
+82	## Logs
+83	
+84	Worker logs are structured JSON lines (`wrangler tail` / Workers dashboard):
+85	
+86	```json
+87	{ "level": "error", "message": "Reminder send failed for user 1", "error": "...", "chat_id": "123456" }
+88	{ "level": "warn", "message": "Aladhan fetch failed for London|UK, retrying in 30000ms", "error": "..." }
+89	```
+90	
+91	Context is limited to chat_id / city — no personal data.
+92	
+93	## Cold start measurement
+94	
+95	Cloudflare Workers cron triggers are expected to cold-start in <5ms (no warm-up needed). To verify on your deployed Worker: `wrangler tail` and inspect the invocation `duration` in the Workers dashboard for a scheduled event. If rendering pushes wall time up, that's billed CPU per request, not cold start.
+96	
+97	## Font
+98	
+99	Arabic rendering uses Noto Naskh Arabic (OFL), embedded as base64 in `src/font.ts` via:
+100	
+101	```bash
+102	node scripts/embed-font.mjs
+103	```
+104	
+105	The source TTF lives in `assets/`. If you replace it, re-run the embed script.
+106	
+107	## Hadith data
+108	
+109	`db/seed.sql` holds 10 authentic (sahih/hasan) hadith on the virtues of Surah al-Kahf with Arabic matn, English translation, and sources. **Re-verify texts with a qualified source before production deployment.**
+110	
+111	Rotation: active hadith = `week_order[week_number % count]` — global per week, every user sees the same hadith.
+112
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:45Z)**_
+
+<think><details><summary>Thought Process</summary>
+Now I have a good picture. Let me also glance at the font.ts head and check a couple of tests to verify claims, plus check the "week.ts" — there's a potential issue: `isoWeekKey` uses UTC, not user timezone. And `runTick` computes weekKey once from `now` (UTC-based ISO week). Spec says rotation by ISO week — that's fine, global.
+
+Now let me check the tests quickly to look for discrepancies, and check whether `font.ts` has the base64 (it's 400KB, presumably fine). Let me read the head of font.ts.
+
+Also key findings to verify:
+
+**Issue #1 criteria:**
+- wrangler init with TS, D1 binding — yes (wrangler.jsonc, d1_databases, migrations).
+- Telegram webhook handler receives updates — yes, webhookCallback in fetch.
+- /start welcome — yes.
+- /help — yes.
+- Bot token secret — documented in README; can't verify secret itself. TELEGRAM_BOT_TOKEN in Env. OK.
+- Deployable via wrangler deploy — wrangler.jsonc has main, compatibility_date. package.json has deploy script. Note database_id is "REPLACE_ME..." placeholder — deploy would fail without it, but that's a setup step. Fine.
+- setMyCommands — yes, though "on cold start" — it's called at bot creation, fire-and-forget. OK.
+
+**Issue #2 criteria:**
+- D1 users table columns: id PK, telegram_chat_id unique, city, country, created_at, updated_at — yes. (Also language/paused — superset, from issue #3.)
+- /setcity fetches Aladhan /timingsByCity, verifies — yes.
+- Valid city: stores, replies "Your city is set to London, UK" — yes (citySetText).
+- Invalid city: helpful error — yes.
+- /status shows city and country — yes.
+- Unset city: "No city set. Use /setcity to configure" — yes.
+- Wrangler deploy with D1 binding and migrations — yes.
+
+**Issue #3 criteria:**
+- language en|ar default en, paused default false — yes.
+- /setlanguage inline keyboard English/العربية — yes.
+- Selection stored, confirmed with reply — yes (callback → setLanguageCommand → reply).
+- /pause sets true, confirmation — yes.
+- /resume sets false, confirmation — yes.
+- /status shows city, language, paused — yes.
+- Warm spiritual tone in both languages — yes.
+
+**Issue #4 criteria:**
+- Cron every 10 min — yes `*/10 * * * *`.
+- Dedup Aladhan calls — one per unique city per tick — yes, cities Map. Note: cache key includes dateEn; the per-tick cache is per-runTick invocation so it's per tick. OK.
+- Thursday detection via Aladhan weekday — yes.
+- Maghrib window: send if Maghrib just passed within current 10-minute window — here REMINDER_WINDOW_MIN = 15 (10-min cadence + jitter margin). Spec says "within the current 10-minute window". The implementation uses 15 min. Hmm — "Maghrib window: send to user if Maghrib just passed within the current 10-minute window" — a 15-minute window is slightly beyond the 10-minute window. It's a deliberate "jitter margin" — arguably minor scope deviation, but it also might send a duplicate? No — sent_log dedup prevents duplicates. It might send a reminder up to 15 min after Maghrib even if the tick at 10 min failed... Actually it could send at up to 15 minutes after Maghrib, which is outside the "current 10-minute window" criterion. Minor. But worth flagging: the criterion says "within the current 10-minute window" — 15 min means that if a tick is missed (e.g., Aladhan failure), a later tick at +15 could still send. Actually that's arguably desired. I'll flag as a slight deviation.
+- Text-only reminder — yes (hadith text included from #5 too).
+- sent_log: id, user_id, hadith_id, sent_at — present, plus week_key. Prevents duplicates — yes, checked before send. But wait — there's a subtle bug: `alreadySent` is checked, then send, then recordSend. If send succeeds but recordSend fails, user gets duplicate next tick. Minor. Also, the dedup is per week_key, not per tick — spec says "prevents duplicate sends" — OK.
+- Paused users and users without city skipped — yes (listActiveUsers WHERE paused=0 AND city not null/empty; and runTick filters again).
+- Per-user error isolation — yes, try/catch per user.
+
+**Issue #5 criteria:**
+- hadith table: id, week_order, text_en, text_ar, source_en, source_ar — yes.
+- Seed SQL 10-20 authentic hadith — 10 entries. Yes. But the seed file includes a warning that texts need re-verification before production — that's a caveat; the criterion says "authentic (sahih/hasan) from recognized collections". The seed has a disclaimer that it should be verified by a qualified source before production. Hmm — that's arguably not fully meeting "curated authentic" but it's a reasonable caveat. I could flag as partial: the disclaimer suggests the data hasn't been verified. Also one entry (7) is "Reported by Ibn Mardawayh; graded hasan by al-Mundhiri" — that's a weaker source (Ibn Mardawayh is a minor collection) but hasan grading claimed. That's fine for the criteria.
+- Rotation: week_order[week_number % count] — yes (pickHadithIndex, index = weekNumber % count). Spec says `week_number % total_hadith_count`. Both consistent.
+- Hadith included in reminder message text — yes.
+- Source citation — yes.
+- Each user sees the same hadith globally — yes, hadith computed once per tick.
+
+Wait — one bug: in cron.ts, `pickHadithIndex(parseWeekNumber(weekKey), hadithCount)` — hadithCount from countHadith, week_order 0..9. Index matches week_order. OK. But if a seed has week_order not starting at 0 or gaps, getHadithByWeekOrder(weekOrder) would return null → `hadith` null → text-only reminder without hadith. Acceptable.
+
+Also the spec says "active hadith for a given ISO week number = week_number % total_hadith_count" — implemented.
+
+**Issue #6 criteria:**
+- Single SVG template with Islamic geometric/natural motif, warm muted tones — yes (star pattern, gradient, gold/cream).
+- Arabic hadith text overlaid prominently, English below, source at bottom — yes. Note: for Arabic-language users, `enLines = []` — English translation omitted, which matches spec ("If user chose Arabic, Arabic-only card is acceptable").
+- Noto Naskh Arabic font bundled base64 — yes (font.ts, assets TTF).
+- resvg-wasm renders SVG to PNG 1080x1080 — yes (fitTo width 1080, SVG is 1080x1080).
+- Bot sends sendPhoto not text — yes, when photo available.
+- Caption includes warm spiritual message — yes (reminderText).
+- Caption respects language — yes.
+- Rendering within CPU limits (10ms CPU per request) — the criterion "Rendering completes within Worker CPU limits (10ms CPU per request)" — there's no measurement in the repo; README talks about cold start measurement but nothing on the 10ms CPU limit for rendering. The criterion asks that rendering completes within CPU limits — cannot verify; no test/benchmark. Flag as unverified/partial. Hmm, resvg-wasm rendering 1080x1080 PNG in 10ms CPU is actually not realistic; the original spec (SPEC.md line 119) says Workers cold-start <5ms, but the 10ms CPU per request is in the issue. Nothing measured. Flag as unverified.
+
+**Issue #7 criteria:**
+- Aladhan failure: retry once after 30s, log, skip tick; next tick retries fresh — yes: ALADHAN_RETRY_DELAY_MS=30000, sleep, retry once. If second fails, promise rejects → catch in the per-city loop logs error and skips city. And the cache purge on rejection ensures next tick retries fresh. But wait — `p.catch(() => timingsCache.delete(key))` — but the loop's `await fetchTimings(...)` will reject; handled by try/catch around city loop. OK. One issue: the retry with 30s sleep in a Worker scheduled handler — Workers allow 30s total for scheduled handlers (ctx.waitUntil up to 30s? Actually for scheduled triggers, the limit is 15 min for waitUntil? For cron triggers, waitUntil can run up to ~15 minutes. OK fine).
+- Image gen failure → text-only fallback — yes.
+- Telegram failure for one user doesn't block others — yes.
+- Invalid city format guidance — yes.
+- Cold start measured <5ms — README only describes how to measure ("To verify on your deployed Worker..."). Not actually measured. The acceptance criterion says "Cold start time measured — under 5ms for scheduled triggers". The README defers measurement to the deployed worker; not done. Partial/missing. Flag.
+- Logs structured with chat_id context — yes (logError with chat_id; logWarn without chat_id but with city). Criterion says "All Worker logs structured with user-identifiable context (chat_id, not personal data)". Logs are JSON structured. OK-ish.
+- wrangler deploy secret handling documented — yes, README.
+
+Now the extra/scope-creep items:
+1. EARLY_MORNING_CUTOFF (00:30) logic — sending for previous day's Thursday Maghrib just after midnight. This is beyond the spec: "Only send if both conditions hold: Maghrib just passed AND today is Thursday." The spec explicitly says today must be Thursday. The implementation sends after midnight (Friday 00:00–00:30) for late Thursday Maghribs. Actually wait — is that scope creep or a bug? The spec's Thursday detection: `DateObject.gregorian.weekday.en === "Thursday"` from Aladhan response — the today fetch's weekday. The implementation adds a just-after-midnight window for the previous day. This is extra behavior not asked for. It's arguably a thoughtful addition but it deviates from "today is Thursday" — Friday 00:15 is not Thursday. Flag as scope creep / deviation. Also note: it could send a reminder on Friday night (00:00-00:30) — hmm, and the spec says reminders happen "Thursday after Maghrib" — a Friday-00:20 reminder for a late Maghrib (23:50 Thursday) is actually within the spirit. But strictly not asked for.
+2. REMINDER_WINDOW_MIN = 15 vs "current 10-minute window" — deviation, flagged above.
+3. sent_log week_key column added (not in spec schema — spec says id, user_id, hadith_id, sent_at). Minor schema addition. The spec's sent_log has no week_key. Adding it is a deviation from spec schema but improves dedup. Flag as scope creep (minor).
+4. README, tests, embed script — normal dev artifacts, not creep.
+
+Now, bugs:
+
+1. **`isoWeekKey` uses UTC**, not the user's timezone. The reminder window check is per-user timezone (formatHHMM with today.timezone), but weekKey is computed from UTC. A user in, say, NZ (UTC+13) on Thursday evening UTC time is already Friday in UTC? Let's see: Thursday Maghrib ~18:00 local NZ = 05:00 UTC Friday. The tick at 05:00 UTC Friday — isoWeekKey(new Date()) is Friday UTC → ISO week of Friday (which is the same ISO week as Thursday, since ISO weeks run Monday-Sunday; Thursday and Friday of the same week are in the same ISO week). So the week key stays the same. Hmm, for NZ Thursday Maghrib at 18:00 NZDT = 05:00 UTC Friday. ISO week of that instant: Friday of that week — same ISO week as Thursday. So weekKey is correct. For US (UTC-7), Thursday Maghrib 18:00 PDT = 01:00 UTC Friday. Same ISO week. So the UTC-based weekKey is actually fine for the ISO-week granularity — as long as the local weekday is within Mon-Sun of the same ISO week, and since the reminder only fires Thursday/Friday-early-morning, the ISO week is the same as computed in UTC. Friday 00:30 in timezone UTC+X where X is large positive: e.g., UTC+14 (Kiritimati) Friday 00:30 = Thursday 10:30 UTC → ISO week of Thursday == ISO week of Friday (same week). Fine. So not a real bug.
+
+2. **The early-morning window + weekKey**: the `EARLY_MORNING_CUTOFF` case sends on Friday 00:00–00:30 for the previous day's Thursday Maghrib. weekKey would be the same ISO week — fine.
+
+3. **`minutesSinceMaghrib` window check**: `passed = minutesSinceMaghrib(today.maghrib, nowHHMM) <= REMINDER_WINDOW_MIN`. minutesSinceMaghrib returns 0..1439 (mod 1440). So at 19:45 Maghrib, at 19:50 → 5 ≤ 15 → send. At 20:00 → 15 → send. At 20:05 → 20 → no. But also — this modulo means that the check `<= 15` is true for times between maghrib and maghrib+15 min... and also for times like 19:30 (15 min before maghrib → diff = 1435 → not ≤ 15). OK fine. But note: it doesn't require Maghrib to have *just* passed within the window on *this* tick only — the window is computed from current time vs maghrib. Good.
+
+Wait — one real issue: `minutesSinceMaghrib` crossing midnight: if Maghrib at 23:50, now at 00:05 → diff = 15 → ≤ 15 → sends. Good, that's the early morning case — but the code only checks the early-morning case when `today.weekdayEn === "Thursday"` is false and previous weekday is Thursday. If today IS Thursday and now is 00:05... the window would be from Thursday 23:50 (the Thursday Maghrib hasn't happened yet — it's in the future). Wait: today = Thursday. Maghrib on Thursday 23:50. now = Thursday 00:05 (early Thursday morning). minutesSinceMaghrib(23:50, 00:05) = 15 → passed = true → **sends a reminder at 00:05 on Thursday morning for a Maghrib that hasn't happened yet (Thursday 23:50 is 23h45m in the future)!** That's a real bug. Because minutesSinceMaghrib wraps modulo 1440, a Maghrib in the future by <15 minutes minus a full day... let me recompute: maghrib = 23:50 → 1430 min. now = 00:05 → 5 min. diff = 5 - 1430 = -1425 → +1440 = 15 → ≤ 15 → true.
+
+So for a city with a late Maghrib (after ~23:35, e.g., far-north latitudes in summer), the bot would send the reminder at 00:05 on Thursday morning, 23+ hours early, because the modulo wrap makes "time until Maghrib" look like "time since Maghrib" when now is just after midnight and Maghrib is near midnight. This is a genuine logic bug in the window calculation. The proper check should require now >= maghrib (same-day comparison) for the "today" case, and the early-morning case should only apply when yesterday was Thursday.
+
+Actually wait, more precisely: the bug condition is `minutesSinceMaghrib <= 15` where maghrib is today's (Thursday's) Maghrib and now is early Thursday (00:00-00:15). diff = now - maghrib (mod 1440). If maghrib is 23:45-23:59 and now is 00:00-00:14, diff ≤ 15 → fires. Real bug for high-latitude summer cities. Also even without the wrap: if maghrib 23:50 and now 23:55 Thursday → diff 5 → fires, correct. The issue is only the wrap case. Worth flagging as "implementation looks wrong".
+
+Hmm, but also note the EARLY_MORNING_CUTOFF branch: `nowHHMM < "00:30"` — string comparison of "HH:MM" works lexicographically for zero-padded times. OK.
+
+Also the "today" case: `passed = minutesSinceMaghrib(...) <= REMINDER_WINDOW_MIN` — it doesn't verify that the tick is after maghrib in the same day. Combined with the modulo wrap, the early-Thursday bug above. Also: Thursday 00:05 with Wednesday Maghrib 23:50 — previous day Wednesday, weekday check: today is Thursday → `today.weekdayEn === "Thursday"` true → checks Thursday's Maghrib (future!) → bug. If instead it checked previous day, it would correctly send at 00:05 for Wednesday 23:50 Maghrib? No wait — the reminder should only fire for *Thursday* Maghrib. Wednesday 23:50 Maghrib passing at 00:05 Thursday should NOT fire (that's a Wednesday reminder, wrong day). So the early-morning window only makes sense when the previous day was Thursday (the code does handle that correctly in the else-if branch). But the Thursday-morning wrap case is a genuine bug.
+
+Also — one more: `formatHHMM(now, today.timezone)` — using today's timings timezone for the "now" time. Fine.
+
+4. **`fetchPrayerTimes` treats any `code !== 200` as CityNotFoundError** — if Aladhan returns 500 with a JSON body, body.code may be 500 → CityNotFoundError → user told "city not found" instead of service error. Minor. Actually Aladhan returns HTTP 400 for invalid city; server errors return 500 with code 500. `if (body.code !== 200 || body.status !== "OK" || !body.data) throw new CityNotFoundError()` — a 500 error with code 500 would throw CityNotFoundError → user gets "I couldn't find that city" — misleading message. Minor correctness issue.
+
+5. **setCityCommand returns cityNotFoundText("en")** — always English, ignoring user's language. Minor: the error reply doesn't respect language preference. The user may have set Arabic earlier; the error is always English. Spec says bot speaks both languages; issue #2 doesn't require localized errors, but given language support, this is a minor inconsistency. Flag lightly.
+
+6. **`statusCommand` checks `!user.city || !user.country`** — good.
+
+7. **Webhook: `webhookCallback(getBot(env), "cloudflare-mod")`** — returns promise? webhookCallback returns a handler; in Cloudflare Workers the fetch handler must return a Response — grammY's webhookCallback with "cloudflare-mod" returns `(req) => Promise<Response>`. OK.
+
+8. **setMyCommands registered for all users but not localized** — fine.
+
+9. **In index.ts, `bot.command("setcity")` — `ctx.match` for commands without args: grammY passes the text after command. OK.
+
+10. **The image cache**: `imageFor` caches per language; but if `hadith` is null (no hadith count), `deps.createImage(hadith as HadithText, lang)` would be called with null → but only when `hadith` is truthy. In the loop, `if (hadith)` guard. But the cache `imageFor` is only called under the guard. OK.
+
+11. **`renderCardPng` — `initWasm` with `resvgWasm` imported from "@resvg/resvg-wasm/index_bg.wasm" — in Cloudflare Workers, importing .wasm requires the module to be compiled via WebAssembly.Module — types.d.ts declares the module as WebAssembly.Module. In Workers, wasm imports are allowed with `wasm_modules` in wrangler config? Actually Workers supports `WebAssembly.Module` imports of .wasm files directly in modules since... `@resvg/resvg-wasm` docs recommend this pattern for Workers. OK, plausible.
+
+12. **font.ts 400KB base64 — worker script size limit is 3MB (free) / 10MB. Fine.
+
+13. **Test coverage exists for all units — good.
+
+Now the missing/partial items:
+
+(a) Issue #6: "Rendering completes within Worker CPU limits (10ms CPU per request)" — no measurement/verification anywhere. Partial.
+(b) Issue #7: "Cold start time measured — under 5ms for scheduled triggers" — not measured; README only says how to measure. Missing (deferred).
+(c) Issue #4: window is 15 min not "the current 10-minute window". Partial/deviation.
+(d) Issue #5: seed has 10 entries (meets 10-20) but the file itself flags "Before production deployment, please have these texts re-verified by a qualified source" — meaning authenticity criterion is self-declared unverified. Also entry 7's source is Ibn Mardawayh (not one of the "recognized collections" listed: Bukhari, Muslim, Tirmidhi, Abu Dawud per SPEC.md line 116) — but graded hasan by al-Mundhiri. Borderline.
+(e) Issue #1: "Deployable via wrangler deploy and responds on Telegram" — wrangler.jsonc has placeholder database_id "REPLACE_ME_after_wrangler_d1_create" — deploy would fail until replaced; that's a documented setup step. Also webhook registration is manual curl (README), not "Worker registers webhook with Telegram on deploy" as SPEC.md line 49 says. SPEC says "Worker registers webhook with Telegram on deploy" — implementation does NOT do this; the README instructs manual curl setWebhook. That's a spec deviation (architecture decision). Flag: missing/partial — webhook not registered by the worker on deploy, requires manual curl; and setMyCommands runs only on cold start (worker instance), which is fine.
+(f) Issue #2 acceptance "Wrangler deploy with D1 binding and migrations working" — migrations dir configured. OK.
+
+Scope creep:
+- EARLY_MORNING_CUTOFF after-midnight send for previous Thursday (deviates from "today is Thursday" — spec line 55: "Only send if both conditions hold: Maghrib just passed AND today is Thursday"). Extra behavior.
+- week_key column in sent_log beyond spec schema (spec line 47: id, user_id, hadith_id, sent_at). Reasonable, but schema deviation.
+- REMINDER_WINDOW_MIN 15 instead of 10.
+
+Bugs:
+- The modulo wrap bug (Thursday 00:05 with late Thursday Maghrib → false positive). Let me double-check this once more. minutesSinceMaghrib(maghribHHMM, nowHHMM): diff = now - maghrib; return (diff+1440)%1440. Case: now = 00:05 (5), maghrib = 23:50 (1430). diff = 5-1430 = -1425. -1425+1440 = 15. Returns 15. In runTick: today fetched = Thursday (weekdayEn Thursday), nowHHMM=00:05 < EARLY_MORNING_CUTOFF but the first branch `today.weekdayEn === "Thursday"` matches → passed = 15 <= 15 → true → user gets a reminder at 00:05 Thursday morning. The Thursday Maghrib (23:50) hasn't happened yet. Definitely a bug. Note the elif branch is only reached when today isn't Thursday.
+
+Hmm wait — is the early morning branch's else-if even reachable for the correct case? Case: Thursday 23:50 Maghrib, tick at Friday 00:05. today = Friday → not Thursday → elif nowHHMM < "00:30" && previousWeekdayEn === "Thursday" → fetch yesterday's timings (Thursday) → maghrib 23:50 → minutesSinceMaghrib(23:50, 00:05) = 15 → passed → send. Correct behavior.
+
+So the bug is the first branch's lack of "maghrib already happened today" check. Actually the check should be that maghrib <= now within the same day, i.e., now >= maghrib. The mod wrap conflates. Real bug worth reporting.
+
+Also note the "already sent" dedup would prevent duplicates within a week — so the 00:05 Thursday send would be the user's only reminder for the week (and the real Thursday-evening reminder would be suppressed by alreadySent). So the user would get the reminder ~24h early. Good catch.
+
+Another potential issue: `runTick` "cities" grouping uses `u.city && u.country` filter — matches spec.
+
+Let me also verify tests mention REMINDER_WINDOW_MIN and early morning to see if the bug is tested (maybe the tests encode the buggy behavior). Let me grep test/cron.test.ts for the early-morning and wrap cases. Also verify the "previousDay" test. Quick grep.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:46Z)**_
+
+<think><details><summary>Thought Process</summary>
+I have a good picture now. Let me also peek at the remaining test files briefly to check for smells, but the main ones are cron.test.ts, commands.test.ts, messages.test.ts, card.test.ts. Let me quickly grep for anything suspicious. Actually the report is under 400 words, so I should focus on the key findings. Let me do a quick scan of commands.test.ts and aladhan.test.ts to check for duplicated setup, but honestly the most important findings are in src/.
+
+Let me identify the violations against documented standards (AGENTS.md, SPEC.md, README.md):
+
+1. **AGENTS.md architecture** — cron flow says "Query D1 for unpaused users with city set" — matches. 
+
+2. **SPEC.md Error Handling**: "Aladhan API failure: Retry once after 30s. If still failing, skip that tick." — cron.ts implements retry in `fetchTimings` closure. Matches. But note: retry happens per city-cache-key promise, and after retry fails, the `p.catch(() => timingsCache.delete(key))` purges. OK.
+
+3. **SPEC.md Thursday detection**: "check DateObject.gregorian.weekday.en === 'Thursday'" — cron uses `weekdayEn === "Thursday"`. Matches.
+
+4. **SPEC.md Testing Decisions**: "Test external behavior only — given a user with city X, when the cron fires at a Thursday Maghrib time, the bot sends a message." Cron tests mock deps — that's internal plumbing (TickDeps), arguably violates "Never test internal Worker plumbing" — but that's a judgement call. Actually the tests test runTick with mocked deps, which is somewhat internal, but the spec's own unit test list mentions "Rotation logic... Time window logic... City deduplication" — dedup tested. Hmm, "Mock Aladhan and Telegram APIs at the boundary" — the tests mock at the deps boundary. This is arguably a violation of "Never test internal Worker plumbing" — but it's a judgement call; the spec lists dedup as a unit test. I'd note it lightly.
+
+5. **AGENTS.md D1 schema vs migrations**: The AGENTS.md schema was updated to match. users table: language NOT NULL DEFAULT 'en' CHECK. Migration 0001 matches AGENTS.md updated schema. OK. But wait — the SPEC.md schema still says `week_number (integer)` for hadith, while AGENTS.md says `week_order`. AGENTS.md overrides. Fine.
+
+6. **Hard violations to look for**:
+
+a. **`city` nullable with CHECK?** Not a violation.
+
+b. **`setLanguageCommand` stores language, but language has CHECK constraint `IN ('en','ar')`** — fine.
+
+c. **store.save dynamic upsert** — keys from UserPatch, fields include `language: "en"|"ar"`, `paused: boolean`. `.bind(chatId, ...keys.map((k) => fields[k] as string | number))` — paused is boolean, D1 binds booleans? D1/SQLite — bind true/false... Actually D1 does support binding booleans? D1 supports null, number, string, boolean (converted to 1/0)? I believe D1 accepts booleans and coerces. Not a standard violation.
+
+d. **Primitive Obsession**: 
+   - `formatHHMM`/`minutesSinceMaghrib` — time strings "HH:MM" as strings. The PrayerTimes interface has maghrib as string. This is primitive obsession territory (time as string). Judgement call.
+   - `cityKey = ${city}|${country}` string key, later split — data clump city|country. `city|country` pair travels together everywhere (User has city and country fields separately; key built as `${u.city}|${u.country}` then split). **Data Clumps**: city+country pair. And the `|` delimiter key is a smell — primitive string encoding a pair (Primitive Obsession). Quote the hunk: `const key = \`${u.city}|${u.country}\`;` and `const [city, country] = cityKey.split("|")`.
+   
+e. **Duplicated Code**: 
+   - `language === "ar" ? "ar" : "en"` normalization appears in store.ts toUser and in index.ts listActiveUsers mapping. Same shape. Also `user?.language ?? "en"` repeated in index.ts commands and commands.ts — minor.
+   - `const user = await store.get(...)` then `user?.language ?? "en"` — repeated pattern.
+   - In cron.ts, the whole `fetchTimings` retry closure and imageFor closure — similar caching shape (Map + lazy promise + purge). Duplicated shape: both `timingsCache` and `imageCache` implement "cache a promise by key, purge on rejection" — the timings one purges on catch, the image one doesn't purge (image failures fall back text, but the failed promise stays in the cache, so a second user in same lang would... actually `p` is rejected, and `await imageFor(...)` re-throws — it's caught per-user, so subsequent users just get the same rejection, no re-render attempt — fine, intended). Duplicated cache-promise pattern is mild.
+   - The `.find((x) => x.type === t)?.value ?? "00"` — `get` closure duplicated in formatHHMM and formatDateEn in window.ts. Same local helper shape. Duplicated Code within window.ts.
+
+f. **Mysterious Name**: 
+   - `dateEn` — in Aladhan response `dateEn: "DD-MM-YYYY"` — named "dateEn" but it's the gregorian date, "En" is confusing (it's not English, it's Gregorian). Actually in aladhan.ts: `dateEn` means "gregorian date DD-MM-YYYY". The name suggests English vs Hijri — probably stands for "date (English/Gregorian)". Mild.
+   - `minutesSinceMaghrib` — computes circular diff (mod 1440) which wraps; named "minutesSince" is okay.
+   - `wrapText` — fine.
+   - `textLines` in card.ts takes `lineHeight` param but title call passes 0 — `textLines(["سُورَةُ الْكَهْفِ"], WIDTH / 2, titleY, 0, 34, ...)` — passing 0 as lineHeight for single-line; mild smell (magic).
+   - `EARLY_MORNING_CUTOFF = "00:30"` — fine.
+   - `getBot`/`botToken` module-level caching — fine.
+   - `renderCardPng` — fine.
+   - `WasmSource = () => Promise<BufferSource | WebAssembly.Module>` — fine.
+   - `hadithOrder` vs `week_order` — fine.
+   - `parseWeekNumber` vs `pickHadithIndex` — fine.
+   - In cron.ts `const cities = new Map<string, ActiveUser[]>()` — the map key is city|country — mysterious.
+   - `previousDateEn`/`previousWeekdayEn` — "En" again.
+   - `tzParts` — fine.
+   - `minutesSinceMaghrib(yesterday.maghrib, nowHHMM)` — "yesterday" is actually Thursday (the previous day). Fine.
+
+g. **Feature Envy**: 
+   - commands.ts setCityCommand takes `raw: string` and parses city/country from it; it reaches into ctx.match in index.ts. Not really feature envy.
+   - statusCommand: takes user and builds statusText — statusText in messages.ts takes `user` object — that's fine.
+   - `d1UserStore.save` builds SQL from `fields` — fine.
+   - Cron `runTick` calls `deps.*` everything — it's a coordinator; heavily reaches into user data (user.city, user.country, user.language, user.telegram_chat_id). Feature envy on ActiveUser? The tick logic genuinely needs those fields. Judgement call, skip or mention lightly.
+
+h. **Shotgun Surgery / Divergent Change**: 
+   - The `city|country` pair: a change to how cities are keyed would touch cron.ts (grouping + split) and... `fetchTimings` in index.ts. Also `ActiveUser` interface defined in cron.ts, User in commands.ts, DbUserRow in store.ts — three parallel user shapes: `ActiveUser` (cron.ts), `User` (commands.ts), `DbUserRow` (store.ts). Three types for the same concept with hand-mapped conversions (toUser, and index.ts listActiveUsers mapping). This is a **Data Clumps / duplicated type** smell: user row shape re-declared in index.ts (inline all<{...}> typing) and store.ts and commands.ts. A change to the users table forces edits in store.ts (DbUserRow + toUser), index.ts (SELECT + inline type + map), commands.ts (User), cron.ts (ActiveUser). That's **Shotgun Surgery** — the user shape is scattered across four files. Quote: index.ts `SELECT id, telegram_chat_id, city, country, language, paused` + inline type, vs store.ts `SELECT * ... first<DbUserRow>`, vs commands.ts `User`.
+
+   Actually the ActiveUser in cron.ts duplicates User in commands.ts almost exactly (id + telegram_chat_id + city + country + language + paused vs telegram_chat_id + city + country + language + paused). Two nearly identical interfaces. Refused Bequest? No. Duplicated type. 
+
+i. **Repeated Switches**: `lang === "ar" ? ... : ...` recurs across messages.ts for every text function — but that's the natural i18n pattern, arguably a repeated switch on Language across ~9 functions. Judgement call; a record/map could hold both. Also `language === "ar" ? "ar" : "en"` normalization repeated. Mild.
+
+j. **Speculative Generality**:
+   - `fetchPrayerTimes(city, country, dateEn, fetchFn: typeof fetch = fetch)` — the `fetchFn` parameter with default. Tests use it (aladhan.test.ts probably). Spec says mock at the boundary — so fetchFn is for testing, justified by SPEC Testing Decisions (Mock Aladhan via undici MockAgent — actually they could use MockAgent on global fetch). It's a test seam; borderline speculative but used by tests. Check aladhan.test.ts to see if fetchFn used.
+   - `getHadithByWeekOrder` — fine.
+   - `WasmSource` param in renderCardPng — used by tests (card.test.ts probably passes mock wasm). Justified for tests.
+   - `imageFor` lang cache — fine.
+   - `pickHadithIndex` — fine.
+
+k. **Message Chains**: `deps` object with many methods — the cron calls deps.listActiveUsers etc. — fine.
+
+l. **Middle Man**: `sendReminder` in TickDeps just delegates to sendMessage in index.ts: `async sendReminder(chatId, text, photo) { await sendMessage(chatId, text, photo); }` — pure delegation. **Middle Man** — quote it. Also `fetchTimings(city, country, dateEn) { return fetchPrayerTimes(city, country, dateEn ?? undefined); }` — thin delegation, though it does the null→undefined normalization (test seam). The sendReminder one is a pure pass-through.
+
+m. **Hard violations of documented standards** — what would count as hard?
+
+Let me re-check SPEC.md testing decisions: "**No tests for:** ... Telegram Bot API wire format" — fine. "Test external behavior only... Never test internal Worker plumbing." — The tests (cron.test.ts) inject TickDeps — this is arguably testing the internal plumbing of runTick with mocked deps rather than "given a user with city X... the bot sends a message" at the boundary. But SPEC also explicitly lists "City deduplication: given multiple users in same city, assert one API call" as a unit test — which is exactly what cron.test.ts does. So tests align with SPEC's own unit test list. Not a violation. Good.
+
+Check AGENTS.md "Out of scope — Multiple prayer calculation methods (ISNA only)" — aladhan.ts sets method=2 (ISNA). OK.
+
+Check README: "Duplicate prevention: sent_log records the ISO week key per user" — implemented. OK.
+
+**Language fallback bug**: `setCityCommand` returns `cityNotFoundText("en")` even for Arabic users — hardcoded "en". The user could be Arabic. Minor judgement call (not a documented standard breach). Also `statusCommand` uses `user?.language ?? "en"` — fine.
+
+**Hard violation candidates**:
+
+1. **README/AGENTS.md: "Hadith seed data — 10-20 authentic hadith"** — AGENTS.md ticket #5 says "10-20 authentic hadith". seed.sql has 10 entries (0..9). ✓ OK.
+
+2. **AGENTS.md: `week_order INTEGER NOT NULL UNIQUE`** — migration matches, seed uses 0..9. ✓.
+
+3. **AGENTS.md architecture: "scheduled handler" — cron: "Query D1 for unpaused users with city set"** — cron.ts does `WHERE paused = 0 AND city IS NOT NULL AND city != ''` and ALSO re-filters `!u.paused && u.city && u.country`. Fine.
+
+4. **SPEC.md Error Handling: "Retry once after 30s. If still failing, skip that tick. Log error."** — cron logs warn on retry, error on final failure. ✓.
+
+Hmm, what about **the retry only being per city-key** — after retry failure, next tick retries fresh: README says "The next tick (10 min later) retries fresh." ✓.
+
+5. **SPEC.md: "After fetching timings, check DateObject.gregorian.weekday.en === 'Thursday'"** ✓.
+
+6. **AGENTS.md Key design decisions: "Isolation: One user's failure never blocks another user's send."** — cron isolates per-user try/catch. ✓. But **the city-level loop**: one city's failure doesn't block other cities ✓.
+
+7. **Image fallback: "Fallback: Image gen fails → text-only reminder. Never silent failure."** — ✓.
+
+Hmm, so are there any hard violations? Let me think harder.
+
+**Wrangel config**: README says `wrangler.jsonc` with `database_id` REPLACE_ME placeholder — that's expected per README.
+
+**font.ts** — generated 400KB. The README says font embedded as base64 in src/font.ts via scripts/embed-font.mjs ✓. But committing a 400KB generated file — README documents it, so fine.
+
+**AGENTS.md D1 schema**: `hadith` table in AGENTS.md includes `week_order INTEGER NOT NULL UNIQUE` — migration matches ✓.
+
+**Hmm — one candidate hard violation**: SPEC.md Implementation Decisions says "Caching: ... Store timestamp of lookup so duplicate cities in same tick hit cache". Fine.
+
+**Another**: SPEC.md "Reminder image: Arabic text prominently with English below" — card.ts: for lang=ar, enLines = [] — Arabic-only card, allowed: "If user chose Arabic, Arabic-only card is acceptable". ✓.
+
+**Now — the city parse in commands.ts**: `/setcity` spec: "`/setcity <city>, <country>`". If no comma, returns cityNotFoundText — spec says invalid city → format guide ✓.
+
+OK here's a real one to consider as documented-standard tension: **AGENTS.md architecture diagram shows reminders "sendPhoto to each matching user"** — fallback text ✓.
+
+What about **`scheduled(_event, env, ctx)` — runTick fire-and-forget via waitUntil** — per-user isolation requires not blocking ✓.
+
+Hmm. What about **READEME "Commands are registered via Telegram setMyCommands on cold start"** — index.ts does `void bot.api.setMyCommands(COMMANDS).catch(...)` inside createBot — on cold start ✓.
+
+**Potential hard violation — SPEC.md "No tests for: ... Worker deployment pipeline"** — nothing tests that. ✓.
+
+So maybe zero hard violations? Let me double-check SPEC vs the **date format**: Aladhan returns `dateEn` in "DD-MM-YYYY" — and the spec says check `data.date.gregorian.weekday.en`. ✓.
+
+Wait — actually there is one: **AGENTS.md "City lookup: Free-text via Aladhan... User types 'London, UK'"** ✓.
+
+What about **users table `created_at`/`updated_at`** — migrations include them ✓.
+
+Hmm — **`paused INTEGER` vs boolean** ✓ matches schema.
+
+**One more: SPEC.md hadith table says `week_number (integer)` but AGENTS.md says `week_order`** — the code uses week_order. AGENTS.md (updated in this diff) is authoritative; SPEC.md is stale but that's docs not code. The diff itself updates AGENTS.md to match. Not a violation.
+
+OK so hard violations: I think there are none that are clear-cut "documented standard" breaches... but wait — let me reconsider. The instruction: "every place the diff violates a documented standard". Let me scan again for real mismatches.
+
+1. README.md Reliability: "**Aladhan failure:** each city fetch retries once after 30s" — implemented.
+
+2. SPEC.md Error Handling: "**Invalid city:** Aladhan returns error → bot replies: 'I couldn't find that city...'" — commands.ts checks `err instanceof CityNotFoundError` → cityNotFoundText ✓. But: aladhan.ts throws CityNotFoundError when `body.code !== 200 || body.status !== "OK" || !body.data` — meaning ANY non-OK code (e.g. server error with code 500) is treated as CityNotFound. Spec distinguishes: Aladhan API failure (retry/skip) vs invalid city (format guide). A 500 with JSON body `{code: 500}` would be misclassified as "city not found" and the user gets the wrong message. That's a bug relative to the documented error-handling model — the two documented failure modes get conflated. This is a real mismatch with SPEC's Error Handling section: Aladhan error responses beyond 400 are collapsed into CityNotFoundError. Is it a "documented standard violation"? Borderline — it violates the documented error taxonomy. I'd call it a borderline hard/judgement. I'll flag it as the closest thing to a hard violation.
+
+Also HTTP 400 check happens before body parse? No — body parsed first, then status checks. `res.status === 400` → CityNotFoundError; other non-ok → AladhanError. So HTTP-level is fine; the body.code !== 200 path conflates. Aladhan actually returns code 200 with status "OK" on success; for invalid city it returns HTTP 400? Actually Aladhan returns code 404/400 for bad city... whatever — the conflation of "any code !== 200" with city-not-found is the smell.
+
+3. **SPEC.md: "Aladhan API failure: Retry once after 30s. If still failing, skip that tick. Log error."** — cron.ts logs `logWarn` for the first failure (retry), and per-city `logError` on final failure ✓. But note the retry: `p.catch(() => timingsCache.delete(key))` — after final failure the promise is purged. ✓.
+
+4. **A documented-standard-adjacent one**: AGENTS.md "Key design decisions — **Tone: Warm, spiritual. Uses 'ﷺ'**" — reminderText uses ﷺ ✓.
+
+5. **setMyCommands** — registered ✓.
+
+Now the message: setLanguageCommand inline keyboard prompt in index.ts duplicates the language-pick logic that lives in messages.ts? Minor.
+
+Also **`bot.command("setcity")` — `ctx.match`** is the raw text after command ✓.
+
+Let me also check: **`citySetText(user?.language ?? "en", city, country)`** — the just-saved user's language. Fine.
+
+Now, is there a genuinely hard violation? Let me think about the **test seam `fetchFn` param in fetchPrayerTimes** vs SPEC "Mock Aladhan responses via undici MockAgent or msw" — SPEC explicitly prescribes MockAgent/msw, but the code uses a fetchFn injection seam and aladhan.test.ts probably passes a fake fetch. Let me check aladhan.test.ts and commands.test.ts quickly to confirm the seams. Also SPEC says "Mock Aladhan and Telegram APIs at the boundary". A fetchFn param is a boundary seam — fine, and it's needed because the code calls `fetch` at module level. Not a violation.
+
+Let me check the remaining test files briefly for duplicated fixtures (e.g., londonActive duplicated across cron.test and commands.test). I saw enough of cron.test.ts. Let me quickly scan commands.test.ts and messages.test.ts headers.
+
+Actually, to keep within word budget, let me do a quick grep for duplicated fixture shapes.
+
+One more real check — **index.ts `listActiveUsers` returns `paused: r.paused !== 0` and `language: r.language === "ar" ? "ar" : "en"`** while store.ts `toUser` does the same two coercions — duplicated conversion logic in two places (Shotgun Surgery on the user-row mapping). This is the strongest concrete smell.
+
+And **cron.ts ActiveUser vs commands.ts User**: `ActiveUser` = User + id. Almost identical interfaces defined in two modules — the refactor would be `User & { id: number }`. Data Clumps/duplicated type.
+
+**The `|`-joined key**: `const key = \`${u.city}|${u.country}\`` then `cityKey.split("|")` — primitive string encoding a pair + fragile (city containing "|" would break — edge). Primitive Obsession + potential bug.
+
+**minutesSinceMaghrib with modulo wrap** — a function named "minutesSince" that wraps around (i.e., if maghrib is 23:55 and now 00:05, returns 10 not -1430) — fine actually, documented.
+
+**EARLY_MORNING_CUTOFF "00:30"** — magic string with comment ✓.
+
+**Duplicated `get` helper in window.ts** — formatHHMM and formatDateEn each define `const get = (t) => p.find(...)` — duplicated code within one file.
+
+**Repeated `user?.language ?? "en"`** — appears in index.ts (start, help, setlanguage), commands.ts (setCityCommand, pauseCommand, resumeCommand, statusCommand) — 7 occurrences of the same fallback expression. Repeated expression smell (could be a helper `langOf(user)`). 
+
+**Card.ts: `textLines(..., 0, ...)` passing 0 for lineHeight when single line** — magic number for "no stacking"; and `enStartY + 26`, `sourceY + 4` magic offsets — fine for template.
+
+**Font file committed (400KB base64)** — README documents the embed flow; the font.ts is generated. Fine per README.
+
+**Biggest structural one — Shotgun Surgery on the user shape**: user row appears in:
+- commands.ts `User` interface
+- cron.ts `ActiveUser` interface (duplicate + id)
+- store.ts `DbUserRow` + toUser
+- index.ts inline SELECT typing + mapping (lines 106-126)
+- test/cron.test.ts fixture `ActiveUser` literals
+
+A schema change (e.g., adding a column) touches 4-5 files. That's the shotgun surgery.
+
+Also **Divergent Change on cron.ts**? runTick does: user listing, hadith rotation, city grouping, dedup cache, retry, window detection, image rendering, send loop, logging — it's a big coordinator. The spec says "commands handled inline" — fine. It's one cohesive tick. Skip.
+
+**Speculative Generality**: 
+- `LogContext` interface — used.
+- `getHadithByWeekOrder` — used.
+- `fetchFn` — used by tests.
+- `WasmSource` — used by tests.
+- `hadith: HadithText | null = null` default param in reminderText — default never used at call site (cron passes hadith explicitly which may be null). Minor.
+
+**Middle Man**: `sendReminder` delegating to `sendMessage` in index.ts — pure pass-through wrapper. Quote: `async sendReminder(chatId, text, photo) { await sendMessage(chatId, text, photo); }`. Also `fetchTimings(city, country, dateEn) { return fetchPrayerTimes(city, country, dateEn ?? undefined); }` — slight normalization, borderline.
+
+**Mysterious Name**: `dateEn` — gregorian date string in Aladhan payloads; also cron's `previousDateEn`. The "En" suffix is ambiguous (English vs Gregorian?). Judgement call.
+
+Also `botToken`/`getBot` fine.
+
+**One more possible hard violation**: AGENTS.md says `setMyCommands` "on deploy" / README "on cold start" — implemented in createBot, fine.
+
+What about **"Register via Telegram setMyCommands on deploy"** vs implementation — runs on every cold start of fetch handler ✓ fine.
+
+Let me also double check `store.save` with `paused` boolean → D1 bind: `.bind(chatId, ...keys.map((k) => fields[k] as string | number))` — `paused: true` is a boolean, cast to string|number. D1 supports booleans? D1's binding supports null, boolean? Actually D1 supports: null, number, string, boolean, Blob... Per D1 docs, supported types: null, number, string, boolean. Yes booleans are supported. Fine.
+
+`Object.keys(fields)` order — fine.
+
+One subtle issue: `INSERT ... ON CONFLICT(telegram_chat_id) DO UPDATE` — creates a user with only provided fields — `language` has DEFAULT 'en', `paused` DEFAULT 0 ✓.
+
+OK now the "hard violation" list. Honest answer: I find zero unambiguous hard violations of the documented standards, with one candidate: the Aladhan error taxonomy conflation (SPEC Error Handling distinguishes "Aladhan API failure" → retry/skip from "Invalid city" → format message; aladhan.ts throws CityNotFoundError for any `code !== 200` body). That's a documented-standard tension but arguably a bug more than a style violation. I'll present it as the single "near-hard" item.
+
+Wait — actually, let me reconsider one thing: SPEC.md Testing Decisions says "**No tests for:** ... Telegram Bot API wire format (tested by their SDK/server)". commands.test.ts and messages.test.ts — fine.
+
+Also SPEC "Integration tests: Use wrangler dev with a local D1 binding" — the diff ships no integration tests, only unit tests. Is that a violation? It says "Integration tests: Use wrangler dev..." — that's a prescription for how to do integration tests, but it doesn't mandate shipping them. All tests are unit. Judgement call — possibly a gap vs the documented testing plan, but the spec's "What makes a good test" is satisfied. I'll mention briefly as judgement.
+
+Also the **dateEn "13-08-2026"** fixtures: 2026-08-13 was a Thursday? The test comment says ISO week 33. Let me trust the tests.
+
+Hmm wait, one more potential hard violation: **AGENTS.md: "Rotation: week_number % hadith_count — deterministic, global, not per-user."** — cron.ts: hadith fetched once per tick via pickHadithIndex(parseWeekNumber(weekKey), hadithCount) ✓ global.
+
+**isoWeekKey** — uses UTC-based ISO week. A user in timezone +14 vs UTC — the "week" boundary could differ between the tick time (UTC) and user's local week. The reminder is sent in the tick; sent_log dedup uses UTC week key. For a user at UTC+14 on Friday 00:30 local, tick time is Thursday 10:30 UTC — same ISO week ✓ mostly fine. Not a documented standard issue.
+
+Now — **the image cache in cron.ts**: `imageFor` caches rejected promises permanently (no purge). The timings cache purges on rejection. Inconsistent caching behavior in the same function — duplicated cache pattern with divergent failure handling. Smell: Duplicated Code (two promise caches with slightly different semantics) + the inconsistency. 
+
+Also **`hadith as HadithText`** cast in cron.ts line 123 — `createImage(hadith as HadithText, lang)` — hadith is `Hadith | null` here but the `if (hadith)` guard is in the caller loop; `imageFor` is called only when hadith is truthy. Cast needed because imageFor is defined before the guard — mild.
+
+Also **reminderText(user.language, user.city as string, hadith)** — `user.city as string` cast because ActiveUser.city is string but filtered. Fine.
+
+Let me quickly scan commands.test.ts to check for duplicated fixtures with cron.test.ts (londonActive etc.). And aladhan.test.ts.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:46Z)**_
+
+Let me scan the remaining tests and seed.sql head for completeness.
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:46Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Inspect font.ts head and tests for window edge cases
+
+`head -c 300 /d/Projects/al-kahf_bot/src/font.ts; echo; echo "====="; grep -n "00:05\|23:5\|midnight\|early\|wrap\|previous" /d/Projects/al-kahf_bot/test/cron.test.ts | head -30; echo "====="; grep -n "REMINDER_WINDOW_MIN\|00:30" /d/Projects/al-kahf_bot/test/window.test.ts /d/Projects/al-kahf_bot/test/cron.test.ts | head`
+
+```text
+// Generated by scripts/embed-font.mjs — do not edit.
+export const NOTO_NASKH_ARABIC_B64 =
+  "AAEAAAATAQAABAAwR0RFRr/PtUcAArHEAAACzkdQT1OzmaZiAAK0lAAAX1xHU1VCUBLE2AADE/AAABj6SFZBUio6zy0AAyzsAAAHb09TLzKf7nWGAAABuAAAAGBTVEFUhBhr7gADNFwAAABYY21hcL8667kAABz0AAAmfGZ2YXKFW3JmAAM0tAAAAExnYXNwAAAAEAACsbwA
+=====
+180:  it("sends just after midnight for a late Thursday Maghrib, checking yesterday's timings", async () => {
+182:      maghrib: "23:55",
+192:    // Friday 00:05 local (23:05 UTC) — Thursday's Maghrib was 10 minutes ago.
+=====
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:46Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\test\commands.test.ts`
+
+```text
+1	import { describe, expect, it } from "vitest";
+2	import { CityNotFoundError, type PrayerTimes } from "../src/aladhan";
+3	import {
+4	  pauseCommand,
+5	  resumeCommand,
+6	  setCityCommand,
+7	  setLanguageCommand,
+8	  statusCommand,
+9	  type User,
+10	  type UserStore,
+11	} from "../src/commands";
+12	
+13	function fakeStore(initial: Record<string, User> = {}): UserStore {
+14	  const users = new Map(Object.entries(initial));
+15	  return {
+16	    async save(chatId, fields) {
+17	      const existing = users.get(chatId) ?? {
+18	        telegram_chat_id: chatId,
+19	        city: null,
+20	        country: null,
+21	        language: "en",
+22	        paused: false,
+23	      };
+24	      users.set(chatId, { ...existing, ...fields });
+25	    },
+26	    async get(chatId) {
+27	      return users.get(chatId) ?? null;
+28	    },
+29	  };
+30	}
+31	
+32	const okTimings: PrayerTimes = {
+33	  maghrib: "19:45",
+34	  weekdayEn: "Thursday",
+35	  dateEn: "14-08-2026",
+36	  timezone: "Europe/London",
+37	};
+38	
+39	describe("setCityCommand", () => {
+40	  it("stores a valid city and confirms", async () => {
+41	    const store = fakeStore();
+42	    const reply = await setCityCommand("London, UK", "42", {
+43	      store,
+44	      fetchPrayerTimes: async () => okTimings,
+45	    });
+46	    expect(reply).toBe("Your city is set to London, UK");
+47	    expect(await store.get("42")).toMatchObject({ city: "London", country: "UK" });
+48	  });
+49	
+50	  it("asks for the right format when city is invalid", async () => {
+51	    const reply = await setCityCommand("Narnia, XX", "42", {
+52	      store: fakeStore(),
+53	      fetchPrayerTimes: async () => {
+54	        throw new CityNotFoundError();
+55	      },
+56	    });
+57	    expect(reply).toBe(
+58	      "I couldn't find that city. Please try again with format: /setcity London, UK"
+59	    );
+60	  });
+61	
+62	  it("rejects input without a comma", async () => {
+63	    let called = false;
+64	    const reply = await setCityCommand("London", "42", {
+65	      store: fakeStore(),
+66	      fetchPrayerTimes: async () => {
+67	        called = true;
+68	        return okTimings;
+69	      },
+70	    });
+71	    expect(reply).toContain("/setcity London, UK");
+72	    expect(called).toBe(false);
+73	  });
+74	
+75	  it("confirms in the user's language", async () => {
+76	    const store = fakeStore();
+77	    await store.save("42", { language: "ar" });
+78	    const reply = await setCityCommand("London, UK", "42", {
+79	      store,
+80	      fetchPrayerTimes: async () => okTimings,
+81	    });
+82	    expect(reply).toContain("تم حفظ مدينتك");
+83	  });
+84	});
+85	
+86	describe("statusCommand", () => {
+87	  it("shows current city and country", async () => {
+88	    const reply = await statusCommand("42", {
+89	      store: fakeStore({
+90	        "42": { telegram_chat_id: "42", city: "London", country: "UK", language: "en", paused: false },
+91	      }),
+92	    });
+93	    expect(reply).toContain("London, UK");
+94	  });
+95	
+96	  it("shows language and paused state", async () => {
+97	    const reply = await statusCommand("42", {
+98	      store: fakeStore({
+99	        "42": { telegram_chat_id: "42", city: "London", country: "UK", language: "en", paused: true },
+100	      }),
+101	    });
+102	    expect(reply).toContain("English");
+103	    expect(reply).toContain("Paused");
+104	  });
+105	
+106	  it("renders status in Arabic for Arabic-language users", async () => {
+107	    const reply = await statusCommand("42", {
+108	      store: fakeStore({
+109	        "42": { telegram_chat_id: "42", city: "London", country: "UK", language: "ar", paused: true },
+110	      }),
+111	    });
+112	    expect(reply).toContain("متوقفة");
+113	  });
+114	
+115	  it("guides user to /setcity when no city set", async () => {
+116	    const reply = await statusCommand("42", { store: fakeStore() });
+117	    expect(reply).toBe("No city set. Use /setcity to configure");
+118	  });
+119	});
+120	
+121	describe("setLanguageCommand", () => {
+122	  it("stores the language and confirms", async () => {
+123	    const store = fakeStore();
+124	    const reply = await setLanguageCommand("ar", "42", { store });
+125	    expect(await store.get("42")).toMatchObject({ language: "ar" });
+126	    expect(reply).toContain("العربية");
+127	  });
+128	});
+129	
+130	describe("pauseCommand / resumeCommand", () => {
+131	  it("pause sets paused=true and confirms", async () => {
+132	    const store = fakeStore({
+133	      "42": { telegram_chat_id: "42", city: "London", country: "UK", language: "en", paused: false },
+134	    });
+135	    const reply = await pauseCommand("42", { store });
+136	    expect((await store.get("42"))?.paused).toBe(true);
+137	    expect(reply).toContain("/resume");
+138	  });
+139	
+140	  it("resume sets paused=false and confirms", async () => {
+141	    const store = fakeStore({
+142	      "42": { telegram_chat_id: "42", city: "London", country: "UK", language: "en", paused: true },
+143	    });
+144	    const reply = await resumeCommand("42", { store });
+145	    expect((await store.get("42"))?.paused).toBe(false);
+146	    expect(reply).toContain("resumed");
+147	  });
+148	});
+149
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:47Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\test\aladhan.test.ts`
+
+```text
+1	import { http, HttpResponse } from "msw";
+2	import { setupServer } from "msw/node";
+3	import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+4	import { AladhanError, CityNotFoundError, fetchPrayerTimes } from "../src/aladhan";
+5	
+6	const server = setupServer();
+7	
+8	beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+9	afterEach(() => server.resetHandlers());
+10	afterAll(() => server.close());
+11	
+12	const aladhanResponse = {
+13	  code: 200,
+14	  status: "OK",
+15	  data: {
+16	    timings: { Maghrib: "19:45" },
+17	    date: {
+18	      gregorian: { date: "14-08-2026", weekday: { en: "Thursday" } },
+19	    },
+20	    meta: { timezone: "Europe/London" },
+21	  },
+22	};
+23	
+24	const aladhanOk = () =>
+25	  http.get("https://api.aladhan.com/v1/timingsByCity", () =>
+26	    HttpResponse.json(aladhanResponse)
+27	  );
+28	
+29	describe("fetchPrayerTimes", () => {
+30	  it("parses Maghrib, weekday and date from Aladhan response", async () => {
+31	    server.use(aladhanOk());
+32	
+33	    const result = await fetchPrayerTimes("London", "UK");
+34	    expect(result).toEqual({
+35	      maghrib: "19:45",
+36	      weekdayEn: "Thursday",
+37	      dateEn: "14-08-2026",
+38	      timezone: "Europe/London",
+39	    });
+40	  });
+41	
+42	  it("throws CityNotFoundError when Aladhan reports no such city", async () => {
+43	    server.use(
+44	      http.get("https://api.aladhan.com/v1/timingsByCity", () =>
+45	        HttpResponse.json({ code: 200, status: "ERROR", data: "Unable to compute prayer times" })
+46	      )
+47	    );
+48	
+49	    await expect(fetchPrayerTimes("Narnia", "XX")).rejects.toBeInstanceOf(CityNotFoundError);
+50	  });
+51	
+52	  it("throws AladhanError on non-200 responses", async () => {
+53	    server.use(
+54	      http.get("https://api.aladhan.com/v1/timingsByCity", () =>
+55	        HttpResponse.json({ error: "boom" }, { status: 500 })
+56	      )
+57	    );
+58	
+59	    await expect(fetchPrayerTimes("London", "UK")).rejects.toBeInstanceOf(AladhanError);
+60	  });
+61	
+62	  it("throws CityNotFoundError on Aladhan 400 validation errors", async () => {
+63	    server.use(
+64	      http.get("https://api.aladhan.com/v1/timingsByCity", () =>
+65	        HttpResponse.json({ code: 400, status: "BAD_REQUEST", data: "Invalid city" }, { status: 400 })
+66	      )
+67	    );
+68	
+69	    await expect(fetchPrayerTimes("Narnia", "XX")).rejects.toBeInstanceOf(CityNotFoundError);
+70	  });
+71	});
+72
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:48Z)**_
+
+<think><details><summary>Thought Process</summary>
+The tests cover the Friday 00:05 case (previous day Thursday). Let me check whether the Thursday 00:05 bug (early Thursday morning, Thursday Maghrib 23:50 in the future) is tested — grep didn't show it, and the wrap case is not covered. Let me quickly check window.test.ts for the minutesSinceMaghrib wrap behavior.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:49Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./\test\window.test.ts`
+
+```text
+1	import { describe, expect, it } from "vitest";
+2	import { formatDateEn, formatHHMM, minutesSinceMaghrib, previousDateEn } from "../src/window";
+3	
+4	describe("minutesSinceMaghrib", () => {
+5	  it("is 0 exactly at Maghrib", () => {
+6	    expect(minutesSinceMaghrib("20:00", "20:00")).toBe(0);
+7	  });
+8	
+9	  it("counts minutes after Maghrib", () => {
+10	    expect(minutesSinceMaghrib("20:00", "20:05")).toBe(5);
+11	  });
+12	
+13	  it("handles midnight rollover as a continuation of the same evening", () => {
+14	    // Maghrib 23:55, now 00:05 → 10 minutes after.
+15	    expect(minutesSinceMaghrib("23:55", "00:05")).toBe(10);
+16	  });
+17	
+18	  it("is large when Maghrib has not yet passed", () => {
+19	    expect(minutesSinceMaghrib("20:00", "19:00")).toBe(23 * 60);
+20	  });
+21	
+22	  it("is large for the wrong day entirely (maghrib long passed)", () => {
+23	    expect(minutesSinceMaghrib("18:00", "20:05")).toBe(125);
+24	  });
+25	});
+26	
+27	describe("formatHHMM", () => {
+28	  it("formats an instant in the given timezone", () => {
+29	    // 19:05 UTC = 20:05 in London (BST) during August.
+30	    expect(formatHHMM(new Date("2026-08-14T19:05:00Z"), "Europe/London")).toBe("20:05");
+31	  });
+32	});
+33	
+34	describe("formatDateEn / previousDateEn", () => {
+35	  it("formats date as DD-MM-YYYY in the given timezone", () => {
+36	    expect(formatDateEn(new Date("2026-08-14T19:05:00Z"), "Europe/London")).toBe("14-08-2026");
+37	  });
+38	
+39	  it("returns the previous day", () => {
+40	    expect(previousDateEn(new Date("2026-08-15T00:05:00Z"), "Europe/London")).toBe("14-08-2026");
+41	  });
+42	});
+43
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:56Z)**_
+
+<think><details><summary>Thought Process</summary>
+I have everything I need. Note the tests use msw per SPEC — good. Now let me compose the report under 400 words.
+
+Key findings:
+
+**Hard violations of documented standards**: I found essentially one borderline: the Aladhan error taxonomy conflation (SPEC.md Error Handling distinguishes "Aladhan API failure" (retry/skip) vs "Invalid city" (format guide); aladhan.ts `body.code !== 200 || body.status !== "OK" || !body.data → CityNotFoundError` collapses any non-OK body, including 500s, into CityNotFoundError, so a server error with code 500 body would tell the user "I couldn't find that city" instead of retrying). That's the strongest. Everything else in the spec I checked conforms (retry once/30s, image fallback, per-user isolation, sent_log dedup, ISNA method=2, setMyCommands, 10 hadith, week_order unique, nullable city, tone).
+
+Actually let me also double check one thing — the failed-city retry behavior vs SPEC: "If still failing, skip that tick. Log error." — ✓.
+
+And SPEC "Check DateObject.gregorian.weekday.en === 'Thursday'" ✓.
+
+One more potential: SPEC.md says "**Aladhan API failure:** Retry once after 30s" — cron.ts retries once after 30s ✓.
+
+**Baseline smells** (judgement calls):
+1. Shotgun Surgery / duplicated type — user shape declared 4×: commands.ts `User`, cron.ts `ActiveUser` (≈ User+id), store.ts `DbUserRow`+toUser, index.ts inline SELECT type + coercion map (language/paused re-coerced in both index.ts and store.ts). Quote.
+2. Primitive Obsession + Data Clump — `city|country` joined key: cron.ts `const key = \`${u.city}|${u.country}\`` then `cityKey.split("|")`. Also city+country travel as a clump in User/ActiveUser/fetchTimings.
+3. Middle Man — index.ts `sendReminder` pure pass-through to sendMessage; `fetchTimings` thin wrapper (has null→undefined normalization, so borderline).
+4. Duplicated Code — two promise caches in cron.ts (timingsCache purges on reject, imageCache doesn't); `get` closure duplicated in window.ts formatHHMM/formatDateEn; `user?.language ?? "en"` fallback 7× across index.ts/commands.ts; language/paused coercion duplicated.
+5. Repeated Switches — `lang === "ar" ? … : …` cascade across all of messages.ts.
+6. Mysterious Name — `dateEn`/`previousDateEn` (it's the Gregorian date, not "English"); `minutesSinceMaghrib` wraps mod 1440 (name implies linear diff).
+7. Speculative Generality — `reminderText(lang, city, hadith = null)` default param never exercised (cron passes null explicitly); `fetchFn` param in fetchPrayerTimes is used by... wait, aladhan.test.ts uses msw, NOT fetchFn! Let me check — aladhan.test.ts uses msw's setupServer which intercepts global fetch. So the `fetchFn` parameter IS speculative generality — nothing in the diff passes a custom fetchFn. Let me verify: grep for fetchFn usage. index.ts calls `fetchPrayerTimes(city, country)` — no fetchFn. Tests use msw. So `fetchFn: typeof fetch = fetch` is unused — Speculative Generality. And msw is used per SPEC. Good catch.
+
+Wait, does msw in vitest work — setupServer intercepts. Yes.
+
+So fetchFn is genuinely unused — speculative. Also `WasmSource` param of renderCardPng — is it used with custom source? card.test.ts likely passes a fake. Let me check quickly... I haven't read card.test.ts. Let me grep quickly. Actually image.test.ts exists too. Let me check whether renderCardPng is called with non-default wasm in tests. In index.ts: `renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm))` — passes the real wasm. If tests also pass fakes, the seam is used. Let me grep.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:56Z)**_
+
+One quick check on whether the test seams (`fetchFn`, `WasmSource`) are actually exercised.
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:56Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./\test` pattern `fetchFn|renderCardPng|WasmSource|buildCardSvg`
+
+```text
+test\image.test.ts:4:import { buildCardSvg } from "../src/card";
+test\image.test.ts:5:import { renderCardPng } from "../src/image";
+test\image.test.ts:23:describe("renderCardPng", () => {
+test\image.test.ts:25:    const png = await renderCardPng(buildCardSvg(hadith, "en"), () =>
+test\card.test.ts:2:import { buildCardSvg, escapeXml, wrapText } from "../src/card";
+test\card.test.ts:15:  return buildCardSvg(hadith, lang).replace(/\s+/g, " ");
+test\card.test.ts:18:describe("buildCardSvg", () => {
+```
+</details></tool-use>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:29:58Z)**_
+
+<think><details><summary>Thought Process</summary>
+So:
+- `fetchFn` in fetchPrayerTimes: never passed anywhere (tests use msw) → Speculative Generality.
+- `WasmSource`/`renderCardPng` wasmSource param: image.test.ts passes a fake wasm source — used. So that seam is exercised.
+
+Now write the report, under 400 words.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:30:05Z)**_
+
+# Review: 01e6c15...HEAD
+
+## Documented-standard breaches
+
+**One borderline hard violation — Aladhan error taxonomy.** SPEC.md Error Handling distinguishes "Aladhan API failure" (retry once/30s, skip tick, log) from "Invalid city" (format guide). `src/aladhan.ts:52-54` collapses them: `if (body.code !== 200 || body.status !== "OK" || !body.data) throw new CityNotFoundError()`. A server-side error body (e.g. `{code:500}`) is reported to the user as "I couldn't find that city" (`src/commands.ts:51`) instead of triggering the documented retry/skip path. Everything else I checked conforms (retry/30s, image→text fallback, per-user isolation, `sent_log` dedup, ISNA `method=2`, `setMyCommands`, 10 hadith, `week_order` UNIQUE, nullable city, Arabic-only card, msw-based tests per SPEC Testing Decisions).
+
+## Baseline smells (judgement calls)
+
+- **Shotgun Surgery / duplicated type — user shape declared four times**: `User` (`src/commands.ts:13`), `ActiveUser` ≈ User+id (`src/cron.ts:18`), `DbUserRow`+`toUser` (`src/store.ts:3-19`), and an inline `SELECT` type + hand coercion in `src/index.ts:106-126`. The same `language === "ar" ? "ar" : "en"` / `paused !== 0` coercion is duplicated in store.ts and index.ts. A schema change touches 4 files.
+- **Primitive Obsession / Data Clumps — city+country encoded as a joined string**: `src/cron.ts:67` `const key = \`${u.city}|${u.country}\`;` then `:98` `cityKey.split("|")`. The pair also travels through `User`, `fetchTimings`, and `setCityCommand`'s string parse (`src/commands.ts:38-46`).
+- **Middle Man**: `src/index.ts:130-132` `async sendReminder(chatId, text, photo) { await sendMessage(chatId, text, photo); }` — pure pass-through; `fetchTimings` (`:127-129`) is near-delegation too.
+- **Duplicated Code — two promise caches with divergent semantics**: `timingsCache` purges rejected promises (`src/cron.ts:88`), `imageCache` doesn't (`:119-127`); a failed render is re-thrown to every same-language user that tick. Also the `get` closure in `src/window.ts:18,25` and the `user?.language ?? "en"` fallback 7× across index.ts/commands.ts.
+- **Repeated Switches**: the `lang === "ar" ? … : …` cascade recurs through every function in `src/messages.ts`.
+- **Speculative Generality**: `fetchFn: typeof fetch = fetch` (`src/aladhan.ts:25`) — nothing passes it; tests mock via msw. The `wasmSource` seam in `src/image.ts` *is* exercised (`test/image.test.ts:25`), so it's fine.
+- **Mysterious Name**: `dateEn`/`previousDateEn` (`src/window.ts:23,30`) — it's the *Gregorian* date, not an "English" one; `minutesSinceMaghrib` (`src/window.ts:2`) wraps mod 1440, so the name implies a linear diff it doesn't compute.
+
+No other hard violations found; the error-taxonomy conflation is the only documented-standard breach.
+
+---
+
+_**User (2026-08-16 19:30:05Z)**_
+
+<task-notification>
+<task-id>ab1d5fb9780763b10</task-id>
+<tool-use-id>call_00_ET_7BWlvnGicItw6ra0KI9h3365</tool-use-id>
+<output-file>C:\Users\eshan\AppData\Local\Temp\claude\D--Projects-al-kahf-bot\93e3c44b-6689-44b4-ab8a-742cd7cc1995\tasks\ab1d5fb9780763b10.output</output-file>
+<status>completed</status>
+<summary>Agent "Standards review of diff" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result># Review: 01e6c15...HEAD
+
+## Documented-standard breaches
+
+**One borderline hard violation — Aladhan error taxonomy.** SPEC.md Error Handling distinguishes "Aladhan API failure" (retry once/30s, skip tick, log) from "Invalid city" (format guide). `src/aladhan.ts:52-54` collapses them: `if (body.code !== 200 || body.status !== "OK" || !body.data) throw new CityNotFoundError()`. A server-side error body (e.g. `{code:500}`) is reported to the user as "I couldn't find that city" (`src/commands.ts:51`) instead of triggering the documented retry/skip path. Everything else I checked conforms (retry/30s, image→text fallback, per-user isolation, `sent_log` dedup, ISNA `method=2`, `setMyCommands`, 10 hadith, `week_order` UNIQUE, nullable city, Arabic-only card, msw-based tests per SPEC Testing Decisions).
+
+## Baseline smells (judgement calls)
+
+- **Shotgun Surgery / duplicated type — user shape declared four times**: `User` (`src/commands.ts:13`), `ActiveUser` ≈ User+id (`src/cron.ts:18`), `DbUserRow`+`toUser` (`src/store.ts:3-19`), and an inline `SELECT` type + hand coercion in `src/index.ts:106-126`. The same `language === "ar" ? "ar" : "en"` / `paused !== 0` coercion is duplicated in store.ts and index.ts. A schema change touches 4 files.
+- **Primitive Obsession / Data Clumps — city+country encoded as a joined string**: `src/cron.ts:67` `const key = \`${u.city}|${u.country}\`;` then `:98` `cityKey.split("|")`. The pair also travels through `User`, `fetchTimings`, and `setCityCommand`'s string parse (`src/commands.ts:38-46`).
+- **Middle Man**: `src/index.ts:130-132` `async sendReminder(chatId, text, photo) { await sendMessage(chatId, text, photo); }` — pure pass-through; `fetchTimings` (`:127-129`) is near-delegation too.
+- **Duplicated Code — two promise caches with divergent semantics**: `timingsCache` purges rejected promises (`src/cron.ts:88`), `imageCache` doesn't (`:119-127`); a failed render is re-thrown to every same-language user that tick. Also the `get` closure in `src/window.ts:18,25` and the `user?.language ?? "en"` fallback 7× across index.ts/commands.ts.
+- **Repeated Switches**: the `lang === "ar" ? … : …` cascade recurs through every function in `src/messages.ts`.
+- **Speculative Generality**: `fetchFn: typeof fetch = fetch` (`src/aladhan.ts:25`) — nothing passes it; tests mock via msw. The `wasmSource` seam in `src/image.ts` *is* exercised (`test/image.test.ts:25`), so it's fine.
+- **Mysterious Name**: `dateEn`/`previousDateEn` (`src/window.ts:23,30`) — it's the *Gregorian* date, not an "English" one; `minutesSinceMaghrib` (`src/window.ts:2`) wraps mod 1440, so the name implies a linear diff it doesn't compute.
+
+No other hard violations found; the error-taxonomy conflation is the only documented-standard breach.</result>
+<usage><subagent_tokens>54977</subagent_tokens><tool_uses>28</tool_uses><duration_ms>99513</duration_ms></usage>
+</task-notification>
+
+---
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:30:13Z)**_
+
+<think><details><summary>Thought Process</summary>
+The wrap case is tested as a feature ("handles midnight rollover as a continuation of the same evening") but the bug is: in runTick's first branch (`today.weekdayEn === "Thursday"`), the modulo wrap makes an early-Thursday-morning tick fire for a Thursday-evening Maghrib that hasn't happened yet (Maghrib 23:45–23:59, now 00:00–00:14 Thursday). That case is untested. The reminder would go out ~24h early, and `alreadySent` would suppress the real one.
+
+Let me quickly verify this scenario concretely:
+- Tick at Thursday 00:05 (user's timezone), Aladhan returns Thursday's Maghrib 23:50 (late latitude).
+- today.weekdayEn === "Thursday" → passed = minutesSinceMaghrib("23:50", "00:05") = 15 ≤ 15 → true → send.
+
+Yes. Bug confirmed. It would fire even at 00:00 with maghrib 23:45 (diff = 15). And at 00:10 with 23:45 (diff 25, no). So the window is essentially "within 15 min of midnight on Thursday morning" for cities whose Thursday Maghrib is within 15 min before midnight. High-latitude summer (e.g., Tromsø, Murmansk, Reykjavik ~23:55 in June? Reykjavik maghrib around 00:2x in midsummer... some places have maghrib just before midnight). It's a narrow but real edge case.
+
+Also the second branch (else-if) is only reached if today isn't Thursday — correct there.
+
+Now also check `isoWeekKey` once more for the early-Friday case: Friday 00:05 UTC (for timezone UTC+14, local Friday 00:05 = Thursday 10:05 UTC — week key of Thursday; but the ISO week of the local Friday equals ISO week of local Thursday since same week). Fine.
+
+One more check — `parseWeekNumber(weekKey)` and `pickHadithIndex(weekNumber, count)` → index used as week_order directly. OK.
+
+Check commands.test.ts quickly? Not necessary. 
+
+Let me also double check the `setMyCommands` — issue #1 wants commands registered via setMyCommands — implemented (fire-and-forget on bot creation, called for both webhook and cron paths). OK.
+
+Webhook registration: SPEC.md line 49: "Worker registers webhook with Telegram on deploy." Implementation: manual curl in README. The issue #1 criteria don't include webhook registration explicitly ("Telegram webhook handler receives updates" — yes). So it's a spec (Implementation Decisions) deviation, not an issue criteria miss. Worth a mention under (a) or (b) — it's in SPEC's implementation decisions; I'll note it as partial (deploy flow requires manual curl; not automated).
+
+Also check: SPEC says "Caching: Per 10-minute tick, deduplicate city lookups. Store timestamp of lookup so duplicate cities in same tick hit cache, not the API." Implemented per-tick cache. Yes.
+
+Issue #4 "Maghrib window: send to user if Maghrib just passed within the current 10-minute window" — impl uses 15 min window (REMINDER_WINDOW_MIN = 15). Deviation — flag under (b) or (a). It's a deliberate "jitter margin" — slight expansion. I'll flag it as scope creep / deviation since the criterion explicitly says 10-minute window. Note that with a 15-min window, a reminder can fire up to 5 minutes after the window closes — spec user story just says "every Thursday after my local Maghrib time" — not critical, but the criterion says 10. I'll mention.
+
+Issue #6 criterion: "Rendering completes within Worker CPU limits (10ms CPU per request)" — no benchmark/measurement. Partial.
+
+Issue #7: "Cold start time measured — under 5ms" — README defers ("To verify on your deployed Worker..."). Not measured. Partial/missing.
+
+Issue #5: seed = 10 hadith (meets "10-20"), but the seed file's own warning says "Before production deployment, please have these texts re-verified by a qualified source" — so authenticity criterion ("curated authentic hadith from recognized collections") is flagged unverified. Also SPEC.md line 116: "All hadith in the seed data must be verified authentic (sahih or hasan) from recognized collections (Bukhari, Muslim, Tirmidhi, Abu Dawud, etc.)" — entry 7 sources Ibn Mardawayh (not in the listed collections) though graded hasan by al-Mundhiri. Flag as partial with the caveat being explicit in the repo.
+
+Also: SPEC.md line 78: "10-20 curated authentic hadith" — 10 satisfies.
+
+Bug in aladhan.ts: non-200 JSON body (e.g., 500) → CityNotFoundError → user told city not found when service failed. Actually Aladhan returns code 500 with HTTP 500 for server errors; res.status 500 → `!res.ok` → AladhanError before body.code check. Wait, order: `if (res.status === 400) CityNotFound; if (!res.ok) AladhanError`. So HTTP 500 → AladhanError (correct). But Aladhan's "invalid city" returns HTTP 400. What about HTTP 200 with code != 200? Aladhan uses code 200 for success; invalid city might return HTTP 400. The `body.code !== 200` → CityNotFoundError. Probably fine. Not a bug worth flagging.
+
+Another check — `statusCommand` returns noCityText for `!user` — welcomeText/helpText default en. Fine.
+
+Language error message: setCityCommand's error paths always return English cityNotFoundText("en") — even for Arabic users. Minor inconsistency with the tone/language requirements. Issue #3's tone criterion is about messages; error messages in English for Arabic users is a minor gap. I'll mention briefly.
+
+Also the "Telegram API failure" for sendPhoto — in cron, wrapped per-user try/catch — good.
+
+One more scope creep check: tests — fine. README — fine. scripts/embed-font.mjs — fine. AGENTS.md changes — fine.
+
+What about "no manual upkeep" / "warm spiritual tone" — messages use ﷺ and As-salamu alaykum — good.
+
+Also SPEC user story #15: "handle unknown or misspelled cities gracefully" — yes.
+
+Now check issue #2's "City lookup is cached per cron tick" — done.
+
+Also issue #4 "sent_log D1 table: id, user_id, hadith_id, sent_at — prevents duplicate sends" — impl adds week_key and dedups on (user_id, week_key) — that's actually a sensible improvement; the dedup check happens per tick before sending. Fine — minor schema addition beyond spec. I'll count week_key as scope creep (spec line 47 sent_log columns: id, user_id, hadith_id, sent_at).
+
+Word budget: under 400 words. Let me structure:
+
+(a) Missing/partial:
+1. Issue #7 cold-start measurement — not done; README only instructs how (criterion: "Cold start time measured — under 5ms").
+2. Issue #6 CPU-limit criterion ("Rendering completes within Worker CPU limits (10ms CPU per request)") — no measurement/benchmark.
+3. Issue #5 authenticity — seed contains its own warning to re-verify before production ("Before production deployment, please have these texts re-verified by a qualified source"); one source is Ibn Mardawayh, outside SPEC's recognized-collections list (SPEC line 116). Partially met (10 hadith, all with sources, but self-declared unverified).
+4. Issue #1 webhook — SPEC line 49 says "Worker registers webhook with Telegram on deploy"; impl only documents manual curl in README (webhook registration not automated). Also setMyCommands runs on worker cold start rather than deploy (minor, acceptable).
+5. Issue #4 window: criterion "within the current 10-minute window"; impl REMINDER_WINDOW_MIN = 15 ("10-min cadence + jitter margin") — beyond criterion.
+
+(b) Scope creep:
+1. EARLY_MORNING_CUTOFF (00:30) after-midnight send — SPEC line 55: "Only send if both conditions hold: Maghrib just passed AND today is Thursday." Impl also sends on Friday 00:00–00:30 for late Thursday Maghribs.
+2. sent_log week_key column — SPEC line 47 schema is id, user_id, hadith_id, sent_at.
+
+(c) Wrong implementation:
+1. Minutes-wrap bug: on Thursday 00:00–00:14, minutesSinceMaghrib("23:4x", "00:0x") wraps to ≤15 → reminder fires ~24h early for cities with Maghrib just before midnight (e.g. high-latitude summer); alreadySent then suppresses the real Thursday-evening reminder. First branch of runTick lacks a "Maghrib already happened today" check; the modulo in window.ts makes a future Maghrib look like it just passed.
+2. setCityCommand error replies hardcoded English (cityNotFoundText("en")) — Arabic users get English errors, inconsistent with #3's bilingual tone criterion.
+
+Let me verify the bug once more precisely with numbers. Maghrib Thursday 23:45. Tick Thursday 00:05. minutesSinceMaghrib("23:45","00:05"): 5-1425 = -1420 +1440 = 20 → 20 > 15 → no fire. Maghrib 23:50: 5-1430=-1425+1440=15 → fires. Maghrib 23:55, now 00:05: 5-1435=-1430+1440=10 → fires. Now 00:10, maghrib 23:55: 10-1435+1440=15 → fires. So cities with Thursday Maghrib 23:50–23:59 and ticks at 00:00–00:14 Thursday. Real edge case (northern latitudes near solstice; e.g., London doesn't, but Tromsø/Stavanger? Stavanger maghrib late June ~23:5x). Yes, real.
+
+Also, is there a guard for `nowHHMM < EARLY_MORNING_CUTOFF` in the Thursday branch? No — the Thursday branch fires whenever weekday is Thursday, all day, if diff ≤ 15 — wait, that's the normal case too: Thursday 19:45 maghrib, tick 19:50 → fires. Correct. The bug is only the wrap near midnight.
+
+Word count discipline: aim ~380 words. Let me draft.
+</details></think>
+
+_**Agent - sidechain (deepseek-v4-flash 2026-08-16 19:30:19Z)**_
+
+The diff (1.2MB, mostly `.specstory/`) spans 7 commits matching issues #1–#7. I read all `src/` files, migrations, seed, `wrangler.jsonc`, tests, and README.
+
+## (a) Missing or partial
+
+1. **Issue #7 — "Cold start time measured — under 5ms"**: not measured anywhere. README's "Cold start measurement" section only says "To verify on your deployed Worker…". Deferred, not done.
+2. **Issue #6 — "Rendering completes within Worker CPU limits (10ms CPU per request)"**: no measurement or benchmark exists.
+3. **Issue #5 — authenticity**: seed has 10 hadith (meets "10–20") with citations, but the file itself says "⚠️ Before production deployment, please have these texts re-verified by a qualified source" — the criterion "curated authentic hadith" is self-declared unverified. Entry 7 cites Ibn Mardawayh, outside SPEC.md's list ("recognized collections (Bukhari, Muslim, Tirmidhi, Abu Dawud, etc.)").
+4. **SPEC.md line 49 — "Worker registers webhook with Telegram on deploy"**: not implemented; README instructs a manual `curl setWebhook`. `setMyCommands` runs on worker cold start, not deploy.
+5. **Issue #4 — "Maghrib just passed within the current 10-minute window"**: implemented as `REMINDER_WINDOW_MIN = 15` ("10-min cadence + jitter margin") — wider than the criterion.
+
+## (b) Scope creep
+
+1. **After-midnight send**: `EARLY_MORNING_CUTOFF` in `cron.ts` sends on Friday 00:00–00:30 for the previous day's Thursday Maghrib. SPEC.md line 55: "Only send if both conditions hold: Maghrib just passed AND today is Thursday" — Friday is not Thursday. Untested-in-spec behavior.
+2. **`sent_log.week_key` column**: SPEC.md line 47 schema is `id, user_id, hadith_id, sent_at`; migration adds `week_key` (with index).
+
+## (c) Looks implemented but wrong
+
+1. **Early-Thursday false positive (real bug)**: `minutesSinceMaghrib` in `window.ts` wraps modulo 1440 (`(diff + 1440) % 1440`). In `cron.ts`, when `today.weekdayEn === "Thursday"` there's no "Maghrib already happened today" check — so for a city whose Thursday Maghrib is 23:50–23:59 (high-latitude summer), a tick at Thursday 00:05 computes `minutesSinceMaghrib("23:50","00:05")` = 15 ≤ 15 → **sends the reminder ~24h early**; `alreadySent` then suppresses the real Thursday-evening reminder. The wrap case is tested as a feature in `window.test.ts` but never in the Thursday-morning context.
+2. **Hardcoded English errors**: `setCityCommand` always returns `cityNotFoundText("en")` (and the service-unavailable message), even for Arabic users — inconsistent with issue #3's "warm spiritual tone in both languages" criterion.
+
+Minor: `wrangler.jsonc` holds a placeholder `database_id` (documented setup step, so acceptable).
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:30:22Z)**_
+
+<think><details><summary>Thought Process</summary>
+Standards agent done. One hard-ish finding: Aladhan error taxonomy conflation — `{code:500}` body → CityNotFoundError → user told "couldn't find city". Legit issue. Worth fixing: distinguish error status codes from validation. In aladhan.ts: if body.code === 200 && status === "OK" && data → ok. If status is error-type (5xx-ish or status string like "ERROR" with HTTP 200) — Aladhan returns HTTP 200 with `"code": 200, "status": "ERROR"` for unknown city? That's the actual behavior for invalid city: HTTP 200, code 200, status "ERROR"?? Hmm. Actually Aladhan invalid city: HTTP 200 `{"code":200,"status":"OK"...}` no — real Aladhan: invalid city → `{"code": 200, "status": "ERROR", "data": "Unable to compute prayer times..."}`. That's exactly what my test mocks. So status !== "OK" = unknown city is CORRECT for Aladhan's protocol. The reviewer's scenario — server-side error body `{code:500}` — would arrive with HTTP 500 → my code throws AladhanError before body checks (res.ok false first). So misclassification requires Aladhan to send HTTP 200 with server-error semantics — plausible in edge (their API historically returns 200 with error payloads). Distinguish better: if status === "ERROR" and data string contains "Unable to compute" → city not found; otherwise AladhanError. Safer: treat `status: "ERROR"` + HTTP 200 as... can't reliably tell. Aladhan docs: unknown city → 200 + `{"code":200,"status":"ERROR","data":"Unable to compute prayer times"}`? Some docs show HTTP 400 with `{"code":400,"status":"BAD_REQUEST","data":"Invalid value..."}`. My 400 → CityNotFound covers that. 200+ERROR → "Unable to compute" = city not found per Aladhan's own convention. Server errors → non-200 HTTP. So current mapping matches Aladhan's real protocol; reviewer's hypothetical `{code:500}` with HTTP 200 doesn't happen per Aladhan docs. Keep? Minor hardening: check `status === "ERROR" && data includes "Unable to compute"` → CityNotFound; other 200-with-ERROR → AladhanError. Cheap fix, closes the gap. Do it.
+
+Other findings = judgement calls. Several legit: user shape duplication (4 files), city|country string encoding, Middle Man sendReminder, imageCache no purge, speculative fetchFn param, mysterious dateEn naming.
+
+Per implement skill: review done → report. Skill says aggregate findings, not necessarily fix all. But some fixes cheap + real: 
+1. aladhan error taxonomy (tighten).
+2. imageCache purge rejected (bug-ish: failed render re-throws per user — actually re-throw caught per-user → logs per user, harmless but noisy; purge → single retry per tick). Cheap.
+3. fetchFn param — remove (unused speculative).
+4. dateEn → gregorianDate rename? Touches tests; moderate. Skip or do? Mysterious name — real. Rename cheap-ish (aladhan, window, cron, tests). Do if quick.
+
+Wait for Spec agent before deciding final report. Spec agent still running. Report Standards findings to user after both done. Meanwhile — don't fix yet; wait for spec findings, then aggregate + fix worthy items + rerun tests + commit fixes.
+
+Actually implement skill: review stage → fix in review cycle is allowed ("Refactoring is not part of the loop. It belongs to the review stage"). I can apply fixes now while spec agent runs — but avoid touching files spec agent reads? Spec agent reads diff vs 01e6c15...HEAD — my fixes change working tree, not HEAD; diff command unchanged. Safe.
+
+But wait — process: aggregate both reports first, then fix. Fixing now risks half-done. Wait for spec agent. Just note progress.
+</details></think>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:30:23Z)**_
+
+Standards review in. One hard-ish finding (Aladhan error taxonomy), rest judgement calls. Waiting on Spec agent before aggregate + fixes.
+
+---
+
+_**User (2026-08-16 19:30:23Z)**_
+
+<task-notification>
+<task-id>afc776a0cf594a8ab</task-id>
+<tool-use-id>call_01_ET_adXiyPoGOfZz60d4xDSX5461</tool-use-id>
+<output-file>C:\Users\eshan\AppData\Local\Temp\claude\D--Projects-al-kahf-bot\93e3c44b-6689-44b4-ab8a-742cd7cc1995\tasks\afc776a0cf594a8ab.output</output-file>
+<status>completed</status>
+<summary>Agent "Spec review of diff" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>The diff (1.2MB, mostly `.specstory/`) spans 7 commits matching issues #1–#7. I read all `src/` files, migrations, seed, `wrangler.jsonc`, tests, and README.
+
+## (a) Missing or partial
+
+1. **Issue #7 — "Cold start time measured — under 5ms"**: not measured anywhere. README's "Cold start measurement" section only says "To verify on your deployed Worker…". Deferred, not done.
+2. **Issue #6 — "Rendering completes within Worker CPU limits (10ms CPU per request)"**: no measurement or benchmark exists.
+3. **Issue #5 — authenticity**: seed has 10 hadith (meets "10–20") with citations, but the file itself says "⚠️ Before production deployment, please have these texts re-verified by a qualified source" — the criterion "curated authentic hadith" is self-declared unverified. Entry 7 cites Ibn Mardawayh, outside SPEC.md's list ("recognized collections (Bukhari, Muslim, Tirmidhi, Abu Dawud, etc.)").
+4. **SPEC.md line 49 — "Worker registers webhook with Telegram on deploy"**: not implemented; README instructs a manual `curl setWebhook`. `setMyCommands` runs on worker cold start, not deploy.
+5. **Issue #4 — "Maghrib just passed within the current 10-minute window"**: implemented as `REMINDER_WINDOW_MIN = 15` ("10-min cadence + jitter margin") — wider than the criterion.
+
+## (b) Scope creep
+
+1. **After-midnight send**: `EARLY_MORNING_CUTOFF` in `cron.ts` sends on Friday 00:00–00:30 for the previous day's Thursday Maghrib. SPEC.md line 55: "Only send if both conditions hold: Maghrib just passed AND today is Thursday" — Friday is not Thursday. Untested-in-spec behavior.
+2. **`sent_log.week_key` column**: SPEC.md line 47 schema is `id, user_id, hadith_id, sent_at`; migration adds `week_key` (with index).
+
+## (c) Looks implemented but wrong
+
+1. **Early-Thursday false positive (real bug)**: `minutesSinceMaghrib` in `window.ts` wraps modulo 1440 (`(diff + 1440) % 1440`). In `cron.ts`, when `today.weekdayEn === "Thursday"` there's no "Maghrib already happened today" check — so for a city whose Thursday Maghrib is 23:50–23:59 (high-latitude summer), a tick at Thursday 00:05 computes `minutesSinceMaghrib("23:50","00:05")` = 15 ≤ 15 → **sends the reminder ~24h early**; `alreadySent` then suppresses the real Thursday-evening reminder. The wrap case is tested as a feature in `window.test.ts` but never in the Thursday-morning context.
+2. **Hardcoded English errors**: `setCityCommand` always returns `cityNotFoundText("en")` (and the service-unavailable message), even for Arabic users — inconsistent with issue #3's "warm spiritual tone in both languages" criterion.
+
+Minor: `wrangler.jsonc` holds a placeholder `database_id` (documented setup step, so acceptable).</result>
+<usage><subagent_tokens>47309</subagent_tokens><tool_uses>26</tool_uses><duration_ms>110611</duration_ms></usage>
+</task-notification>
+
+---
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:30:47Z)**_
+
+<think><details><summary>Thought Process</summary>
+Both reviews in. Aggregate per skill, then fix worthy findings.
+
+Spec findings:
+(a) Missing/partial:
+1. Cold start measurement — can't measure without deployment. Document as deferred. AC says "measured — under 5ms". Cannot do from here. Report honestly.
+2. CPU limits — same, needs deployment. Document.
+3. Hadith authenticity — seed comment flags verification; entry 7 cites Ibn Mardawayh (outside recognized collections list "etc." — al-Mundhiri's Targhib is recognized classical collection; "etc." covers. Keep + flag to user.)
+4. Webhook registration on deploy — not implemented (manual curl). Could implement: on scheduled tick, call setWebhook? URL unknown. Standard practice: wrangler deploy hook (custom command) or registration on first webhook-less start. Realistic: add `webhook` registration via wrangler `deploy` script? Can't know worker URL pre-deploy. Alternative: register webhook lazily in fetch handler when env.WEBHOOK_URL set? Simpler honest path: keep manual step documented. Note as known deviation.
+5. Window 15 vs 10 — intentional jitter margin; deviation documented in code. Report.
+
+(b) Scope creep:
+1. After-midnight send — legit feature for late maghribs (23:55 Thursday, tick 00:00 Friday would MISS without it). Spec "today is Thursday" vs reminder correctness. Keep; document. Actually — combined with finding (c)1 this whole window logic needs fix.
+2. week_key column — documented in AGENTS.md; justified dedup.
+
+(c) Bugs:
+1. **Early-Thursday false positive — REAL BUG**: Thursday 00:05 with maghrib 23:50 (same Thursday's evening, 24h later): minutesSince = (5 - 1430 + 1440) % 1440 = 15 ≤ 15 → sends at Thursday 00:05 ~24h early. Suppressed real reminder. MUST FIX. Fix: in Thursday branch, only consider rollover if now is past maghrib in the linear evening sense. Correct logic: 
+   - If nowHHMM >= maghribHHMM (string compare, same day): diff = now - maghrib (0..window) → due.
+   - If nowHHMM < maghribHHMM: only due if within early-morning cutoff (just after midnight, maghrib from yesterday). For Thursday branch with now < maghrib: means Thursday 00:05, maghrib 23:50 → maghrib is LATER TODAY — NOT passed → don't send, regardless of wrap distance. The wrap case only valid when crossing midnight: now early morning (< EARLY_MORNING_CUTOFF) and maghrib was yesterday evening. In Thursday branch, "yesterday" = Wednesday — not Thursday → no send anyway! So in the Thursday branch, wrap-comparison is ALWAYS wrong: either same-day passed (diff ≥ 0 small) or not-passed (maghrib later today or yesterday was Wednesday). Correct Thursday logic:
+     diff = now - maghrib (linear minutes, allow negative); due iff 0 <= diff <= window.
+     If diff negative → maghrib hasn't passed today (coming up tonight) OR we're past midnight Friday... Thursday branch only when today IS Thursday. Past-midnight-Friday handled by else branch (today=Friday). So Thursday: due iff 0 <= now - maghrib <= window. Simple! Remove wrap from Thursday branch; keep wrap only in the early-morning branch (yesterday maghrib near midnight).
+   - Else branch (Friday early morning): minutesSince wrap correct there.
+   Fix minutesSinceMaghrib usage: introduce linear `minutesAfter(maghrib, now)` = now - maghrib (no mod) for Thursday branch; keep minutesSinceMaghrib (mod) for the midnight-crossing branch. Update window tests accordingly.
+2. Hardcoded English errors in setCityCommand for ar users: get user lang before reply: on CityNotFound → cityNotFoundText(userLang). Need user fetch in setCityCommand: deps.store.get(chatId). Minor fix.
+
+Standards findings to fix:
+- Aladhan error taxonomy: 200+status ERROR "Unable to compute" → CityNotFound; other 200-ERROR → AladhanError. Tighten.
+- imageCache purge rejected promise (align with timingsCache).
+- Remove speculative fetchFn param (aladhan fetchFn — actually commands pass fetchPrayerTimes wrapper; tests use msw → param unused → remove).
+- dateEn naming → keep? Rename to gregorianDate — touches aladhan/commands/cron/window/tests. Cheap enough? Multiple files... I'll rename in window.ts helpers only? Inconsistent. Skip rename — marginal. Actually "mysterious name" — leave; note.
+- User shape duplication / city|country string / Middle Man / user?.language ?? "en" ×7 / lang ternary cascade — larger refactors. Judgement calls; skip for now, note in report. TDD skill: refactor belongs to review stage — but scope control: fix real bugs + cheap wins, list rest as follow-up.
+
+Fix list (this pass):
+1. Thursday-branch false positive (real bug) + window logic tests.
+2. setcity lang-aware errors (ar users).
+3. Aladhan 200-ERROR taxonomy.
+4. imageCache purge.
+5. Remove unused fetchFn param.
+
+Red tests first for bug fixes:
+- window: minutesAfter linear fn? Add to window.ts: `minutesAfterMaghrib(maghrib, now)` linear. Tests: "23:50","00:05" → -1425 (negative, not passed).
+- cron test: Thursday 00:05 tick, maghrib 23:50 → NO send (early-morning Thursday, maghrib later that day). Fixture: weekdayEn Thursday, maghrib "23:50", timezone London, now 2026-08-13T00:05Z → local? Need local 00:05 Thursday. 2026-08-13 is Thursday; 00:05 local = 23:05Z prev day (Aug 12 23:05Z → Aug 13 00:05 BST). now = 2026-08-12T23:05:00Z. today fetched (Thursday), nowHHMM 00:05, maghrib 23:50 → linear diff negative → no send ✓. Also same-day passed check unchanged.
+- commands: ar user invalid city → Arabic error text.
+- aladhan: 200 + status ERROR + data "something else" → AladhanError test.
+
+Implement after red. Also update existing window tests? minutesSinceMaghrib still used in midnight branch — keep its tests. Add minutesAfter tests.
+
+Then rerun suite, commit fixes. Then final aggregate report to user.
+</details></think>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:30:51Z)**_
+
+Both reviews in. Aggregate + fix real findings.
+
+## Standards
+
+**Documented-standard breach (1):** Aladhan error taxonomy — `aladhan.ts` throws `CityNotFoundError` for any 200-non-OK body, so a server-style error body tells users "couldn't find that city" instead of retry/skip. Everything else conforms.
+
+**Baseline smells (judgement calls):** user shape declared 4× (commands/cron/store/index), `city|country` string encoding, Middle Man `sendReminder`, imageCache lacks rejected-promise purge (divergent from timingsCache), speculative `fetchFn` param, `dateEn` naming, lang-ternary cascade.
+
+## Spec
+
+**(c1) Real bug:** Thursday 00:05 + Maghrib 23:50 → modulo-1440 wrap makes it "15 min since Maghrib" → sends ~24h early, then `sent_log` suppresses the real evening reminder. **(c2)** `/setcity` errors hardcoded English for ar users. **(a)** Cold-start/CPU measurement not done (needs deployed env — documented as deferred). Webhook registration = manual curl (documented). Window 15min vs AC 10min = documented jitter margin. Hadith verification flagged to user.
+
+Fix the two bugs + 3 cheap ones. Red first:
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:30:54Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\test\window.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:30:56Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\test\cron.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:30:57Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\test\commands.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:08Z)**_
+
+<think><details><summary>Thought Process</summary>
+Wait — commands test: invalid city for ar user — setCityCommand needs to know user lang. But for invalid city + NO user row yet: fallback "en". My test sets language first ✓.
+
+Also check cron test: "does not send Thursday morning" — the else branch early-morning check: now Thursday 00:05 → today.weekdayEn === "Thursday" → Thursday branch → minutesAfter negative → not due ✓. But wait: Thursday 00:05, EARLY_MORNING branch not reached (Thursday branch takes it). ✓.
+
+But hmm — midnight-crossing Thursday 23:50 case: Thursday 23:55 maghrib 23:50 → diff 5 → due ✓ (same day linear).
+
+What about real "late Thursday maghrib crossing midnight" — maghrib Thursday 23:50, tick Friday 00:05: today = Friday → else branch → early morning ✓ previousWeekday Thursday ✓ → yesterday maghrib 23:50 vs now 00:05 via minutesSinceMaghrib (mod) = 15 ≤ 15 ✓ due. Existing test covers (23:55 → 10). ✓.
+
+Also aladhan test for 200-status-ERROR-not-city → AladhanError. Add test.
+
+Implement code changes:
+1. window.ts: minutesAfterMaghrib (linear).
+2. cron.ts: Thursday branch uses minutesAfterMaghrib; else branch keeps minutesSinceMaghrib.
+3. commands.ts setCityCommand: lang-aware errors (get user first).
+4. aladhan.ts: 200 + status ERROR: if data string includes "Unable to compute" → CityNotFound else AladhanError. Hmm Aladhan "Unable to compute prayer times" — my existing test mocks exactly that → CityNotFound ✓. Add test: status ERROR data "Internal error" → AladhanError.
+5. cron.ts imageCache purge.
+6. aladhan.ts remove fetchFn param (index/commands pass through fine: fetchPrayerTimes(city, country, dateEn?) — signature change: (city, country, dateEn?) 3 args — commands call with (city, country) ✓; index fetchTimings calls fetchPrayerTimes(city, country, dateEn ?? undefined) ✓).
+
+Wait aladhan fetchFn removal: fetchPrayerTimes(city, country, dateEn?) — fine.
+
+Commands lang-aware: setCityCommand — fetch user at start: `const user = await deps.store.get(chatId); const lang = user?.language ?? "en";` — replaces all "en" literals. Service-unavailable message: add ar variant? messages.ts add `serviceUnavailableText(lang)`? Minor — inline: ar "تعذر الوصول إلى خدمة مواقيت الصلاة. حاول مرة أخرى بعد قليل." Add to messages.ts as function + test? Keep inline minimal — add function for consistency + quick test. Add messages test.
+</details></think>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:11Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\window.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:14Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\cron.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:16Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\cron.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:19Z)**_
+
+<think><details><summary>Thought Process</summary>
+Continue fixes: aladhan taxonomy + fetchFn removal, commands lang-aware errors, messages serviceUnavailableText. Create task for review fixes? Small batch — skip task tracking, nearly done.
+</details></think>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:24Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\aladhan.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:26Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\test\aladhan.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:31Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\commands.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:33Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\commands.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:34Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\messages.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:40Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="PowerShell"><details>
+<summary>Tool use: **PowerShell**</summary>
+Full tests + typecheck after review fixes
+
+```text
+Exit code 1
+      Tests  11 failed | 78 passed (89)
+   Start at  01:31:38
+   Duration  448ms (transform 500ms, setup 0ms, import 935ms, tests 292ms, environment 1ms)
+
+src/aladhan.ts(54,52): error TS2339: Property 'includes' does not exist on type 'never'.
+src/cron.ts(106,22): error TS2304: Cannot find name 'minutesAfterMaghrib'.
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:43Z)**_
+
+<think><details><summary>Thought Process</summary>
+Two type errors:
+1. aladhan.ts: `typeof body.data === "string"` — body.data type is object | undefined (interface), so narrow to never. Fix: cast body.data as unknown or check `typeof (body.data as unknown) === "string"`.
+2. cron.ts: minutesAfterMaghrib not imported. Add import.
+</details></think>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:44Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\aladhan.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:45Z)**_
+
+<tool-use data-tool-type="write" data-tool-name="Edit"><details>
+<summary>Tool use: **Edit**</summary>
+
+```text
+The file D:\Projects\al-kahf_bot\src\cron.ts has been updated successfully. (file state is current in your context — no need to Read it back)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:50Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="PowerShell"><details>
+<summary>Tool use: **PowerShell**</summary>
+Full tests + typecheck
+
+```text
+      Tests  89 passed (89)
+   Start at  01:31:49
+   Duration  391ms (transform 482ms, setup 0ms, import 861ms, tests 247ms, environment 1ms)
+```
+</details></tool-use>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:53Z)**_
+
+<think><details><summary>Thought Process</summary>
+89 green + typecheck clean. Commit review fixes.
+</details></think>
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:53Z)**_
+
+89 green. Commit fixes:
+
+_**Agent (deepseek-v4-pro 2026-08-16 19:31:55Z)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="PowerShell"><details>
+<summary>Tool use: **PowerShell**</summary>
+Commit review fixes
+</details></tool-use>

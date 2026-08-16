@@ -21,8 +21,7 @@ interface AladhanResponse {
 export async function fetchPrayerTimes(
   city: string,
   country: string,
-  dateEn?: string,
-  fetchFn: typeof fetch = fetch
+  dateEn?: string
 ): Promise<PrayerTimes> {
   const url = new URL("https://api.aladhan.com/v1/timingsByCity");
   url.searchParams.set("city", city);
@@ -32,7 +31,7 @@ export async function fetchPrayerTimes(
     url.searchParams.set("date", dateEn);
   }
 
-  const res = await fetchFn(url);
+  const res = await fetch(url);
   let body: AladhanResponse | string;
   try {
     body = (await res.json()) as AladhanResponse;
@@ -50,7 +49,13 @@ export async function fetchPrayerTimes(
     throw new AladhanError("Aladhan returned unexpected body");
   }
   if (body.code !== 200 || body.status !== "OK" || !body.data) {
-    throw new CityNotFoundError();
+    // Aladhan reports unknown cities as 200 + status ERROR ("Unable to
+    // compute prayer times..."). Anything else is a service-side error.
+    const errorData = body.data as unknown;
+    if (typeof errorData === "string" && errorData.includes("Unable to compute")) {
+      throw new CityNotFoundError();
+    }
+    throw new AladhanError(`Aladhan error response: ${body.status}`);
   }
 
   const { timings, date, meta } = body.data;

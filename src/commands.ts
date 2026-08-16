@@ -6,6 +6,7 @@ import {
   noCityText,
   pausedText,
   resumedText,
+  serviceUnavailableText,
   statusText,
   type Language,
 } from "./messages";
@@ -35,29 +36,31 @@ export async function setCityCommand(
   chatId: string,
   deps: CommandDeps
 ): Promise<string> {
+  const user = await deps.store.get(chatId);
+  const lang = user?.language ?? "en";
+
   const comma = raw.indexOf(",");
   if (comma === -1) {
-    return cityNotFoundText("en");
+    return cityNotFoundText(lang);
   }
   const city = raw.slice(0, comma).trim();
   const country = raw.slice(comma + 1).trim();
   if (!city || !country) {
-    return cityNotFoundText("en");
+    return cityNotFoundText(lang);
   }
 
   try {
     await deps.fetchPrayerTimes(city, country);
   } catch (err) {
     if (err instanceof CityNotFoundError) {
-      return cityNotFoundText("en");
+      return cityNotFoundText(lang);
     }
     // Service unavailable — ask the user to retry later (hardened in #7).
-    return "I couldn't reach the prayer times service. Please try again in a moment.";
+    return serviceUnavailableText(lang);
   }
 
   await deps.store.save(chatId, { city, country });
-  const user = await deps.store.get(chatId);
-  return citySetText(user?.language ?? "en", city, country);
+  return citySetText(lang, city, country);
 }
 
 export async function statusCommand(

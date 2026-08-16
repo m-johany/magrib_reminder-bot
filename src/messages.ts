@@ -80,6 +80,13 @@ export function noCityText(lang: Language): string {
   return "No city set. Use /setcity to configure";
 }
 
+export function serviceUnavailableText(lang: Language): string {
+  if (lang === "ar") {
+    return "تعذّر الوصول إلى خدمة مواقيت الصلاة. حاول مرة أخرى بعد قليل.";
+  }
+  return "I couldn't reach the prayer times service. Please try again in a moment.";
+}
+
 export function statusText(
   lang: Language,
   user: { city: string; country: string; language: Language; paused: boolean }

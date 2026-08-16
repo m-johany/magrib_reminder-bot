@@ -59,6 +59,16 @@ describe("fetchPrayerTimes", () => {
     await expect(fetchPrayerTimes("London", "UK")).rejects.toBeInstanceOf(AladhanError);
   });
 
+  it("throws AladhanError on 200 responses with non-city server errors", async () => {
+    server.use(
+      http.get("https://api.aladhan.com/v1/timingsByCity", () =>
+        HttpResponse.json({ code: 500, status: "ERROR", data: "Internal error" })
+      )
+    );
+
+    await expect(fetchPrayerTimes("London", "UK")).rejects.toBeInstanceOf(AladhanError);
+  });
+
   it("throws CityNotFoundError on Aladhan 400 validation errors", async () => {
     server.use(
       http.get("https://api.aladhan.com/v1/timingsByCity", () =>

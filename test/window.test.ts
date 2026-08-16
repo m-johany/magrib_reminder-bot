@@ -1,5 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { formatDateEn, formatHHMM, minutesSinceMaghrib, previousDateEn } from "../src/window";
+import {
+  formatDateEn,
+  formatHHMM,
+  minutesAfterMaghrib,
+  minutesSinceMaghrib,
+  previousDateEn,
+} from "../src/window";
+
+describe("minutesAfterMaghrib", () => {
+  it("is 0 exactly at Maghrib", () => {
+    expect(minutesAfterMaghrib("20:00", "20:00")).toBe(0);
+  });
+
+  it("counts minutes after Maghrib on the same day", () => {
+    expect(minutesAfterMaghrib("20:00", "20:05")).toBe(5);
+  });
+
+  it("is negative when Maghrib is later the same day", () => {
+    // Thursday 00:05, Maghrib 23:50 → the day's Maghrib has NOT passed.
+    expect(minutesAfterMaghrib("23:50", "00:05")).toBeLessThan(0);
+  });
+});
 
 describe("minutesSinceMaghrib", () => {
   it("is 0 exactly at Maghrib", () => {

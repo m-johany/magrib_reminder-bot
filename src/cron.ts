@@ -4,6 +4,7 @@ import { parseWeekNumber, pickHadithIndex } from "./rotation";
 import { isoWeekKey } from "./week";
 import {
   formatHHMM,
+  minutesAfterMaghrib,
   minutesSinceMaghrib,
   previousDateEn,
   previousWeekdayEn,
@@ -101,7 +102,10 @@ export async function runTick(now: Date, deps: TickDeps): Promise<void> {
 
       let passed = false;
       if (today.weekdayEn === "Thursday") {
-        passed = minutesSinceMaghrib(today.maghrib, nowHHMM) <= REMINDER_WINDOW_MIN;
+        // Same-day linear check: a negative diff means today's Maghrib is
+        // still ahead (e.g. Thursday 00:05 with Maghrib 23:50) — never send.
+        const diff = minutesAfterMaghrib(today.maghrib, nowHHMM);
+        passed = diff >= 0 && diff <= REMINDER_WINDOW_MIN;
       } else if (nowHHMM < EARLY_MORNING_CUTOFF && previousWeekdayEn(now, today.timezone) === "Thursday") {
         // Thursday's Maghrib may still be inside the window just after midnight.
         const yesterday = await fetchTimings(city, country, previousDateEn(now, today.timezone));
@@ -121,6 +125,8 @@ export async function runTick(now: Date, deps: TickDeps): Promise<void> {
     let p = imageCache.get(lang);
     if (!p) {
       p = deps.createImage(hadith as HadithText, lang);
+      // Same policy as the timings cache: a failed render is retried, not cached.
+      p.catch(() => imageCache.delete(lang));
       imageCache.set(lang, p);
     }
     return p;

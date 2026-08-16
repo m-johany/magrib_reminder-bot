@@ -344,6 +344,23 @@ describe("runTick", () => {
     expect(errors).toHaveLength(1);
   });
 
+  it("does not send Thursday morning for an evening Maghrib (no 24h-early false positive)", async () => {
+    const lateThursday: PrayerTimes = {
+      maghrib: "23:50",
+      weekdayEn: "Thursday",
+      dateEn: "13-08-2026",
+      timezone: "Europe/London",
+    };
+    const { deps, sends } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: lateThursday },
+    ]);
+
+    // Thursday 00:05 local — Maghrib (23:50) is ~24h away, not just passed.
+    await runTick(new Date("2026-08-12T23:05:00Z"), deps);
+
+    expect(sends).toHaveLength(0);
+  });
+
   it("logs chat_id context on per-user send failures", async () => {
     const { deps } = makeDeps([londonActive], [
       { city: "London", dateEn: null, timings: thursdayLondon },

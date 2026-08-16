@@ -1,10 +1,16 @@
+const toMinutes = (hhmm: string): number => {
+  const [h, m] = hhmm.split(":").map((p) => Number.parseInt(p, 10));
+  return (h ?? 0) * 60 + (m ?? 0);
+};
+
+/** Linear minutes from Maghrib to now on the same day; negative = Maghrib still ahead. */
+export function minutesAfterMaghrib(maghribHHMM: string, nowHHMM: string): number {
+  return toMinutes(nowHHMM) - toMinutes(maghribHHMM);
+}
+
 /** Minutes from `maghribHHMM` to `nowHHMM` within the same evening, crossing midnight. */
 export function minutesSinceMaghrib(maghribHHMM: string, nowHHMM: string): number {
-  const toMinutes = (hhmm: string): number => {
-    const [h, m] = hhmm.split(":").map((p) => Number.parseInt(p, 10));
-    return (h ?? 0) * 60 + (m ?? 0);
-  };
-  const diff = toMinutes(nowHHMM) - toMinutes(maghribHHMM);
+  const diff = minutesAfterMaghrib(maghribHHMM, nowHHMM);
   return (diff + 1440) % 1440;
 }
 

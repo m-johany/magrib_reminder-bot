@@ -8,7 +8,11 @@
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:migrate:local": "wrangler d1 migrations apply al-kahf-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply al-kahf-db --remote",
+    "db:seed:local": "wrangler d1 execute al-kahf-db --local --file=./db/seed.sql",
+    "db:seed:remote": "wrangler d1 execute al-kahf-db --remote --file=./db/seed.sql"
   },
   "dependencies": {
     "grammy": "^1.45.1"

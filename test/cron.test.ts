@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PrayerTimes } from "../src/aladhan";
-import { runTick, type ActiveUser, type TickDeps } from "../src/cron";
+import { runTick, type ActiveUser, type Hadith, type TickDeps } from "../src/cron";
 
 interface FetchedTimings {
   city: string;
@@ -8,11 +8,24 @@ interface FetchedTimings {
   timings: PrayerTimes;
 }
 
-function makeDeps(users: ActiveUser[], fetchResults: FetchedTimings[]) {
+const weekHadith: Hadith = {
+  id: 3,
+  textEn: "Whoever recites Surah al-Kahf on Friday, a light will shine for him between the two Fridays.",
+  textAr: "مَنْ قَرَأَ سُورَةَ الْكَهْفِ يَوْمَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ مَا بَيْنَ الْجُمُعَتَيْنِ",
+  sourceEn: "Al-Mustadrak 2/399; graded sahih by al-Albani",
+  sourceAr: "المستدرك ٢/٣٩٩ وصححه الألباني",
+};
+
+function makeDeps(
+  users: ActiveUser[],
+  fetchResults: FetchedTimings[],
+  hadiths: Hadith[] = [weekHadith]
+) {
   const fetchCalls: { city: string; dateEn: string | null }[] = [];
   const sends: { chatId: string; text: string }[] = [];
-  const records: { userId: number; weekKey: string }[] = [];
+  const records: { userId: number; hadithId: number | null; weekKey: string }[] = [];
   const errors: string[] = [];
+  const hadithOrders: number[] = [];
 
   const deps: TickDeps = {
     async listActiveUsers() {
@@ -32,15 +45,22 @@ function makeDeps(users: ActiveUser[], fetchResults: FetchedTimings[]) {
     async alreadySent() {
       return false;
     },
-    async recordSend(userId, _hadithId, weekKey) {
-      records.push({ userId, weekKey });
+    async recordSend(userId, hadithId, weekKey) {
+      records.push({ userId, hadithId, weekKey });
+    },
+    async countHadith() {
+      return hadiths.length;
+    },
+    async getHadithByWeekOrder(weekOrder) {
+      hadithOrders.push(weekOrder);
+      return hadiths[weekOrder % hadiths.length] ?? null;
     },
     logError(msg) {
       errors.push(msg);
     },
   };
 
-  return { deps, fetchCalls, sends, records, errors };
+  return { deps, fetchCalls, sends, records, errors, hadithOrders };
 }
 
 const londonActive: ActiveUser = {
@@ -173,7 +193,7 @@ describe("runTick", () => {
     deps.alreadySent = async () => sent;
     deps.recordSend = async () => {
       sent = true;
-      records.push({ userId: 1, weekKey: "2026-W33" });
+      records.push({ userId: 1, hadithId: null, weekKey: "2026-W33" });
     };
 
     await runTick(new Date("2026-08-13T19:05:00Z"), deps);
@@ -195,5 +215,39 @@ describe("runTick", () => {
 
     expect(sends.map((s) => s.chatId)).toEqual(["222"]);
     expect(errors).toHaveLength(1);
+  });
+
+  it("includes the week's hadith in the reminder and records its id", async () => {
+    // 2026-08-13 is ISO week 33; weekOrder = 33 % 1 = 0.
+    const { deps, sends, records, hadithOrders } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(hadithOrders).toEqual([33 % 1]);
+    expect(sends[0]?.text).toContain("light will shine");
+    expect(records[0]).toMatchObject({ userId: 1, hadithId: 3 });
+  });
+
+  it("picks the same hadith for every user in the same week (single lookup per tick)", async () => {
+    const { deps, hadithOrders } = makeDeps([londonActive, londonActive2], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ]);
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(hadithOrders).toHaveLength(1);
+  });
+
+  it("falls back to a plain reminder when no hadith are seeded", async () => {
+    const { deps, sends, records } = makeDeps([londonActive], [
+      { city: "London", dateEn: null, timings: thursdayLondon },
+    ], []);
+
+    await runTick(new Date("2026-08-13T19:05:00Z"), deps);
+
+    expect(sends[0]?.text).not.toContain("Hadith");
+    expect(records[0]?.hadithId).toBeNull();
   });
 });

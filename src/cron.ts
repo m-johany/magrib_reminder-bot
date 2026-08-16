@@ -1,5 +1,6 @@
 import type { PrayerTimes } from "./aladhan";
-import { reminderText, type Language } from "./messages";
+import { reminderText, type HadithText, type Language } from "./messages";
+import { parseWeekNumber, pickHadithIndex } from "./rotation";
 import { isoWeekKey } from "./week";
 import {
   formatHHMM,
@@ -23,18 +24,31 @@ export interface ActiveUser {
   paused: boolean;
 }
 
+export interface Hadith extends HadithText {
+  id: number;
+}
+
 export interface TickDeps {
   listActiveUsers(): Promise<ActiveUser[]>;
   fetchTimings(city: string, country: string, dateEn: string | null): Promise<PrayerTimes>;
   sendReminder(chatId: string, text: string): Promise<void>;
   alreadySent(userId: number, weekKey: string): Promise<boolean>;
   recordSend(userId: number, hadithId: number | null, weekKey: string): Promise<void>;
+  countHadith(): Promise<number>;
+  getHadithByWeekOrder(weekOrder: number): Promise<Hadith | null>;
   logError(message: string, err?: unknown): void;
 }
 
 export async function runTick(now: Date, deps: TickDeps): Promise<void> {
   const users = (await deps.listActiveUsers()).filter((u) => !u.paused && u.city && u.country);
   const weekKey = isoWeekKey(now);
+
+  // Global weekly rotation: every user gets the same hadith each week.
+  const hadithCount = await deps.countHadith();
+  const hadith =
+    hadithCount > 0
+      ? await deps.getHadithByWeekOrder(pickHadithIndex(parseWeekNumber(weekKey), hadithCount))
+      : null;
 
   // Group users by unique city so each city hits the Aladhan API once per date.
   const cities = new Map<string, ActiveUser[]>();
@@ -85,8 +99,11 @@ export async function runTick(now: Date, deps: TickDeps): Promise<void> {
       if (await deps.alreadySent(user.id, weekKey)) {
         continue;
       }
-      await deps.sendReminder(user.telegram_chat_id, reminderText(user.language, user.city as string));
-      await deps.recordSend(user.id, null, weekKey);
+      await deps.sendReminder(
+        user.telegram_chat_id,
+        reminderText(user.language, user.city as string, hadith)
+      );
+      await deps.recordSend(user.id, hadith?.id ?? null, weekKey);
     } catch (err) {
       deps.logError(`Reminder send failed for user ${user.id}`, err);
     }

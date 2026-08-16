@@ -122,7 +122,38 @@ export function resumedText(lang: Language): string {
   return "Reminders resumed ✅. See you Thursday after Maghrib, insha'Allah 🌙";
 }
 
-export function reminderText(lang: Language, city: string): string {
+export interface HadithText {
+  textEn: string;
+  textAr: string;
+  sourceEn: string;
+  sourceAr: string;
+}
+
+export function reminderText(lang: Language, city: string, hadith: HadithText | null = null): string {
+  const hadithBlock = hadith
+    ? lang === "ar"
+      ? [
+          "",
+          "━━━━━━━━━━━━━",
+          "📜 حديث الأسبوع:",
+          "",
+          hadith.textAr,
+          "",
+          `المصدر: ${hadith.sourceAr}`,
+        ].join("\n")
+      : [
+          "",
+          "━━━━━━━━━━━━━",
+          "📜 Hadith of the week:",
+          "",
+          hadith.textAr,
+          "",
+          `"${hadith.textEn}"`,
+          "",
+          `— ${hadith.sourceEn}`,
+        ].join("\n")
+    : "";
+
   if (lang === "ar") {
     return [
       "السلام عليكم ورحمة الله وبركاته 🌙",
@@ -130,6 +161,7 @@ export function reminderText(lang: Language, city: string): string {
       `حان وقت قراءة سورة الكهف — إنها ليلة الجمعة في ${city} بعد المغرب.`,
       "",
       "لا تنسَ قراءة سورة الكهف اليوم، فقد حثّ عليها النبي ﷺ. تقبّل الله منا ومنكم.",
+      hadithBlock,
     ].join("\n");
   }
   return [
@@ -138,5 +170,6 @@ export function reminderText(lang: Language, city: string): string {
     `It's Thursday after Maghrib in ${city} — the night of Jumu'ah has begun.`,
     "",
     "Don't forget to recite Surah al-Kahf today, as the Prophet ﷺ encouraged. May Allah accept it from you.",
+    hadithBlock,
   ].join("\n");
 }

@@ -135,6 +135,32 @@ function makeTickDeps(env: Env, sendMessage: (chatId: string, text: string) => P
         .bind(userId, hadithId, weekKey)
         .run();
     },
+    async countHadith() {
+      const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM hadith").first<{ n: number }>();
+      return row?.n ?? 0;
+    },
+    async getHadithByWeekOrder(weekOrder) {
+      const row = await env.DB.prepare(
+        "SELECT id, text_en, text_ar, source_en, source_ar FROM hadith WHERE week_order = ?"
+      )
+        .bind(weekOrder)
+        .first<{
+          id: number;
+          text_en: string;
+          text_ar: string;
+          source_en: string;
+          source_ar: string;
+        }>();
+      return row
+        ? {
+            id: row.id,
+            textEn: row.text_en,
+            textAr: row.text_ar,
+            sourceEn: row.source_en,
+            sourceAr: row.source_ar,
+          }
+        : null;
+    },
     logError,
   };
 }

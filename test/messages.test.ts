@@ -6,10 +6,18 @@ import {
   languageSetText,
   noCityText,
   pausedText,
+  reminderText,
   resumedText,
   statusText,
   welcomeText,
 } from "../src/messages";
+
+const hadith = {
+  textEn: "Whoever recites Surah al-Kahf on Friday, a light will shine for him between the two Fridays.",
+  textAr: "مَنْ قَرَأَ سُورَةَ الْكَهْفِ يَوْمَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ مَا بَيْنَ الْجُمُعَتَيْنِ",
+  sourceEn: "Al-Mustadrak 2/399; graded sahih by al-Albani, Sahih al-Jami' 6470",
+  sourceAr: "المستدرك ٢/٣٩٩، وصححه الألباني في صحيح الجامع ٦٤٧٠",
+};
 
 describe("welcomeText", () => {
   it("opens with Islamic greeting in English", () => {
@@ -120,5 +128,29 @@ describe("pausedText / resumedText", () => {
   it("has Arabic variants", () => {
     expect(pausedText("ar")).toContain("إيقاف");
     expect(resumedText("ar")).toContain("استئناف");
+  });
+});
+
+describe("reminderText", () => {
+  it("includes the hadith text and source citation", () => {
+    const text = reminderText("en", "London", hadith);
+    expect(text).toContain("light will shine");
+    expect(text).toContain("Sahih al-Jami' 6470");
+  });
+
+  it("shows the Arabic matn alongside the translation", () => {
+    const text = reminderText("en", "London", hadith);
+    expect(text).toContain("سُورَةَ الْكَهْفِ");
+  });
+
+  it("works without a hadith (plain reminder)", () => {
+    const text = reminderText("en", "London", null);
+    expect(text).toContain("Surah al-Kahf");
+    expect(text).not.toContain("Hadith");
+  });
+
+  it("uses the Arabic source for Arabic-language users", () => {
+    const text = reminderText("ar", "London", hadith);
+    expect(text).toContain("صحيح الجامع");
   });
 });

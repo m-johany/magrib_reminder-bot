@@ -12,13 +12,14 @@ A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recit
 
 Repo state: `main` @ `2bd5ed2` on GitHub, 89 tests green, typecheck clean, `wrangler deploy --dry-run` bundles (3MB / 1.17MB gzip).
 
+**Card render bug found + fixed (2026-08-17):** resvg-wasm ignores SVG `@font-face` data URIs — without explicit `font.fontBuffers` the hadith text silently rendered as *nothing* (cards were empty frames; the PNG smoke test only checked bytes). Fixed in `src/image.ts` (embedded font decoded from `src/font.ts` and injected via options); `test/image.test.ts` now decodes the PNG and asserts cream text pixels are present (>5000), so blank renders fail CI. Arabic shaping verified correct: resvg ink widths match harfbuzz-shaped reference within ~5% (ink-extent vs advance-width delta). Rendered cards: `/tmp/card7-en.png`, `/tmp/card7-ar.png`, `/tmp/card4-ar.png`.
+
 ### Remaining before real deployment (pick up here)
 
 1. **Re-verify the 10 hadith texts** in `db/seed.sql` with a qualified source (Arabic matn + translations + gradings). The seed file itself flags this.
-2. **Visually check one rendered card** — Arabic shaping (rtl + ligatures) in resvg needs eyeball verification. Render: `renderCardPng(buildCardSvg(hadith, "en"), wasm)`; easiest via a small local script or after deploy, `/status`-adjacent test message.
-3. **Deploy**: create D1 (`wrangler d1 create al-kahf-db`), put real `database_id` in `wrangler.jsonc` (currently `REPLACE_ME_after_wrangler_d1_create`), `wrangler secret put TELEGRAM_BOT_TOKEN`, `npm run deploy`, `npm run db:migrate:remote`, `npm run db:seed:remote`, register webhook via `curl setWebhook` (steps in `README.md`).
-4. **Measure cold start / render CPU** on the deployed worker (issue #7 criteria deferred until deployed).
-5. Optional follow-ups from code review (judgement calls, not blocking): user shape declared 4× (`commands/cron/store/index`), `city|country` string encoding in `cron.ts`, `sendReminder` Middle Man in `index.ts`, `dateEn` naming in `window.ts`/`aladhan.ts`.
+2. **Deploy**: create D1 (`wrangler d1 create al-kahf-db`), put real `database_id` in `wrangler.jsonc` (currently `REPLACE_ME_after_wrangler_d1_create`), `wrangler secret put TELEGRAM_BOT_TOKEN`, `npm run deploy`, `npm run db:migrate:remote`, `npm run db:seed:remote`, register webhook via `curl setWebhook` (steps in `README.md`).
+3. **Measure cold start / render CPU** on the deployed worker (issue #7 criteria deferred until deployed).
+4. Optional follow-ups from code review (judgement calls, not blocking): user shape declared 4× (`commands/cron/store/index`), `city|country` string encoding in `cron.ts`, `sendReminder` Middle Man in `index.ts`, `dateEn` naming in `window.ts`/`aladhan.ts`.
 
 ### Known deviations from SPEC.md (intentional)
 

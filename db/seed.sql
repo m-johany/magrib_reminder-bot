@@ -7,9 +7,9 @@
 --
 -- Verified 2026-08-17 against primary sources (sunnah.com, al-Mustadrak via
 -- sunnah.com hakim, dorar.net, shamela.ws at-Targhib wa'l-Tarhib): entries
--- 0-6 PASS as-is; entry 7 carries a weak (da'if per al-Albani) grading and is
--- pending a keep/drop/replace decision; the original entries 8 (duplicate of
--- 3) and wrong citations (1, 3, 4, 9) were corrected/removed in this commit.
+-- 0-6 PASS as-is; the weak Ibn Mardawayh entry (da'if per al-Albani) and the
+-- duplicate of entry 3 were removed; wrong citations (1, 3, 4, 9) were
+-- corrected in this commit.
 -- week_order runs 0..N-1; rotation = week_number % count.
 
 INSERT INTO hadith (week_order, text_en, text_ar, source_en, source_ar) VALUES
@@ -56,12 +56,6 @@ INSERT INTO hadith (week_order, text_en, text_ar, source_en, source_ar) VALUES
  'المستدرك ٢/٣٩٩؛ وصححه الألباني في صحيح الجامع ٦٤٧٠'),
 
 (7,
- 'Whoever recites Surah al-Kahf on Friday, a light will shine for him from beneath his feet to the clouds of the sky, lighting him on the Day of Resurrection, and he will be forgiven between the two Fridays.',
- 'مَنْ قَرَأَ سُورَةَ الْكَهْفِ فِي يَوْمِ الْجُمُعَةِ سَطَعَ لَهُ نُورٌ مِنْ تَحْتِ قَدَمِهِ إِلَى عَنَانِ السَّمَاءِ يُضِيءُ لَهُ يَوْمَ الْقِيَامَةِ، وَغُفِرَ لَهُ مَا بَيْنَ الْجُمُعَتَيْنِ',
- 'Ibn Mardawayh in his Tafsir, as cited in at-Targhib wa''l-Tarhib 1/298 (al-Mundhiri: acceptable isnad; al-Albani graded it da''if)',
- 'رواه ابن مردويه في تفسيره، نقله المنذري في الترغيب والترهيب ١/٢٩٨ (بإسناد لا بأس به، وضعّفه الألباني)'),
-
-(8,
  'Whoever recites Surah al-Kahf on the night of Friday, a light will shine for him between him and the Ancient House (the Ka''bah).',
  'مَنْ قَرَأَ سُورَةَ الْكَهْفِ لَيْلَةَ الْجُمُعَةِ أَضَاءَ لَهُ مِنَ النُّورِ فِيمَا بَيْنَهُ وَبَيْنَ الْبَيْتِ الْعَتِيقِ',
  'Sunan al-Darimi 3312; al-Bayhaqi 5856; graded sahih by al-Albani, Sahih at-Targhib 736',

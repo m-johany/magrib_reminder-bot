@@ -2,6 +2,7 @@
   "name": "al-kahf-bot",
   "main": "src/index.ts",
   "compatibility_date": "2026-08-01",
+  "account_id": "a2bb69f77ebcfb845a14d2ce46582a56",
   "observability": {
     "enabled": true
   },
@@ -9,13 +10,7 @@
     {
       "binding": "DB",
       "database_name": "al-kahf-db",
-      "database_id": "REPLACE_ME_after_wrangler_d1_create"
-    }
-  ],
-  "migrations": [
-    {
-      "tag": "v1",
-      "database_name": "al-kahf-db",
+      "database_id": "57ff5617-cba9-403d-b2bf-2c5dad98e9b4",
       "migrations_dir": "migrations"
     }
   ],

@@ -8,6 +8,7 @@ import {
   setCityCommand,
   setLanguageCommand,
   statusCommand,
+  testCommand,
 } from "./commands";
 import { runTick, type TickDeps } from "./cron";
 import { helpText, type HadithText, type Language, welcomeText } from "./messages";
@@ -26,6 +27,7 @@ const COMMANDS = [
   { command: "pause", description: "Pause reminders" },
   { command: "resume", description: "Resume reminders" },
   { command: "status", description: "Show your current settings" },
+  { command: "test", description: "Send a test preview of this week's reminder" },
   { command: "help", description: "List all commands" },
 ];
 
@@ -81,6 +83,20 @@ function createBot(token: string, env: Env): Bot {
     const reply = await statusCommand(String(ctx.chat.id), { store });
     await ctx.reply(reply);
   });
+  bot.command("test", async (ctx) => {
+    const result = await testCommand(String(ctx.chat.id), {
+      store,
+      fetchPrayerTimes: (city, country) => fetchPrayerTimes(city, country),
+      ...makeHadithDeps(env),
+    });
+    if (result.photo) {
+      await ctx.replyWithPhoto(new InputFile(result.photo, "al-kahf.png"), {
+        caption: result.text,
+      });
+    } else {
+      await ctx.reply(result.text);
+    }
+  });
 
   // Register commands with Telegram so they appear in the client UI.
   void bot.api
@@ -88,6 +104,41 @@ function createBot(token: string, env: Env): Bot {
     .catch((err: unknown) => console.error("setMyCommands failed", err));
 
   return bot;
+}
+
+/** Hadith selection + card rendering, shared by the cron tick and /test. */
+function makeHadithDeps(env: Env) {
+  return {
+    async countHadith(): Promise<number> {
+      const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM hadith").first<{ n: number }>();
+      return row?.n ?? 0;
+    },
+    async getHadithByWeekOrder(weekOrder: number) {
+      const row = await env.DB.prepare(
+        "SELECT id, text_en, text_ar, source_en, source_ar FROM hadith WHERE week_order = ?"
+      )
+        .bind(weekOrder)
+        .first<{
+          id: number;
+          text_en: string;
+          text_ar: string;
+          source_en: string;
+          source_ar: string;
+        }>();
+      return row
+        ? {
+            id: row.id,
+            textEn: row.text_en,
+            textAr: row.text_ar,
+            sourceEn: row.source_en,
+            sourceAr: row.source_ar,
+          }
+        : null;
+    },
+    createImage(hadith: HadithText, lang: Language): Promise<Uint8Array> {
+      return renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm));
+    },
+  };
 }
 
 function makeTickDeps(
@@ -102,6 +153,7 @@ function makeTickDeps(
     console.warn(JSON.stringify({ level: "warn", message, error: String(err ?? "") }));
 
   return {
+    ...makeHadithDeps(env),
     async listActiveUsers() {
       const { results } = await env.DB.prepare(
         `SELECT id, telegram_chat_id, city, country, language, paused
@@ -130,9 +182,6 @@ function makeTickDeps(
     async sendReminder(chatId, text, photo) {
       await sendMessage(chatId, text, photo);
     },
-    async createImage(hadith: HadithText, lang: Language) {
-      return renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm));
-    },
     async alreadySent(userId, weekKey) {
       const row = await env.DB.prepare(
         "SELECT COUNT(*) AS n FROM sent_log WHERE user_id = ? AND week_key = ?"
@@ -148,34 +197,10 @@ function makeTickDeps(
         .bind(userId, hadithId, weekKey)
         .run();
     },
-    async countHadith() {
-      const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM hadith").first<{ n: number }>();
-      return row?.n ?? 0;
-    },
-    async getHadithByWeekOrder(weekOrder) {
-      const row = await env.DB.prepare(
-        "SELECT id, text_en, text_ar, source_en, source_ar FROM hadith WHERE week_order = ?"
-      )
-        .bind(weekOrder)
-        .first<{
-          id: number;
-          text_en: string;
-          text_ar: string;
-          source_en: string;
-          source_ar: string;
-        }>();
-      return row
-        ? {
-            id: row.id,
-            textEn: row.text_en,
-            textAr: row.text_ar,
-            sourceEn: row.source_en,
-            sourceAr: row.source_ar,
-          }
-        : null;
-    },
     sleep(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+      const { promise, resolve } = Promise.withResolvers<void>();
+      setTimeout(resolve, ms);
+      return promise;
     },
     logError,
     logWarn,

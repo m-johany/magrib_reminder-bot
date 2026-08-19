@@ -7,6 +7,7 @@ const COMMAND_LIST_EN = [
   ["/pause", "Pause reminders temporarily"],
   ["/resume", "Resume reminders"],
   ["/status", "Show your current settings"],
+  ["/test", "Send a test preview of this week's reminder"],
   ["/help", "List all commands"],
 ] as const;
 
@@ -17,6 +18,7 @@ const COMMAND_LIST_AR: readonly (readonly [string, string])[] = [
   ["/pause", "إيقاف التذكيرات مؤقتًا"],
   ["/resume", "استئناف التذكيرات"],
   ["/status", "عرض إعداداتك الحالية"],
+  ["/test", "أرسل معاينة تجريبية لتذكير هذا الأسبوع"],
   ["/help", "عرض جميع الأوامر"],
 ];
 
@@ -127,6 +129,20 @@ export function resumedText(lang: Language): string {
     return "تم استئناف التذكيرات ✅. نلتقي ليلة الجمعة بعد المغرب بإذن الله 🌙";
   }
   return "Reminders resumed ✅. See you Thursday after Maghrib, insha'Allah 🌙";
+}
+
+export function testPreviewText(lang: Language): string {
+  if (lang === "ar") {
+    return "🧪 هذه معاينة تجريبية لتذكيرك الأسبوعي — سيُرسل التذكير الحقيقي في موعده كالمعتاد.";
+  }
+  return "🧪 This is a test preview of your weekly reminder — the real reminder will still arrive on Thursday as usual.";
+}
+
+export function testImageFailedText(lang: Language): string {
+  if (lang === "ar") {
+    return "⚠️ تعذّر إنشاء صورة البطاقة — يُعرض النص فقط.";
+  }
+  return "⚠️ The card image failed to render — showing text only.";
 }
 
 export interface HadithText {

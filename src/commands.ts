@@ -1,15 +1,22 @@
 import { CityNotFoundError, type PrayerTimes } from "./aladhan";
+import type { Hadith } from "./cron";
 import {
   cityNotFoundText,
   citySetText,
   languageSetText,
   noCityText,
   pausedText,
+  reminderText,
   resumedText,
   serviceUnavailableText,
   statusText,
+  testImageFailedText,
+  testPreviewText,
+  type HadithText,
   type Language,
 } from "./messages";
+import { parseWeekNumber, pickHadithIndex } from "./rotation";
+import { isoWeekKey } from "./week";
 
 export interface User {
   telegram_chat_id: string;
@@ -104,4 +111,76 @@ export async function resumeCommand(
   await deps.store.save(chatId, { paused: false });
   const user = await deps.store.get(chatId);
   return resumedText(user?.language ?? "en");
+}
+
+export interface TestDeps {
+  store: UserStore;
+  fetchPrayerTimes: (city: string, country: string) => Promise<PrayerTimes>;
+  countHadith: () => Promise<number>;
+  getHadithByWeekOrder: (weekOrder: number) => Promise<Hadith | null>;
+  createImage: (hadith: HadithText, lang: Language) => Promise<Uint8Array>;
+}
+
+export interface TestResult {
+  /** Reply text on error; photo caption on success. */
+  text: string;
+  /** Rendered card bytes when the image pipeline succeeded. */
+  photo?: Uint8Array;
+}
+
+/**
+ * Preview this week's reminder right now, mirroring the cron send path:
+ * Aladhan city validation, the global weekly rotation, and card rendering
+ * with a text-only fallback. Never writes sent_log, so the real Thursday
+ * reminder still fires for this user.
+ */
+export async function testCommand(
+  chatId: string,
+  deps: TestDeps,
+  now: Date = new Date()
+): Promise<TestResult> {
+  const user = await deps.store.get(chatId);
+  const lang = user?.language ?? "en";
+
+  if (!user?.city || !user.country) {
+    return { text: noCityText(lang) };
+  }
+
+  try {
+    await deps.fetchPrayerTimes(user.city, user.country);
+  } catch (err) {
+    if (err instanceof CityNotFoundError) {
+      return { text: cityNotFoundText(lang) };
+    }
+    return { text: serviceUnavailableText(lang) };
+  }
+
+  // Same deterministic weekly rotation as the cron tick.
+  const hadithCount = await deps.countHadith();
+  const hadith =
+    hadithCount > 0
+      ? await deps.getHadithByWeekOrder(
+          pickHadithIndex(parseWeekNumber(isoWeekKey(now)), hadithCount)
+        )
+      : null;
+
+  const caption = [testPreviewText(lang), "", reminderText(lang, user.city, hadith)].join("\n");
+  if (!hadith) {
+    return { text: caption };
+  }
+
+  try {
+    const photo = await deps.createImage(hadith, lang);
+    return { text: caption, photo };
+  } catch {
+    // Same policy as the cron tick: a failed render never blocks the send.
+    return {
+      text: [
+        testPreviewText(lang),
+        testImageFailedText(lang),
+        "",
+        reminderText(lang, user.city, hadith),
+      ].join("\n"),
+    };
+  }
 }

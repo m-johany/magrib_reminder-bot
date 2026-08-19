@@ -10,7 +10,7 @@ A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recit
 
 **All 7 tickets implemented, reviewed, merged to `main`, pushed. Issues #1–#7 closed.**
 
-Repo state: `main` @ `2bd5ed2` on GitHub, 89 tests green, typecheck clean, `wrangler deploy --dry-run` bundles (3MB / 1.17MB gzip).
+Repo state: `main` @ `2bd5ed2` on GitHub, 97 tests green, typecheck clean, `wrangler deploy --dry-run` bundles (3MB / 1.17MB gzip).
 
 **Card render bug found + fixed (2026-08-17):** resvg-wasm ignores SVG `@font-face` data URIs — without explicit `font.fontBuffers` the hadith text silently rendered as *nothing* (cards were empty frames; the PNG smoke test only checked bytes). Fixed in `src/image.ts` (embedded font decoded from `src/font.ts` and injected via options); `test/image.test.ts` now decodes the PNG and asserts cream text pixels are present (>5000), so blank renders fail CI. Arabic shaping verified correct: resvg ink widths match harfbuzz-shaped reference within ~5% (ink-extent vs advance-width delta). Rendered cards: `/tmp/card7-en.png`, `/tmp/card7-ar.png`, `/tmp/card4-ar.png`.
 
@@ -113,6 +113,7 @@ CREATE TABLE sent_log (
 | /pause | Halt reminders, confirm |
 | /resume | Resume reminders, confirm |
 | /status | Show city, language, paused state |
+| /test | Send this week's reminder card now (preview; never writes sent_log) |
 | /help | List all commands |
 
 ## Key design decisions

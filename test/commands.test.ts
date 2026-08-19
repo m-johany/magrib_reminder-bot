@@ -6,6 +6,8 @@ import {
   setCityCommand,
   setLanguageCommand,
   statusCommand,
+  testCommand,
+  type TestDeps,
   type User,
   type UserStore,
 } from "../src/commands";
@@ -156,5 +158,138 @@ describe("pauseCommand / resumeCommand", () => {
     const reply = await resumeCommand("42", { store });
     expect((await store.get("42"))?.paused).toBe(false);
     expect(reply).toContain("resumed");
+  });
+});
+
+describe("testCommand", () => {
+  // Deterministic clock: 2026-08-19 is ISO week 33; 33 % 8 = 1.
+  const now = new Date("2026-08-19T12:00:00Z");
+  const hadith = {
+    id: 4,
+    textEn: "Test hadith English",
+    textAr: "حديث تجريبي",
+    sourceEn: "Test source",
+    sourceAr: "مصدر تجريبي",
+  };
+  const happyDeps: TestDeps = {
+    store: fakeStore({
+      "42": { telegram_chat_id: "42", city: "London", country: "UK", language: "en", paused: false },
+    }),
+    fetchPrayerTimes: async () => okTimings,
+    countHadith: async () => 8,
+    getHadithByWeekOrder: async () => hadith,
+    createImage: async () => new Uint8Array([137, 80, 78, 71]),
+  };
+
+  it("renders and returns this week's reminder card", async () => {
+    const result = await testCommand("42", happyDeps, now);
+    expect(result.photo).toBeDefined();
+    expect(result.text).toContain("test preview");
+    expect(result.text).toContain("London");
+    expect(result.text).toContain("Test hadith English");
+  });
+
+  it("uses the same weekly rotation as the cron tick", async () => {
+    const orders: number[] = [];
+    const result = await testCommand(
+      "42",
+      {
+        ...happyDeps,
+        getHadithByWeekOrder: async (weekOrder) => {
+          orders.push(weekOrder);
+          return hadith;
+        },
+      },
+      now
+    );
+    expect(orders[0]).toBe(2); // ISO week 34 % 8 hadith
+    expect(result.photo).toBeDefined();
+  });
+
+  it("asks for a city before testing", async () => {
+    let fetched = false;
+    const result = await testCommand(
+      "42",
+      {
+        ...happyDeps,
+        store: fakeStore(),
+        fetchPrayerTimes: async () => {
+          fetched = true;
+          return okTimings;
+        },
+      },
+      now
+    );
+    expect(result.text).toBe("No city set. Use /setcity to configure");
+    expect(result.photo).toBeUndefined();
+    expect(fetched).toBe(false);
+  });
+
+  it("reports an unknown city", async () => {
+    const result = await testCommand(
+      "42",
+      {
+        ...happyDeps,
+        fetchPrayerTimes: async () => {
+          throw new CityNotFoundError();
+        },
+      },
+      now
+    );
+    expect(result.text).toContain("couldn't find that city");
+    expect(result.photo).toBeUndefined();
+  });
+
+  it("reports a prayer-times service outage", async () => {
+    const result = await testCommand(
+      "42",
+      {
+        ...happyDeps,
+        fetchPrayerTimes: async () => {
+          throw new Error("boom");
+        },
+      },
+      now
+    );
+    expect(result.text).toContain("couldn't reach the prayer times service");
+    expect(result.photo).toBeUndefined();
+  });
+
+  it("falls back to text when the card render fails", async () => {
+    const result = await testCommand(
+      "42",
+      {
+        ...happyDeps,
+        createImage: async () => {
+          throw new Error("resvg oom");
+        },
+      },
+      now
+    );
+    expect(result.photo).toBeUndefined();
+    expect(result.text).toContain("failed to render");
+    expect(result.text).toContain("Test hadith English");
+  });
+
+  it("sends text-only when no hadith are seeded", async () => {
+    const result = await testCommand("42", { ...happyDeps, countHadith: async () => 0 }, now);
+    expect(result.photo).toBeUndefined();
+    expect(result.text).toContain("test preview");
+    expect(result.text).not.toContain("Test hadith English");
+  });
+
+  it("previews in Arabic for Arabic-language users, even when paused", async () => {
+    const result = await testCommand(
+      "42",
+      {
+        ...happyDeps,
+        store: fakeStore({
+          "42": { telegram_chat_id: "42", city: "القاهرة", country: "EG", language: "ar", paused: true },
+        }),
+      },
+      now
+    );
+    expect(result.text).toContain("معاينة تجريبية");
+    expect(result.photo).toBeDefined();
   });
 });

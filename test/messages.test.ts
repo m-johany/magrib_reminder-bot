@@ -79,7 +79,7 @@ describe("citySetText", () => {
 describe("cityNotFoundText", () => {
   it("matches the agreed retry format", () => {
     expect(cityNotFoundText("en")).toBe(
-      "I couldn't find that city. Please try again with format: /setcity London, UK"
+      "I couldn't find that city. Try /setcity Dhaka or /setcity London, UK"
     );
   });
 });

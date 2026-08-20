@@ -23,6 +23,7 @@ import {
 } from "./messages";
 import { renderCardPng } from "./image";
 import { d1UserStore } from "./store";
+import { resolveCityName } from "./geocode";
 
 export interface Env {
   TELEGRAM_BOT_TOKEN: string;
@@ -77,6 +78,7 @@ function createBot(token: string, env: Env): Bot {
     const reply = await setCityCommand(ctx.match, String(ctx.chat.id), {
       store,
       fetchPrayerTimes: (city, country) => fetchPrayerTimes(city, country),
+      resolveCity: (city) => resolveCityName(city),
     });
     await ctx.reply(reply);
   });

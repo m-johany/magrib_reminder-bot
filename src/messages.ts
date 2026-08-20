@@ -70,9 +70,9 @@ export function citySetText(lang: Language, city: string, country: string): stri
 
 export function cityNotFoundText(lang: Language): string {
   if (lang === "ar") {
-    return "لم أجد هذه المدينة. جرّب مرة أخرى بهذه الصيغة: /setcity لندن, UK";
+    return "لم أجد هذه المدينة. جرّب /setcity تونس أو /setcity لندن, UK";
   }
-  return "I couldn't find that city. Please try again with format: /setcity London, UK";
+  return "I couldn't find that city. Try /setcity Dhaka or /setcity London, UK";
 }
 
 export function noCityText(lang: Language): string {

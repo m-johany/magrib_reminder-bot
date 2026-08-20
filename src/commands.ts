@@ -1,5 +1,6 @@
 import { CityNotFoundError, type PrayerTimes } from "./aladhan";
 import type { Hadith } from "./cron";
+import type { GeocodedCity } from "./geocode";
 import {
   cityNotFoundText,
   citySetText,
@@ -49,6 +50,7 @@ export async function isGroupAdmin(
 export interface CommandDeps {
   store: UserStore;
   fetchPrayerTimes: (city: string, country: string) => Promise<PrayerTimes>;
+  resolveCity: (city: string) => Promise<GeocodedCity | null>;
 }
 
 export async function setCityCommand(
@@ -60,13 +62,32 @@ export async function setCityCommand(
   const lang = user?.language ?? "en";
 
   const comma = raw.indexOf(",");
+  let city: string;
+  let country: string;
   if (comma === -1) {
-    return cityNotFoundText(lang);
-  }
-  const city = raw.slice(0, comma).trim();
-  const country = raw.slice(comma + 1).trim();
-  if (!city || !country) {
-    return cityNotFoundText(lang);
+    // Bare city name — resolve the country via geocoding.
+    const name = raw.trim();
+    if (!name) {
+      return cityNotFoundText(lang);
+    }
+    let resolved: GeocodedCity | null;
+    try {
+      resolved = await deps.resolveCity(name);
+    } catch {
+      // Geocoding service down — ask the user to retry later.
+      return serviceUnavailableText(lang);
+    }
+    if (!resolved) {
+      return cityNotFoundText(lang);
+    }
+    city = resolved.city;
+    country = resolved.country;
+  } else {
+    city = raw.slice(0, comma).trim();
+    country = raw.slice(comma + 1).trim();
+    if (!city || !country) {
+      return cityNotFoundText(lang);
+    }
   }
 
   try {

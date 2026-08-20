@@ -43,6 +43,7 @@ Repo state: `main` @ `2bd5ed2` on GitHub, 97 tests green, typecheck clean, `wran
 | `src/commands.ts` | Command logic (`setCityCommand`, `statusCommand`, language/pause/resume) — deps injected (`UserStore`, `fetchPrayerTimes`) |
 | `src/cron.ts` | `runTick` — city dedup, Thursday+window detection, retry-once-30s, hadith rotation, per-user isolation, image cache |
 | `src/aladhan.ts` | Aladhan client — `fetchPrayerTimes`, `CityNotFoundError` vs `AladhanError` ("Unable to compute" payload = city not found) |
+| `src/geocode.ts` | Open-Meteo geocoding — `resolveCityName` (bare city name → city + country) |
 | `src/window.ts` | Time math — `minutesAfterMaghrib` (linear, same-day), `minutesSinceMaghrib` (midnight-crossing), `formatHHMM`/`formatDateEn` (IANA tz via Intl) |
 | `src/week.ts` / `src/rotation.ts` | ISO week key + `week_number % count` rotation |
 | `src/messages.ts` | All user-facing text, en + ar variants |
@@ -108,7 +109,7 @@ CREATE TABLE sent_log (
 | Command | Behavior |
 |---------|----------|
 | /start | Welcome + prompt set city/language |
-| /setcity London, UK | Validate via Aladhan, store, confirm (in groups: sets the group's city, admins only) |
+| /setcity London, UK | Validate via Aladhan, store, confirm (bare city names like /setcity Dhaka auto-resolve the country; in groups: sets the group's city, admins only) |
 | /setlanguage | Inline keyboard: English / العربية |
 | /pause | Halt reminders, confirm |
 | /resume | Resume reminders, confirm |
@@ -128,6 +129,7 @@ CREATE TABLE sent_log (
 ## APIs used
 
 - **Aladhan:** `GET https://api.aladhan.com/v1/timingsByCity?city=London&country=UK&method=2` (+ optional `date=DD-MM-YYYY`) — `data.timings.Maghrib`, `data.date.gregorian.weekday.en`, `data.meta.timezone`
+- **Open-Meteo:** `GET https://geocoding-api.open-meteo.com/v1/search?name=Dhaka&count=1&language=en&format=json` — resolves a bare `/setcity Dhaka` to city + country (top GeoNames match; null on no match)
 - **Telegram Bot API:** Webhook for updates, `sendMessage`, `sendPhoto`, `setMyCommands`
 - No auth keys beyond `TELEGRAM_BOT_TOKEN`
 

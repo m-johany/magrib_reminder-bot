@@ -45,6 +45,7 @@ describe("setCityCommand", () => {
     const reply = await setCityCommand("London, UK", "42", {
       store,
       fetchPrayerTimes: async () => okTimings,
+      resolveCity: async () => null,
     });
     expect(reply).toBe("Your city is set to London, UK");
     expect(await store.get("42")).toMatchObject({ city: "London", country: "UK" });
@@ -56,9 +57,10 @@ describe("setCityCommand", () => {
       fetchPrayerTimes: async () => {
         throw new CityNotFoundError();
       },
+      resolveCity: async () => null,
     });
     expect(reply).toBe(
-      "I couldn't find that city. Please try again with format: /setcity London, UK"
+      "I couldn't find that city. Try /setcity Dhaka or /setcity London, UK"
     );
   });
 
@@ -70,11 +72,12 @@ describe("setCityCommand", () => {
       fetchPrayerTimes: async () => {
         throw new CityNotFoundError();
       },
+      resolveCity: async () => null,
     });
     expect(reply).toContain("لم أجد");
   });
 
-  it("rejects input without a comma", async () => {
+  it("guides the user when a bare city cannot be resolved", async () => {
     let called = false;
     const reply = await setCityCommand("London", "42", {
       store: fakeStore(),
@@ -82,9 +85,53 @@ describe("setCityCommand", () => {
         called = true;
         return okTimings;
       },
+      resolveCity: async () => null,
     });
     expect(reply).toContain("/setcity London, UK");
     expect(called).toBe(false);
+  });
+
+  it("resolves a bare city name and stores city + country", async () => {
+    const store = fakeStore();
+    const reply = await setCityCommand("Dhaka", "42", {
+      store,
+      fetchPrayerTimes: async () => okTimings,
+      resolveCity: async () => ({ city: "Dhaka", country: "Bangladesh" }),
+    });
+    expect(reply).toBe("Your city is set to Dhaka, Bangladesh");
+    expect(await store.get("42")).toMatchObject({ city: "Dhaka", country: "Bangladesh" });
+  });
+
+  it("confirms a resolved bare city in the user's language", async () => {
+    const store = fakeStore();
+    await store.save("42", { language: "ar" });
+    const reply = await setCityCommand("Tunis", "42", {
+      store,
+      fetchPrayerTimes: async () => okTimings,
+      resolveCity: async () => ({ city: "Tunis", country: "Tunisia" }),
+    });
+    expect(reply).toContain("تم حفظ مدينتك");
+    expect(await store.get("42")).toMatchObject({ city: "Tunis", country: "Tunisia" });
+  });
+
+  it("asks to retry when the geocoding service is down", async () => {
+    const reply = await setCityCommand("Dhaka", "42", {
+      store: fakeStore(),
+      fetchPrayerTimes: async () => okTimings,
+      resolveCity: async () => {
+        throw new Error("geocoder unreachable");
+      },
+    });
+    expect(reply).toContain("couldn't reach the prayer times service");
+  });
+
+  it("guides to the format when the command has no city at all", async () => {
+    const reply = await setCityCommand("", "42", {
+      store: fakeStore(),
+      fetchPrayerTimes: async () => okTimings,
+      resolveCity: async () => null,
+    });
+    expect(reply).toContain("/setcity");
   });
 
   it("confirms in the user's language", async () => {
@@ -93,6 +140,7 @@ describe("setCityCommand", () => {
     const reply = await setCityCommand("London, UK", "42", {
       store,
       fetchPrayerTimes: async () => okTimings,
+      resolveCity: async () => null,
     });
     expect(reply).toContain("تم حفظ مدينتك");
   });

@@ -4,6 +4,42 @@ A Telegram bot that sends personalized Thursday-after-Maghrib reminders to recit
 
 Runs on Cloudflare Workers with D1 (SQLite), Cron Triggers, and the Aladhan API. Full spec: [SPEC.md](SPEC.md).
 
+## User guide
+
+### Getting started
+
+1. Open a chat with the bot (or add it to a group).
+2. Send `/start` — the bot walks you through setup.
+3. Set your city. A bare city name works for most cities worldwide: `/setcity Dhaka`. Use `/setcity London, UK` to be explicit. The bot confirms with the resolved country: "Your city is set to Dhaka, Bangladesh".
+4. Pick a language: `/setlanguage` → English or العربية.
+5. Done. Every Thursday after Maghrib (at your city's time) you receive the weekly Surah al-Kahf reminder card.
+
+### Commands
+
+| Command | What it does |
+|---------|--------------|
+| `/start` | Welcome message and setup guide |
+| `/setcity Dhaka` | Set your city; bare city names auto-resolve the country |
+| `/setcity London, UK` | Set your city with an explicit country |
+| `/setlanguage` | Choose English or العربية |
+| `/pause` / `/resume` | Stop / restart reminders |
+| `/status` | Show your city, language, and reminder state |
+| `/test` | Preview this week's reminder card (does not affect the real one) |
+| `/help` | List all commands |
+
+### In groups
+
+- One city per group, chosen by an admin. `/setcity`, `/setlanguage`, `/pause`, and `/resume` are admin-only — non-admins get "Only group admins can change this group's settings."
+- Everyone in the group sees the same reminder at the group city's time. Want reminders at your own local time? Message the bot privately.
+- `/status` and `/help` work for any member.
+- Anonymous admins (identity hidden) are treated as non-admins; configure the group with your identity shown.
+- The group's language defaults to English until an admin runs `/setlanguage`.
+
+### Reminder timing and data
+
+- The reminder fires on Thursday after Maghrib at your city's time (within a ~15-minute window). Each week's card features a rotating hadith on the virtues of Surah al-Kahf.
+- The bot stores only your chat id, city, country, language, and pause state, plus a record of which weekly reminder was sent (to prevent duplicates). Nothing else.
+
 ## Architecture
 
 ```
@@ -20,19 +56,6 @@ Cron Trigger (every 10 min) → Worker (scheduled handler)
   ├── SVG card rendered to PNG (resvg-wasm, Noto Naskh Arabic)
   └── sendPhoto with warm caption (text-only fallback on image failure)
 ```
-
-## Commands
-
-| Command | Behavior |
-|---------|----------|
-| `/start` | Welcome + setup guide |
-| `/setcity London, UK` | Validate city via Aladhan, store, confirm |
-| `/setlanguage` | Inline keyboard: English / العربية |
-| `/pause` / `/resume` | Toggle reminders |
-| `/status` | City, language, paused state |
-| `/help` | List all commands |
-
-Commands are registered via Telegram `setMyCommands` on cold start.
 
 ## Local development
 
@@ -77,7 +100,7 @@ npm run dev                 # wrangler dev (webhook needs a tunnel for Telegram)
 - **Image generation failure:** the reminder falls back to text-only with the hadith in plain text — never silent.
 - **Per-user isolation:** one user's Telegram failure never blocks another user's send in the same tick.
 - **Duplicate prevention:** `sent_log` records the ISO week key per user; a user never receives two reminders in the same week.
-- **Invalid city:** `/setcity` replies with the format guide: `/setcity London, UK`.
+- **Invalid city:** `/setcity` replies with the format guide — a bare city name (e.g. `/setcity Dhaka`) or explicit `City, Country` (e.g. `/setcity London, UK`).
 
 ## Logs
 
@@ -106,6 +129,6 @@ The source TTF lives in `assets/`. If you replace it, re-run the embed script.
 
 ## Hadith data
 
-`db/seed.sql` holds 10 authentic (sahih/hasan) hadith on the virtues of Surah al-Kahf with Arabic matn, English translation, and sources. **Re-verify texts with a qualified source before production deployment.**
+`db/seed.sql` holds 8 authentic (sahih/hasan) hadith on the virtues of Surah al-Kahf with Arabic matn, English translation, and sources.
 
 Rotation: active hadith = `week_order[week_number % count]` — global per week, every user sees the same hadith.

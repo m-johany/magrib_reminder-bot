@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  adminOnlyText,
   cityNotFoundText,
   citySetText,
+  groupWelcomeText,
   helpText,
   languageSetText,
   noCityText,
@@ -152,5 +154,27 @@ describe("reminderText", () => {
   it("uses the Arabic source for Arabic-language users", () => {
     const text = reminderText("ar", "London", hadith);
     expect(text).toContain("صحيح الجامع");
+  });
+});
+
+describe("groupWelcomeText", () => {
+  it("explains admin setup commands in English", () => {
+    const text = groupWelcomeText("en");
+    expect(text).toContain("/setcity");
+    expect(text).toContain("/setlanguage");
+  });
+
+  it("has an Arabic variant mentioning the group", () => {
+    expect(groupWelcomeText("ar")).toContain("المجموعة");
+  });
+});
+
+describe("adminOnlyText", () => {
+  it("warns in English", () => {
+    expect(adminOnlyText("en")).toBe("Only group admins can change this group's settings.");
+  });
+
+  it("has an Arabic variant", () => {
+    expect(adminOnlyText("ar")).toContain("مدراء");
   });
 });

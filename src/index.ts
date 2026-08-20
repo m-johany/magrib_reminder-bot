@@ -1,17 +1,26 @@
-import { Bot, InlineKeyboard, InputFile, webhookCallback } from "grammy";
+import { Bot, InlineKeyboard, InputFile, webhookCallback, type Context } from "grammy";
 import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm";
 import { fetchPrayerTimes } from "./aladhan";
 import { buildCardSvg } from "./card";
 import {
+  isGroupAdmin,
   pauseCommand,
   resumeCommand,
   setCityCommand,
   setLanguageCommand,
   statusCommand,
   testCommand,
+  type UserStore,
 } from "./commands";
 import { runTick, type TickDeps } from "./cron";
-import { helpText, type HadithText, type Language, welcomeText } from "./messages";
+import {
+  adminOnlyText,
+  groupWelcomeText,
+  helpText,
+  type HadithText,
+  type Language,
+  welcomeText,
+} from "./messages";
 import { renderCardPng } from "./image";
 import { d1UserStore } from "./store";
 
@@ -35,15 +44,36 @@ function createBot(token: string, env: Env): Bot {
   const bot = new Bot(token);
   const store = d1UserStore(env.DB);
 
+  async function ensureGroupAdmin(ctx: Context, store: UserStore): Promise<boolean> {
+    const chat = ctx.chat;
+    if (chat && chat.type === "private") return true;
+    // Anonymous admins (sender_chat) cannot be identified -> blocked.
+    if (!chat || !ctx.from || ctx.from.id === 777000) return false;
+    const admin = await isGroupAdmin(
+      (chatId, userId) => ctx.api.getChatMember(chatId, userId).then((m) => m.status),
+      String(chat.id),
+      ctx.from.id
+    );
+    if (admin) return true;
+    const user = await store.get(String(chat.id));
+    await ctx.reply(adminOnlyText(user?.language ?? "en"));
+    return false;
+  }
+
   bot.command("start", async (ctx) => {
     const user = await store.get(String(ctx.chat.id));
-    await ctx.reply(welcomeText(user?.language ?? "en"));
+    const text =
+      ctx.chat?.type === "private"
+        ? welcomeText(user?.language ?? "en")
+        : groupWelcomeText(user?.language ?? "en");
+    await ctx.reply(text);
   });
   bot.command("help", async (ctx) => {
     const user = await store.get(String(ctx.chat.id));
     await ctx.reply(helpText(user?.language ?? "en"));
   });
   bot.command("setcity", async (ctx) => {
+    if (!(await ensureGroupAdmin(ctx, store))) return;
     const reply = await setCityCommand(ctx.match, String(ctx.chat.id), {
       store,
       fetchPrayerTimes: (city, country) => fetchPrayerTimes(city, country),
@@ -51,6 +81,7 @@ function createBot(token: string, env: Env): Bot {
     await ctx.reply(reply);
   });
   bot.command("setlanguage", async (ctx) => {
+    if (!(await ensureGroupAdmin(ctx, store))) return;
     const keyboard = new InlineKeyboard()
       .text("English", "lang:en")
       .text("العربية", "lang:ar");
@@ -66,16 +97,33 @@ function createBot(token: string, env: Env): Bot {
       await ctx.answerCallbackQuery({ text: "Error: no chat" });
       return;
     }
+    if (
+      ctx.chat.type !== "private" &&
+      (!ctx.from ||
+        ctx.from.id === 777000 ||
+        !(await isGroupAdmin(
+          (chatId, userId) => ctx.api.getChatMember(chatId, userId).then((m) => m.status),
+          String(ctx.chat.id),
+          ctx.from.id
+        )))
+    ) {
+      await ctx.answerCallbackQuery({
+        text: adminOnlyText((await store.get(String(ctx.chat.id)))?.language ?? "en"),
+      });
+      return;
+    }
     const lang = ctx.match[1] as Language;
     const reply = await setLanguageCommand(lang, String(ctx.chat.id), { store });
     await ctx.answerCallbackQuery();
     await ctx.reply(reply);
   });
   bot.command("pause", async (ctx) => {
+    if (!(await ensureGroupAdmin(ctx, store))) return;
     const reply = await pauseCommand(String(ctx.chat.id), { store });
     await ctx.reply(reply);
   });
   bot.command("resume", async (ctx) => {
+    if (!(await ensureGroupAdmin(ctx, store))) return;
     const reply = await resumeCommand(String(ctx.chat.id), { store });
     await ctx.reply(reply);
   });

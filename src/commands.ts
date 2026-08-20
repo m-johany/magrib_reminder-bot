@@ -33,6 +33,19 @@ export interface UserStore {
   get(chatId: string): Promise<User | null>;
 }
 
+export async function isGroupAdmin(
+  getMemberStatus: (chatId: string, userId: number) => Promise<string>,
+  chatId: string,
+  userId: number
+): Promise<boolean> {
+  try {
+    const status = await getMemberStatus(chatId, userId);
+    return status === "creator" || status === "administrator";
+  } catch {
+    return false;
+  }
+}
+
 export interface CommandDeps {
   store: UserStore;
   fetchPrayerTimes: (city: string, country: string) => Promise<PrayerTimes>;

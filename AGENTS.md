@@ -108,7 +108,7 @@ CREATE TABLE sent_log (
 | Command | Behavior |
 |---------|----------|
 | /start | Welcome + prompt set city/language |
-| /setcity London, UK | Validate via Aladhan, store, confirm |
+| /setcity London, UK | Validate via Aladhan, store, confirm (in groups: sets the group's city, admins only) |
 | /setlanguage | Inline keyboard: English / العربية |
 | /pause | Halt reminders, confirm |
 | /resume | Resume reminders, confirm |
@@ -134,7 +134,7 @@ CREATE TABLE sent_log (
 ## Out of scope
 
 - Admin dashboard / web UI
-- Group chat support (DM only initially)
+- Per-member city targeting inside a single group (Telegram groups can't filter visibility; use one group per region, or DMs)
 - Hijri calendar integration
 - Dynamic hadith API (config-based only)
 - Multiple prayer calculation methods (ISNA only)

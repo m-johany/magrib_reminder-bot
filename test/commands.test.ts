@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CityNotFoundError, type PrayerTimes } from "../src/aladhan";
 import {
+  isGroupAdmin,
   pauseCommand,
   resumeCommand,
   setCityCommand,
@@ -291,5 +292,33 @@ describe("testCommand", () => {
     );
     expect(result.text).toContain("معاينة تجريبية");
     expect(result.photo).toBeDefined();
+  });
+});
+
+describe("isGroupAdmin", () => {
+  it("returns true for the group creator", async () => {
+    const admin = await isGroupAdmin(async () => "creator", "-100123", 42);
+    expect(admin).toBe(true);
+  });
+
+  it("returns true for an administrator", async () => {
+    const admin = await isGroupAdmin(async () => "administrator", "-100123", 42);
+    expect(admin).toBe(true);
+  });
+
+  it("returns false for a regular member", async () => {
+    const admin = await isGroupAdmin(async () => "member", "-100123", 42);
+    expect(admin).toBe(false);
+  });
+
+  it("returns false when the membership check fails", async () => {
+    const admin = await isGroupAdmin(
+      async () => {
+        throw new Error("bot not in group");
+      },
+      "-100123",
+      42
+    );
+    expect(admin).toBe(false);
   });
 });

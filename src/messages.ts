@@ -145,6 +145,41 @@ export function testImageFailedText(lang: Language): string {
   return "⚠️ The card image failed to render — showing text only.";
 }
 
+export function groupWelcomeText(lang: Language): string {
+  if (lang === "ar") {
+    return [
+      "السلام عليكم ورحمة الله وبركاته 🌙",
+      "",
+      "أنا بوت الكهف. سأرسل تذكير سورة الكهف الأسبوعي هنا في وقت المغرب الخاص بهذه المجموعة.",
+      "",
+      "على المشرف أن:",
+      "1. يحدد مدينة المجموعة: /setcity تونس, Tunisia",
+      "2. يختار لغة التذكيرات: /setlanguage",
+      "",
+      "تريد التذكير بوقت مدينتك أنت؟ راسلني مباشرة.",
+    ].join("\n");
+  }
+
+  return [
+    "As-salamu alaykum 👋",
+    "",
+    "I'm Al-Kahf Bot. I'll post the weekly Surah al-Kahf reminder here at this group's Maghrib time.",
+    "",
+    "An admin should:",
+    "1. /setcity City, Country - set this group's city (e.g. /setcity Tunis, Tunisia)",
+    "2. /setlanguage - choose the reminder language",
+    "",
+    "Want reminders at your own local time? Message me privately.",
+  ].join("\n");
+}
+
+export function adminOnlyText(lang: Language): string {
+  if (lang === "ar") {
+    return "يمكن لمدراء المجموعة فقط تغيير إعداداتها.";
+  }
+  return "Only group admins can change this group's settings.";
+}
+
 export interface HadithText {
   textEn: string;
   textAr: string;

@@ -90,7 +90,7 @@ export async function fetchRandomSahihHadith(
   const {
     apiKey,
     recentKeys = [],
-    maxRetries = 3,
+    maxRetries = 5,
     fetchFn = fetch,
     randomFn = Math.random,
   } = options;
@@ -119,11 +119,11 @@ export async function fetchRandomSahihHadith(
       const formatted = formatHadith(item);
       const { hadithKey, textAr, textEn } = formatted;
 
-      // 1. Length validation (must have substantive Arabic & English text)
+      // 1. Length validation: substantive text that fits within Telegram 1024-char caption & card
       if (textAr.length < 25 || textEn.length < 25) {
         continue;
       }
-      if (textAr.length > 1500 || textEn.length > 2000) {
+      if (textAr.length > 480 || textEn.length > 550) {
         continue;
       }
 

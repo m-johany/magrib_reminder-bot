@@ -44,6 +44,27 @@ const COMMANDS = [
   { command: "help", description: "List all commands" },
 ];
 
+async function sendPhotoOrReply(
+  sendFn: (photo: InputFile, caption: string) => Promise<unknown>,
+  sendTextFn: (text: string) => Promise<unknown>,
+  photo: Uint8Array,
+  text: string
+): Promise<void> {
+  const MAX_CAPTION = 1024;
+  if (text.length <= MAX_CAPTION) {
+    await sendFn(new InputFile(photo, "al-kahf.png"), text);
+    return;
+  }
+  const splitPoint = text.lastIndexOf("\n\n", MAX_CAPTION);
+  const caption = splitPoint > 200 ? text.slice(0, splitPoint).trim() : text.slice(0, MAX_CAPTION - 3) + "...";
+  const remaining = splitPoint > 200 ? text.slice(splitPoint).trim() : text;
+
+  await sendFn(new InputFile(photo, "al-kahf.png"), caption);
+  if (remaining) {
+    await sendTextFn(remaining);
+  }
+}
+
 function createBot(token: string, env: Env): Bot {
   const bot = new Bot(token);
   const store = d1UserStore(env.DB);
@@ -143,9 +164,12 @@ function createBot(token: string, env: Env): Bot {
       ...makeHadithDeps(env),
     });
     if (result.photo) {
-      await ctx.replyWithPhoto(new InputFile(result.photo, "al-kahf.png"), {
-        caption: result.text,
-      });
+      await sendPhotoOrReply(
+        (photo, caption) => ctx.replyWithPhoto(photo, { caption }),
+        (text) => ctx.reply(text),
+        result.photo,
+        result.text
+      );
     } else {
       await ctx.reply(result.text);
     }
@@ -376,11 +400,18 @@ export default {
     ctx.waitUntil(
       runTick(
         new Date(),
-        makeTickDeps(env, (chatId, text, photo) =>
-          photo
-            ? activeBot.api.sendPhoto(chatId, new InputFile(photo, "al-kahf.png"), { caption: text })
-            : activeBot.api.sendMessage(chatId, text)
-        )
+        makeTickDeps(env, async (chatId, text, photo) => {
+          if (photo) {
+            await sendPhotoOrReply(
+              (p, caption) => activeBot.api.sendPhoto(chatId, p, { caption }),
+              (t) => activeBot.api.sendMessage(chatId, t),
+              photo,
+              text
+            );
+          } else {
+            await activeBot.api.sendMessage(chatId, text);
+          }
+        })
       )
     );
   },

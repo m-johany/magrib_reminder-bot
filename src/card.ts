@@ -88,8 +88,13 @@ export function buildCardSvg(hadith: HadithText, lang: Language): string {
   const enStartY = matnEndY + 90;
   const enEndY = enStartY + (enLines.length - 1) * 40;
   const sourceY = enLines.length > 0 ? enEndY + 110 : matnEndY + 110;
+  const sourceEndY = sourceY + (sourceLines.length - 1) * 32;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
+  // Extend height if hadith is long, maintaining minimum 1080px square
+  const bottomPadding = 100;
+  const cardHeight = Math.max(HEIGHT, Math.ceil(sourceEndY + bottomPadding));
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${cardHeight}" viewBox="0 0 ${WIDTH} ${cardHeight}">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${COLORS.bgTop}"/>
@@ -109,11 +114,11 @@ export function buildCardSvg(hadith: HadithText, lang: Language): string {
     </style>
   </defs>
 
-  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#bg)"/>
-  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#star)"/>
-  <rect x="40" y="40" width="${WIDTH - 80}" height="${HEIGHT - 80}" rx="24"
+  <rect width="${WIDTH}" height="${cardHeight}" fill="url(#bg)"/>
+  <rect width="${WIDTH}" height="${cardHeight}" fill="url(#star)"/>
+  <rect x="40" y="40" width="${WIDTH - 80}" height="${cardHeight - 80}" rx="24"
         fill="none" stroke="${COLORS.gold}" stroke-opacity="0.5" stroke-width="2"/>
-  <rect x="56" y="56" width="${WIDTH - 112}" height="${HEIGHT - 112}" rx="16"
+  <rect x="56" y="56" width="${WIDTH - 112}" height="${cardHeight - 112}" rx="16"
         fill="none" stroke="${COLORS.gold}" stroke-opacity="0.2" stroke-width="1"/>
 
   ${textLines(["سُورَةُ الْكَهْفِ"], WIDTH / 2, titleY, 0, 34, { fill: COLORS.gold })}

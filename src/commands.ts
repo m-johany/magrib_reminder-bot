@@ -152,6 +152,7 @@ export interface TestDeps {
   fetchPrayerTimes: (city: string, country: string) => Promise<PrayerTimes>;
   countHadith: () => Promise<number>;
   getHadithByWeekOrder: (weekOrder: number) => Promise<Hadith | null>;
+  getHadithForWeek?: (weekKey: string) => Promise<HadithText | null>;
   createImage: (hadith: HadithText, lang: Language) => Promise<Uint8Array>;
 }
 
@@ -190,13 +191,20 @@ export async function testCommand(
   }
 
   // Same deterministic weekly rotation as the cron tick.
-  const hadithCount = await deps.countHadith();
-  const hadith =
-    hadithCount > 0
-      ? await deps.getHadithByWeekOrder(
-          pickHadithIndex(parseWeekNumber(isoWeekKey(now)), hadithCount)
-        )
-      : null;
+  const weekKey = isoWeekKey(now);
+  let hadith: HadithText | null = null;
+  if (deps.getHadithForWeek) {
+    hadith = await deps.getHadithForWeek(weekKey);
+  }
+  if (!hadith) {
+    const hadithCount = await deps.countHadith();
+    hadith =
+      hadithCount > 0
+        ? await deps.getHadithByWeekOrder(
+            pickHadithIndex(parseWeekNumber(weekKey), hadithCount)
+          )
+        : null;
+  }
 
   const caption = [testPreviewText(lang), "", reminderText(lang, user.city, hadith)].join("\n");
   if (!hadith) {

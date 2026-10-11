@@ -43,6 +43,7 @@ export interface TickDeps {
   recordSend(userId: number, hadithId: number | null, weekKey: string): Promise<void>;
   countHadith(): Promise<number>;
   getHadithByWeekOrder(weekOrder: number): Promise<Hadith | null>;
+  getHadithForWeek?(weekKey: string): Promise<HadithText | null>;
   sleep(ms: number): Promise<void>;
   logError(message: string, err?: unknown, context?: LogContext): void;
   logWarn(message: string, err?: unknown): void;
@@ -56,11 +57,17 @@ export async function runTick(now: Date, deps: TickDeps): Promise<void> {
   const weekKey = isoWeekKey(now);
 
   // Global weekly rotation: every user gets the same hadith each week.
-  const hadithCount = await deps.countHadith();
-  const hadith =
-    hadithCount > 0
-      ? await deps.getHadithByWeekOrder(pickHadithIndex(parseWeekNumber(weekKey), hadithCount))
-      : null;
+  let hadith: (HadithText & { id?: number }) | null = null;
+  if (deps.getHadithForWeek) {
+    hadith = await deps.getHadithForWeek(weekKey);
+  }
+  if (!hadith) {
+    const hadithCount = await deps.countHadith();
+    hadith =
+      hadithCount > 0
+        ? await deps.getHadithByWeekOrder(pickHadithIndex(parseWeekNumber(weekKey), hadithCount))
+        : null;
+  }
 
   // Group users by unique city so each city hits the Aladhan API once per date.
   const cities = new Map<string, ActiveUser[]>();

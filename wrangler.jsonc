@@ -6,6 +6,9 @@
   "observability": {
     "enabled": true
   },
+  "vars": {
+    "HADITH_API_KEY": "$2y$10$BtsqL2BTbA8fr7iXztuANp2MMMmZf3FVIwjycwpFpu4TssXG"
+  },
   "d1_databases": [
     {
       "binding": "DB",

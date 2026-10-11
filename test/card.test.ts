@@ -60,6 +60,20 @@ describe("buildCardSvg", () => {
   it("sets rtl direction on Arabic text", () => {
     expect(normalizedSvg("en")).toContain('direction="rtl"');
   });
+
+  it("extends height for long hadiths beyond 1080px", () => {
+    const longHadith: HadithText = {
+      textAr: "هذا نص طويل جداً لتجربة تمديد البطاقة ".repeat(15),
+      textEn: "This is a very long hadith translation text to test card extension beyond square layout. ".repeat(15),
+      sourceAr: "المصدر",
+      sourceEn: "Source",
+    };
+    const svg = buildCardSvg(longHadith, "en");
+    const heightMatch = svg.match(/height="(\d+)"/);
+    expect(heightMatch).not.toBeNull();
+    const height = Number(heightMatch![1]);
+    expect(height).toBeGreaterThan(1080);
+  });
 });
 
 describe("escapeXml", () => {

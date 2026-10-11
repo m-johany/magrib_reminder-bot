@@ -24,10 +24,13 @@ import {
 import { renderCardPng } from "./image";
 import { d1UserStore } from "./store";
 import { resolveCityName } from "./geocode";
+import { fetchRandomSahihHadith } from "./hadith-api";
+import { parseWeekNumber, pickHadithIndex } from "./rotation";
 
 export interface Env {
   TELEGRAM_BOT_TOKEN: string;
   DB: D1Database;
+  HADITH_API_KEY?: string;
 }
 
 const COMMANDS = [
@@ -184,6 +187,102 @@ function makeHadithDeps(env: Env) {
             sourceAr: row.source_ar,
           }
         : null;
+    },
+    async getHadithForWeek(weekKey: string): Promise<HadithText | null> {
+      // 1. Check if we already selected a hadith for this week in weekly_hadith cache
+      try {
+        const cached = await env.DB.prepare(
+          "SELECT text_en, text_ar, source_en, source_ar FROM weekly_hadith WHERE week_key = ?"
+        )
+          .bind(weekKey)
+          .first<{
+            text_en: string;
+            text_ar: string;
+            source_en: string;
+            source_ar: string;
+          }>();
+
+        if (cached) {
+          return {
+            textEn: cached.text_en,
+            textAr: cached.text_ar,
+            sourceEn: cached.source_en,
+            sourceAr: cached.source_ar,
+          };
+        }
+      } catch {
+        // Table may not exist yet, continue
+      }
+
+      // 2. If HADITH_API_KEY is available, fetch a random Sahih hadith from hadithapi.com
+      if (env.HADITH_API_KEY) {
+        try {
+          // Get recent hadith keys (last 10 weeks) for deduplication
+          let recentKeys: string[] = [];
+          try {
+            const rows = await env.DB.prepare(
+              "SELECT hadith_key FROM weekly_hadith ORDER BY created_at DESC LIMIT 10"
+            ).all<{ hadith_key: string }>();
+            recentKeys = (rows.results ?? []).map((r) => r.hadith_key);
+          } catch {
+            // ignore if table doesn't exist yet
+          }
+
+          const fetched = await fetchRandomSahihHadith({
+            apiKey: env.HADITH_API_KEY,
+            recentKeys,
+          });
+
+          if (fetched) {
+            // Cache selected hadith for this week in D1
+            try {
+              await env.DB.prepare(
+                `CREATE TABLE IF NOT EXISTS weekly_hadith (
+                  week_key TEXT PRIMARY KEY,
+                  hadith_key TEXT NOT NULL,
+                  text_en TEXT NOT NULL,
+                  text_ar TEXT NOT NULL,
+                  source_en TEXT NOT NULL,
+                  source_ar TEXT NOT NULL,
+                  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+                )`
+              ).run();
+
+              await env.DB.prepare(
+                `INSERT OR REPLACE INTO weekly_hadith (week_key, hadith_key, text_en, text_ar, source_en, source_ar)
+                 VALUES (?, ?, ?, ?, ?, ?)`
+              )
+                .bind(
+                  weekKey,
+                  fetched.hadithKey,
+                  fetched.textEn,
+                  fetched.textAr,
+                  fetched.sourceEn,
+                  fetched.sourceAr
+                )
+                .run();
+            } catch (err) {
+              console.warn("Failed to cache weekly hadith in D1:", err);
+            }
+
+            return {
+              textEn: fetched.textEn,
+              textAr: fetched.textAr,
+              sourceEn: fetched.sourceEn,
+              sourceAr: fetched.sourceAr,
+            };
+          }
+        } catch (err) {
+          console.warn("hadithapi.com fetch failed:", err);
+        }
+      }
+
+      // 3. Fallback to D1 hadith table (seed data)
+      const count = await this.countHadith();
+      if (count > 0) {
+        return this.getHadithByWeekOrder(pickHadithIndex(parseWeekNumber(weekKey), count));
+      }
+      return null;
     },
     createImage(hadith: HadithText, lang: Language): Promise<Uint8Array> {
       return renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm));

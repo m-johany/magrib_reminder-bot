@@ -308,6 +308,31 @@ function makeHadithDeps(env: Env) {
       }
       return null;
     },
+    async getRandomHadith(): Promise<HadithText | null> {
+      if (env.HADITH_API_KEY) {
+        try {
+          const fetched = await fetchRandomSahihHadith({
+            apiKey: env.HADITH_API_KEY,
+          });
+          if (fetched) {
+            return {
+              textEn: fetched.textEn,
+              textAr: fetched.textAr,
+              sourceEn: fetched.sourceEn,
+              sourceAr: fetched.sourceAr,
+            };
+          }
+        } catch (err) {
+          console.warn("hadithapi.com fetch failed for test:", err);
+        }
+      }
+      const count = await this.countHadith();
+      if (count > 0) {
+        const randomIndex = Math.floor(Math.random() * count);
+        return this.getHadithByWeekOrder(randomIndex);
+      }
+      return null;
+    },
     createImage(hadith: HadithText, lang: Language): Promise<Uint8Array> {
       return renderCardPng(buildCardSvg(hadith, lang), () => Promise.resolve(resvgWasm));
     },
